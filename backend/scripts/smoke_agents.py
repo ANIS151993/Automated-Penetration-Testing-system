@@ -36,6 +36,10 @@ async def main() -> int:
     print(f"[smoke] using ollama at {ollama_url}")
 
     async with LLMClient(ollama_url) as llm:
+        print("[smoke] warming models (may take ~60s on cold CPU)...")
+        await llm.complete("classify", "OPERATOR: warmup")
+        await llm.complete("plan_recon", "OPERATOR: warmup")
+        print("[smoke] models warm; running pipeline")
         state = EngagementState(
             engagement_id="smoke-eng",
             scope_cidrs=["172.20.32.0/18"],

@@ -50,7 +50,7 @@ class LLMClient:
         base_url: str,
         *,
         client: httpx.AsyncClient | None = None,
-        timeout: float = 120.0,
+        timeout: float = 600.0,
         num_ctx: int = 4096,
     ) -> None:
         self._base_url = base_url.rstrip("/")
