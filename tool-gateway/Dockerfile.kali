@@ -3,13 +3,18 @@ FROM kalilinux/kali-rolling
 WORKDIR /app
 
 RUN apt-get update \
-    && apt-get install -y python3 python3-pip nmap curl \
+    && apt-get install -y --no-install-recommends \
+        python3 python3-pip python3-venv \
+        nmap curl \
+        ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-COPY . /app
+COPY pyproject.toml /app/pyproject.toml
+COPY uv.lock /app/uv.lock
+COPY gateway /app/gateway
 
 RUN pip install --break-system-packages .
 
 EXPOSE 5000
 
-CMD ["python3", "-m", "flask", "--app", "gateway.app", "run", "--host", "0.0.0.0", "--port", "5000"]
+CMD ["python3", "-m", "gateway.server"]
