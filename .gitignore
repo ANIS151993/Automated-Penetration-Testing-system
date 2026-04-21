@@ -1,0 +1,17 @@
+.env
+.venv/
+.pytest_cache/
+.mypy_cache/
+__pycache__/
+*.pyc
+.next/
+node_modules/
+.pnpm-store/
+dist/
+coverage/
+secrets/*
+!secrets/.gitkeep
+certs/*
+!certs/.gitkeep
+artifacts/*
+!artifacts/.gitkeep

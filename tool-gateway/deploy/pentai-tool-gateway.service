@@ -1,0 +1,18 @@
+[Unit]
+Description=PentAI Pro Tool Gateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__PENTAI_GATEWAY_USER__
+WorkingDirectory=__PENTAI_GATEWAY_APP_DIR__/tool-gateway
+EnvironmentFile=__PENTAI_GATEWAY_APP_DIR__/tool-gateway.env
+ExecStart=__PENTAI_GATEWAY_APP_DIR__/.venv/bin/python -m gateway.server
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,15 @@
+FROM kalilinux/kali-rolling
+
+WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install -y python3 python3-pip nmap curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY . /app
+
+RUN pip install --break-system-packages .
+
+EXPOSE 5000
+
+CMD ["python3", "-m", "flask", "--app", "gateway.app", "run", "--host", "0.0.0.0", "--port", "5000"]

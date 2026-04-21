@@ -1,0 +1,114 @@
+services:
+  caddy:
+    image: caddy:2.8
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/srv/certs:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: pentai-pro-frontend:local
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000').then((response)=>process.exit(response.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: pentai-pro-backend:local
+    restart: unless-stopped
+    environment:
+      PENTAI_ALLOWED_NETWORK: ${PENTAI_ALLOWED_NETWORK:-172.20.32.0/18}
+      PENTAI_COMMAND_NODE_IP: ${PENTAI_COMMAND_NODE_IP:-172.20.32.74}
+      PENTAI_WEAPON_NODE_URL: ${PENTAI_WEAPON_NODE_URL:-https://172.20.32.68:5000}
+      PENTAI_POSTGRES_DSN: ${PENTAI_POSTGRES_DSN:-postgresql+psycopg://pentai:pentai@postgres:5432/pentai}
+      PENTAI_REDIS_URL: ${PENTAI_REDIS_URL:-redis://redis:6379/0}
+      PENTAI_OLLAMA_URL: ${PENTAI_OLLAMA_URL:-http://ollama:11434}
+      PENTAI_GATEWAY_AUDIENCE: ${PENTAI_GATEWAY_AUDIENCE:-pentai-tool-gateway}
+      PENTAI_GATEWAY_JWT_SECRET: ${PENTAI_GATEWAY_JWT_SECRET:-replace-this-before-use}
+      PENTAI_GATEWAY_CA_CERT_PATH: ${PENTAI_GATEWAY_CA_CERT_PATH:-/app/certs/ca-cert.pem}
+      PENTAI_GATEWAY_CLIENT_CERT_PATH: ${PENTAI_GATEWAY_CLIENT_CERT_PATH:-/app/certs/command-client-cert.pem}
+      PENTAI_GATEWAY_CLIENT_KEY_PATH: ${PENTAI_GATEWAY_CLIENT_KEY_PATH:-/app/certs/command-client-key.pem}
+      PENTAI_ARTIFACTS_ROOT: ${PENTAI_ARTIFACTS_ROOT:-/app/artifacts}
+    volumes:
+      - ./certs:/app/certs:ro
+      - backend-artifacts:/app/artifacts
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "from urllib.request import urlopen; import sys; response=urlopen('http://127.0.0.1:8000/api/v1/healthz'); sys.exit(0 if response.status == 200 else 1)",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pentai
+      POSTGRES_USER: pentai
+      POSTGRES_PASSWORD: pentai
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pentai -d pentai"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama:0.6.6
+    restart: unless-stopped
+    volumes:
+      - ollama-data:/root/.ollama
+
+volumes:
+  backend-artifacts:
+  postgres-data:
+  ollama-data:
