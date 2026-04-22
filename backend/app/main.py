@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -21,6 +22,8 @@ from app.core.tool_invocations import (
     SqlAlchemyToolInvocationRepository,
     ToolInvocationService,
 )
+from app.core.ws_tickets import WSTicketStore
+from app.websocket.execution_bus import ExecutionBus
 
 
 @asynccontextmanager
@@ -29,6 +32,7 @@ async def lifespan(app: FastAPI):
     initialize_database(session_factory)
     app.state.db_session_factory = session_factory
     app.state.db_status = check_database_health(session_factory)
+    app.state.execution_bus.bind_loop(asyncio.get_running_loop())
     yield
 
 
@@ -88,6 +92,9 @@ def create_app() -> FastAPI:
     app.state.finding_service = finding_service
     app.state.report_service = report_service
     app.state.audit_service = audit_service
+    execution_bus = ExecutionBus()
+    app.state.execution_bus = execution_bus
+    app.state.ws_ticket_store = WSTicketStore()
     app.state.gateway_validation_service = GatewayValidationService(
         settings=settings,
         engagement_service=engagement_service,
@@ -95,6 +102,7 @@ def create_app() -> FastAPI:
         audit_service=audit_service,
         tool_invocation_service=tool_invocation_service,
         tool_execution_service=tool_execution_service,
+        execution_bus=execution_bus,
     )
     app.include_router(router)
     return app

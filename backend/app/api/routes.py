@@ -1,7 +1,18 @@
+import json
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    Request,
+    WebSocket,
+    WebSocketDisconnect,
+    status,
+)
 from fastapi.responses import StreamingResponse
+
+from app.core.ws_tickets import TicketError, TicketScope, WSTicketStore
+from app.websocket.execution_bus import ExecutionBus
 
 from app.core.approvals import ApprovalService
 from app.core.audit_service import AuditService
@@ -28,6 +39,7 @@ from app.schemas.inventory import InventoryRead
 from app.schemas.reports import ReportCreate, ReportDocumentRead, ReportRead
 from app.schemas.tools import (
     ToolExecutionCancelResponse,
+    ToolExecutionStreamTicket,
     ToolInvocationRead,
     ToolInvocationRequest,
     ToolInvocationResponse,
@@ -76,6 +88,14 @@ def get_inventory_service(request: Request) -> InventoryService:
 
 def get_report_service(request: Request) -> ReportService:
     return request.app.state.report_service
+
+
+def get_ticket_store(request: Request) -> WSTicketStore:
+    return request.app.state.ws_ticket_store
+
+
+def get_execution_bus(request: Request) -> ExecutionBus:
+    return request.app.state.execution_bus
 
 
 @router.get("/healthz", response_model=HealthResponse)
@@ -438,3 +458,77 @@ async def cancel_tool_execution(
         if detail == "Tool execution is not running":
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=detail) from exc
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=detail) from exc
+
+
+@router.post(
+    "/engagements/{engagement_id}/tool-executions/{execution_id}/stream-ticket",
+    response_model=ToolExecutionStreamTicket,
+    status_code=status.HTTP_201_CREATED,
+)
+async def issue_stream_ticket(
+    engagement_id: UUID,
+    execution_id: UUID,
+    request: Request,
+) -> ToolExecutionStreamTicket:
+    engagement = get_engagement_service(request).get_engagement(engagement_id)
+    if engagement is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Engagement not found"
+        )
+    execution_service = get_tool_execution_service(request)
+    execution = execution_service.get_for_engagement(
+        engagement_id=engagement_id,
+        execution_id=execution_id,
+    )
+    if execution is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Tool execution not found"
+        )
+    scope = TicketScope(engagement_id=engagement_id, execution_id=execution_id)
+    ticket = get_ticket_store(request).issue(scope)
+    return ToolExecutionStreamTicket(
+        ticket=ticket,
+        engagement_id=engagement_id,
+        execution_id=execution_id,
+        expires_in_seconds=60,
+    )
+
+
+@router.websocket(
+    "/ws/engagements/{engagement_id}/tool-executions/{execution_id}/stream"
+)
+async def websocket_execution_stream(
+    websocket: WebSocket,
+    engagement_id: UUID,
+    execution_id: UUID,
+    ticket: str = "",
+) -> None:
+    if not ticket:
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="missing ticket")
+        return
+
+    ticket_store: WSTicketStore = websocket.app.state.ws_ticket_store
+    expected = TicketScope(engagement_id=engagement_id, execution_id=execution_id)
+    try:
+        ticket_store.redeem(ticket, expected=expected)
+    except TicketError:
+        await websocket.close(
+            code=status.WS_1008_POLICY_VIOLATION, reason="invalid ticket"
+        )
+        return
+
+    await websocket.accept()
+    bus: ExecutionBus = websocket.app.state.execution_bus
+    subscription = bus.subscribe(str(execution_id))
+    try:
+        async for event in subscription:
+            await websocket.send_text(json.dumps(event))
+    except WebSocketDisconnect:
+        pass
+    finally:
+        await subscription.aclose()
+        # send_text can raise if the client already hung up; swallow to avoid noise
+        try:
+            await websocket.close()
+        except RuntimeError:
+            pass

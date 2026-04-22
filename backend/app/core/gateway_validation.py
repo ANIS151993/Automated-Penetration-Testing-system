@@ -24,6 +24,7 @@ from app.schemas.tools import (
     ToolInvocationRequest,
     ToolInvocationResponse,
 )
+from app.websocket.execution_bus import ExecutionBus
 
 
 class ToolValidationError(Exception):
@@ -38,6 +39,7 @@ class GatewayValidationService:
     audit_service: AuditService | None = None
     tool_invocation_service: ToolInvocationService | None = None
     tool_execution_service: ToolExecutionService | None = None
+    execution_bus: ExecutionBus | None = None
     http_client: httpx.Client | None = None
 
     def validate_tool_invocation(
@@ -207,6 +209,8 @@ class GatewayValidationService:
                         stderr_lines += 1
                     if event.get("type") in {"completed", "failed", "cancelled", "timed_out"}:
                         terminal_event = event
+                    if self.execution_bus is not None:
+                        self.execution_bus.publish_sync(str(execution.id), event)
                     yield (json.dumps(event) + "\n").encode("utf-8")
 
                 final_status = (
@@ -249,17 +253,18 @@ class GatewayValidationService:
                         actor=self.settings.operator_name,
                     )
         except (httpx.HTTPError, json.JSONDecodeError) as exc:
+            failure_event = {
+                "type": "failed",
+                "status": "failed",
+                "error": str(exc),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+            if self.execution_bus is not None:
+                self.execution_bus.publish_sync(str(execution.id), failure_event)
             stored_execution = self.tool_execution_service.finalize_execution(
                 execution_id=execution.id,
                 invocation=invocation,
-                events=[
-                    {
-                        "type": "failed",
-                        "status": "failed",
-                        "error": str(exc),
-                        "timestamp": datetime.now(timezone.utc).isoformat(),
-                    }
-                ],
+                events=[failure_event],
                 status="failed",
                 exit_code=None,
                 stdout_lines=0,

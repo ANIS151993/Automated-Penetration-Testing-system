@@ -57,3 +57,10 @@ class ToolExecutionCancelResponse(BaseModel):
     execution_id: UUID
     status: str
     detail: str
+
+
+class ToolExecutionStreamTicket(BaseModel):
+    ticket: str
+    engagement_id: UUID
+    execution_id: UUID
+    expires_in_seconds: int
