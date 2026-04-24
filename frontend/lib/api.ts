@@ -420,6 +420,54 @@ export function validateToolInvocation(
   );
 }
 
+export type ExecutionStreamTicket = {
+  ticket: string;
+  engagement_id: string;
+  execution_id: string;
+  expires_in_seconds: number;
+};
+
+export function issueExecutionStreamTicket(engagementId: string, executionId: string) {
+  return request<ExecutionStreamTicket>(
+    `/api/v1/engagements/${engagementId}/tool-executions/${executionId}/stream-ticket`,
+    { method: "POST" },
+  );
+}
+
+export type WsStreamHandle = { close: () => void };
+
+export async function openExecutionStreamWS(
+  engagementId: string,
+  executionId: string,
+  onEvent: (event: ExecutionEvent) => void,
+  onClose?: (info: { reason: string; clean: boolean }) => void,
+): Promise<WsStreamHandle> {
+  const { ticket } = await issueExecutionStreamTicket(engagementId, executionId);
+  const httpBase = apiBaseUrl || (typeof window !== "undefined" ? window.location.origin : "");
+  const wsBase = httpBase.replace(/^http/i, "ws");
+  const url = `${wsBase}/api/v1/ws/engagements/${engagementId}/tool-executions/${executionId}/stream?ticket=${encodeURIComponent(
+    ticket,
+  )}`;
+  const socket = new WebSocket(url);
+  socket.addEventListener("message", (evt) => {
+    try {
+      onEvent(JSON.parse(evt.data) as ExecutionEvent);
+    } catch {
+      /* non-JSON frame — ignore */
+    }
+  });
+  socket.addEventListener("close", (evt) => {
+    onClose?.({ reason: evt.reason || "", clean: evt.wasClean });
+  });
+  return {
+    close: () => {
+      if (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING) {
+        socket.close(1000, "client-closed");
+      }
+    },
+  };
+}
+
 export async function streamToolExecution(
   engagementId: string,
   invocationId: string,

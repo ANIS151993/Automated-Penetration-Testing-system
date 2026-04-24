@@ -45,6 +45,12 @@ import {
   updateEngagementStatus,
   validateToolInvocation,
 } from "@/lib/api";
+import dynamic from "next/dynamic";
+
+const LiveTerminal = dynamic(
+  () => import("./live-terminal").then((mod) => mod.LiveTerminal),
+  { ssr: false },
+);
 
 type OperationOption = {
   label: string;
@@ -1469,6 +1475,10 @@ export function OperatorConsole() {
                   </button>
                 ) : null}
               </div>
+            </div>
+
+            <div className="mt-6">
+              <LiveTerminal events={executionEvents} />
             </div>
 
             <div className="mt-6 grid gap-3">
