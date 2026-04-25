@@ -15,9 +15,9 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Dashboard", icon: "dashboard", match: (p) => p === "/" },
   { href: "/engagements", label: "Engagements", icon: "security" },
-  { href: "/findings", label: "Findings", icon: "bug_report" },
-  { href: "/terminal", label: "Terminal", icon: "terminal" },
-  { href: "/config", label: "Config", icon: "settings" },
+  { href: "/engagements/new", label: "New Engagement", icon: "add_circle" },
+  { href: "/audit", label: "Audit Log", icon: "receipt_long" },
+  { href: "/engagements/console", label: "Op Console", icon: "terminal" },
 ];
 
 type AppShellProps = {
@@ -164,7 +164,7 @@ function SideNav({ pathname }: SideNavProps) {
 
       <div className="mt-auto border-t border-border-subtle pt-2">
         <Link
-          href={"/syslogs" as Route}
+          href={"/audit" as Route}
           className="flex items-center gap-3 px-4 py-1.5 text-text-tertiary hover:text-text-primary transition"
         >
           <span className="material-symbols-outlined text-[16px]">

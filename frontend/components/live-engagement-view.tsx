@@ -18,6 +18,7 @@ import {
   listEngagements,
   listFindings,
 } from "@/lib/api";
+import { ToolLaunchDrawer } from "./tool-launch-drawer";
 
 const LiveTerminal = dynamic(
   () => import("./live-terminal").then((mod) => mod.LiveTerminal),
@@ -64,7 +65,9 @@ export function LiveEngagementView() {
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [audit, setAudit] = useState<AuditEvent[]>([]);
   const [inventory, setInventory] = useState<Inventory>({ hosts: [], services: [] });
-  const [executionEvents] = useState<ExecutionEvent[]>([]);
+  const [executionEvents, setExecutionEvents] = useState<ExecutionEvent[]>([]);
+  const [executionActive, setExecutionActive] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [now, setNow] = useState<number>(Date.now());
   const [error, setError] = useState<string | null>(null);
   const [busyApproval, setBusyApproval] = useState<string | null>(null);
@@ -169,10 +172,28 @@ export function LiveEngagementView() {
           onDecide={handleDecide}
           findings={sortedFindings}
           inventory={inventory}
+          executionActive={executionActive}
+          onLaunchClick={() => setDrawerOpen(true)}
+          launchDisabled={!selectedId}
         />
       </main>
 
       <AuditMarquee events={recentAudit} now={now} />
+
+      <ToolLaunchDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        engagementId={selectedId}
+        onExecutionStart={() => {
+          setExecutionEvents([]);
+          setExecutionActive(true);
+        }}
+        onExecutionEvent={(ev) => setExecutionEvents((cur) => [...cur, ev])}
+        onExecutionEnd={() => {
+          setExecutionActive(false);
+          if (selectedId) refreshDetails(selectedId);
+        }}
+      />
     </div>
   );
 }
@@ -421,18 +442,38 @@ type RightPanelProps = {
   onDecide: (id: string, approved: boolean) => void;
   findings: Finding[];
   inventory: Inventory;
+  executionActive: boolean;
+  onLaunchClick: () => void;
+  launchDisabled: boolean;
 };
 
-function RightPanel({ approvals, busyApproval, onDecide, findings, inventory }: RightPanelProps) {
+function RightPanel({
+  approvals,
+  busyApproval,
+  onDecide,
+  findings,
+  inventory,
+  executionActive,
+  onLaunchClick,
+  launchDisabled,
+}: RightPanelProps) {
   const criticalCount = findings.filter((f) => f.severity === "critical").length;
   const highCount = findings.filter((f) => f.severity === "high").length;
 
   return (
     <section className="col-span-3 border-l border-border-subtle bg-surface-dim flex flex-col overflow-hidden">
-      <div className="p-3 border-b border-border-subtle bg-surface-secondary">
+      <div className="p-3 border-b border-border-subtle bg-surface-secondary flex items-center justify-between">
         <h2 className="font-display text-[11px] font-semibold uppercase tracking-widest text-text-primary">
           Critical Approvals
         </h2>
+        <button
+          type="button"
+          onClick={onLaunchClick}
+          disabled={launchDisabled}
+          className="bg-primary px-2 py-1 font-display text-[10px] uppercase tracking-wider text-white hover:opacity-80 disabled:opacity-30 transition-opacity"
+        >
+          {executionActive ? "Running…" : "Launch Tool"}
+        </button>
       </div>
       <div className="p-3 space-y-3 overflow-y-auto flex-1">
         {approvals.length === 0 && (
