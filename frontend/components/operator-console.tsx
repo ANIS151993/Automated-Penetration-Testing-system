@@ -726,8 +726,8 @@ export function OperatorConsole() {
   const interactionsDisabled = busyAction !== null || isPending;
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(215,255,100,0.15),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(255,182,107,0.18),_transparent_26%),linear-gradient(180deg,_#0b0f10_0%,_#07090a_100%)] text-ink">
-      <section className="mx-auto flex max-w-7xl flex-col gap-8 px-6 py-8 md:px-10 md:py-10">
+    <div className="text-text-primary">
+      <section className="flex flex-col gap-8">
         <header className="grid gap-6 rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-panel backdrop-blur md:grid-cols-[1.3fr_0.7fr]">
           <div className="space-y-5">
             <p className="text-sm uppercase tracking-[0.35em] text-accent/90">
@@ -2112,6 +2112,6 @@ export function OperatorConsole() {
           </div>
         </section>
       </section>
-    </main>
+    </div>
   );
 }
