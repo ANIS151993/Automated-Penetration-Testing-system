@@ -1,32 +1,112 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./app/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
     "./hooks/**/*.{ts,tsx}",
-    "./lib/**/*.{ts,tsx}"
+    "./lib/**/*.{ts,tsx}",
   ],
   theme: {
     extend: {
       colors: {
-        canvas: "#0b0f10",
-        panel: "#11191a",
-        ink: "#edf4ef",
-        accent: "#d7ff64",
-        caution: "#ffb66b",
-        danger: "#ff6a5f"
-      },
-      boxShadow: {
-        panel: "0 24px 80px rgba(0, 0, 0, 0.35)"
+        // PentAI Pro SOC palette (DESIGN.md)
+        "bg-primary": "#0A0B0F",
+        "surface": "#141620",
+        "surface-secondary": "#141620",
+        "surface-tertiary": "#1C1F2E",
+        "surface-container": "#141620",
+        "surface-container-low": "#141620",
+        "surface-container-lowest": "#0A0B0F",
+        "surface-container-high": "#1C1F2E",
+        "surface-container-highest": "#252836",
+        "border-subtle": "#252836",
+        "border-accent": "#2F3447",
+        "outline": "#8c909e",
+        "outline-variant": "#252836",
+        "text-primary": "#E8EAED",
+        "text-secondary": "#9AA0B4",
+        "text-tertiary": "#5C6378",
+        "on-surface": "#E8EAED",
+        "on-surface-variant": "#c2c6d5",
+        "primary": "#4F8EF7",
+        "primary-container": "#4F8EF7",
+        "on-primary": "#ffffff",
+        "on-primary-container": "#ffffff",
+        "secondary": "#00D9A3",
+        "on-secondary": "#003828",
+        "tertiary": "#ffb873",
+        "error": "#FF3366",
+        "severity-critical": "#FF3366",
+        "severity-high": "#FF8C42",
+        "severity-medium": "#FFB800",
+        "severity-low": "#4F8EF7",
+        "severity-info": "#5C6378",
+
+        // Legacy alias fallbacks (keep existing 2100-line operator-console rendering
+        // until Wave 4 rewrites it — these point at the new palette so colors line up.)
+        canvas: "#0A0B0F",
+        panel: "#141620",
+        ink: "#E8EAED",
+        accent: "#4F8EF7",
+        caution: "#FFB800",
+        danger: "#FF3366",
       },
       fontFamily: {
-        sans: ["IBM Plex Sans", "Aptos", "Segoe UI", "sans-serif"],
-        mono: ["IBM Plex Mono", "Consolas", "monospace"]
-      }
-    }
+        sans: [
+          "Inter",
+          "ui-sans-serif",
+          "system-ui",
+          "Segoe UI",
+          "sans-serif",
+        ],
+        display: ["Space Grotesk", "Inter", "sans-serif"],
+        mono: [
+          "JetBrains Mono",
+          "ui-monospace",
+          "SFMono-Regular",
+          "Menlo",
+          "monospace",
+        ],
+        "h1": ["Space Grotesk", "sans-serif"],
+        "h2": ["Space Grotesk", "sans-serif"],
+        "h3": ["Space Grotesk", "sans-serif"],
+        "body-lg": ["Inter", "sans-serif"],
+        "body-md": ["Inter", "sans-serif"],
+        "body-sm": ["Inter", "sans-serif"],
+        "label-caps": ["Inter", "sans-serif"],
+        "mono-code": ["JetBrains Mono", "monospace"],
+      },
+      fontSize: {
+        "h1": ["24px", { lineHeight: "1.2", fontWeight: "700" }],
+        "h2": ["20px", { lineHeight: "1.2", fontWeight: "600" }],
+        "h3": ["16px", { lineHeight: "1.2", fontWeight: "600" }],
+        "body-lg": ["14px", { lineHeight: "1.4", fontWeight: "400" }],
+        "body-md": ["13px", { lineHeight: "1.4", fontWeight: "400" }],
+        "body-sm": ["11px", { lineHeight: "1.3", fontWeight: "400" }],
+        "mono-code": ["11px", { lineHeight: "1.4", fontWeight: "400" }],
+        "label-caps": [
+          "10px",
+          { lineHeight: "1", letterSpacing: "0.1em", fontWeight: "600" },
+        ],
+      },
+      spacing: {
+        base: "4px",
+        gutter: "24px",
+        "nav-height": "56px",
+        "sidebar-expanded": "240px",
+        "sidebar-collapsed": "64px",
+        "padding-card": "24px",
+        "row-dense": "40px",
+        "row-regular": "48px",
+      },
+      boxShadow: {
+        panel: "none",
+      },
+    },
   },
-  plugins: []
+  plugins: [],
 };
 
 export default config;

@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "PentAI Pro",
-  description: "Local-first penetration testing control plane"
+  description: "Automated penetration testing command center",
 };
 
 export default function RootLayout({
@@ -12,8 +12,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html className="dark" lang="en">
+      <body className="bg-bg-primary text-text-primary font-sans antialiased">
+        {children}
+      </body>
     </html>
   );
 }
