@@ -1,10 +1,10 @@
 import { AppShell } from "@/components/app-shell";
-import { OperatorConsole } from "@/components/operator-console";
+import { DashboardScreen } from "@/components/dashboard-screen";
 
 export default function HomePage() {
   return (
-    <AppShell activeKey="engagements">
-      <OperatorConsole />
+    <AppShell>
+      <DashboardScreen />
     </AppShell>
   );
 }

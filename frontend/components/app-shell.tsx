@@ -1,33 +1,37 @@
 "use client";
 
+import type { Route } from "next";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 
 type NavItem = {
-  key: string;
+  href: string;
   label: string;
   icon: string;
+  match?: (pathname: string) => boolean;
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { key: "dashboard", label: "Dashboard", icon: "dashboard" },
-  { key: "engagements", label: "Engagements", icon: "security" },
-  { key: "findings", label: "Findings", icon: "bug_report" },
-  { key: "terminal", label: "Terminal", icon: "terminal" },
-  { key: "config", label: "Config", icon: "settings" },
+  { href: "/", label: "Dashboard", icon: "dashboard", match: (p) => p === "/" },
+  { href: "/engagements", label: "Engagements", icon: "security" },
+  { href: "/findings", label: "Findings", icon: "bug_report" },
+  { href: "/terminal", label: "Terminal", icon: "terminal" },
+  { href: "/config", label: "Config", icon: "settings" },
 ];
 
 type AppShellProps = {
   children: ReactNode;
-  activeKey?: string;
 };
 
-export function AppShell({ children, activeKey = "engagements" }: AppShellProps) {
+export function AppShell({ children }: AppShellProps) {
   const [search, setSearch] = useState("");
+  const pathname = usePathname() ?? "/";
 
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary">
       <TopBar search={search} onSearchChange={setSearch} />
-      <SideNav activeKey={activeKey} />
+      <SideNav pathname={pathname} />
       <main className="ml-[240px] mt-14 px-gutter py-gutter space-y-gutter">
         {children}
       </main>
@@ -102,10 +106,15 @@ function TopBar({ search, onSearchChange }: TopBarProps) {
 }
 
 type SideNavProps = {
-  activeKey: string;
+  pathname: string;
 };
 
-function SideNav({ activeKey }: SideNavProps) {
+function isActive(item: NavItem, pathname: string): boolean {
+  if (item.match) return item.match(pathname);
+  return pathname === item.href || pathname.startsWith(`${item.href}/`);
+}
+
+function SideNav({ pathname }: SideNavProps) {
   return (
     <aside className="fixed left-0 top-0 h-full w-[240px] border-r border-border-subtle bg-bg-primary flex flex-col z-40 mt-14 py-4">
       <div className="mb-4 px-4">
@@ -131,18 +140,16 @@ function SideNav({ activeKey }: SideNavProps) {
 
       <nav className="flex-1">
         {NAV_ITEMS.map((item) => {
-          const isActive = item.key === activeKey;
-          const base =
-            "flex items-center gap-3 px-4 py-2 transition border-r-2";
-          const activeCls =
-            "bg-surface-secondary text-primary border-primary";
+          const active = isActive(item, pathname);
+          const base = "flex items-center gap-3 px-4 py-2 transition border-r-2";
+          const activeCls = "bg-surface-secondary text-primary border-primary";
           const idleCls =
             "text-text-tertiary border-transparent hover:bg-surface-secondary hover:text-text-primary";
           return (
-            <a
-              key={item.key}
-              href="#"
-              className={`${base} ${isActive ? activeCls : idleCls}`}
+            <Link
+              key={item.href}
+              href={item.href as Route}
+              className={`${base} ${active ? activeCls : idleCls}`}
             >
               <span className="material-symbols-outlined text-[18px]">
                 {item.icon}
@@ -150,14 +157,14 @@ function SideNav({ activeKey }: SideNavProps) {
               <span className="text-[10px] font-semibold uppercase tracking-wider">
                 {item.label}
               </span>
-            </a>
+            </Link>
           );
         })}
       </nav>
 
       <div className="mt-auto border-t border-border-subtle pt-2">
-        <a
-          href="#"
+        <Link
+          href={"/syslogs" as Route}
           className="flex items-center gap-3 px-4 py-1.5 text-text-tertiary hover:text-text-primary transition"
         >
           <span className="material-symbols-outlined text-[16px]">
@@ -166,7 +173,7 @@ function SideNav({ activeKey }: SideNavProps) {
           <span className="text-[9px] font-medium uppercase tracking-widest">
             SysLogs
           </span>
-        </a>
+        </Link>
       </div>
     </aside>
   );
