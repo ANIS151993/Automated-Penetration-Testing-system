@@ -1,10 +1,10 @@
 import { AppShell } from "@/components/app-shell";
-import { OperatorConsole } from "@/components/operator-console";
+import { LiveEngagementView } from "@/components/live-engagement-view";
 
 export default function EngagementsPage() {
   return (
     <AppShell>
-      <OperatorConsole />
+      <LiveEngagementView />
     </AppShell>
   );
 }
