@@ -28,14 +28,6 @@ const LiveTerminal = dynamic(
   { ssr: false },
 );
 
-const SEVERITY_COLOR: Record<FindingSeverity, string> = {
-  critical: "#FF3366",
-  high: "#FF8C42",
-  medium: "#FFB800",
-  low: "#4F8EF7",
-  info: "#5C6378",
-};
-
 const SEV_BADGE: Record<FindingSeverity, string> = {
   critical: "bg-severity-critical text-white",
   high: "bg-severity-high text-white",
@@ -231,7 +223,7 @@ export function LiveEngagementView() {
 
         {/* Right column: findings + approvals */}
         <div className="flex flex-col border-l border-border-subtle" style={{ flex: "0 0 33.333%" }}>
-          <FindingsPanel findings={sortedFindings} />
+          <FindingsPanel findings={sortedFindings} now={now} />
           <ApprovalsPanel
             approvals={pendingApprovals}
             busyApproval={busyApproval}
@@ -566,7 +558,7 @@ function TerminalPanel({
 
 /* ─── Findings Panel ─────────────────────────────────────────────────────── */
 
-function FindingsPanel({ findings }: { findings: Finding[] }) {
+function FindingsPanel({ findings, now }: { findings: Finding[]; now: number }) {
   return (
     <section className="flex flex-col overflow-hidden border-b border-border-subtle" style={{ flex: "0 0 60%" }}>
       <div className="px-3 py-2 border-b border-border-subtle flex justify-between items-center bg-surface-tertiary shrink-0">
@@ -578,44 +570,38 @@ function FindingsPanel({ findings }: { findings: Finding[] }) {
           TOTAL: {findings.length}
         </span>
       </div>
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto custom-scrollbar">
         {findings.length === 0 && (
           <div className="p-4 font-mono text-[11px] text-text-tertiary">
             No findings recorded yet.
           </div>
         )}
         {findings.map((f) => (
-          <FindingRow key={f.id} finding={f} />
+          <FindingRow key={f.id} finding={f} now={now} />
         ))}
       </div>
       <button
         type="button"
         className="p-2.5 text-[9px] font-bold text-primary uppercase tracking-widest bg-surface-container border-t border-border-subtle hover:bg-primary/5 transition shrink-0"
       >
-        Export_Findings_JSON
+        Export_Report_JSON
       </button>
     </section>
   );
 }
 
-function FindingRow({ finding }: { finding: Finding }) {
-  const color = SEVERITY_COLOR[finding.severity];
+function FindingRow({ finding, now }: { finding: Finding; now: number }) {
   return (
     <div className="px-3 py-2.5 border-b border-border-subtle hover:bg-surface-tertiary transition cursor-pointer group">
       <div className="flex justify-between items-start mb-1">
-        <span
-          className={`px-1.5 py-0.5 text-[9px] font-bold uppercase ${SEV_BADGE[finding.severity]}`}
-        >
+        <span className={`px-1.5 py-0.5 text-[9px] font-bold uppercase ${SEV_BADGE[finding.severity]}`}>
           {finding.severity}
         </span>
         <span className="font-mono text-[10px] text-text-tertiary">
-          {timeOnly(finding.created_at)}
+          {relativeAge(finding.created_at, now)}
         </span>
       </div>
-      <h3
-        className="font-mono text-xs font-bold text-text-primary group-hover:text-primary transition leading-tight truncate"
-        style={{ color: undefined }}
-      >
+      <h3 className="font-mono text-xs font-bold text-text-primary group-hover:text-primary transition leading-tight truncate uppercase">
         {finding.title}
       </h3>
       <p className="font-mono text-[10px] text-text-tertiary mt-0.5 truncate">

@@ -64,8 +64,51 @@ export default function NewEngagementPage() {
 
   return (
     <AppShell>
-      <div className="flex items-start justify-center pt-6">
-        <div className="w-[640px] bg-surface-secondary border border-border-subtle">
+      <div className="flex items-start justify-center pt-6 gap-6">
+        {/* Phase sidebar */}
+        <div className="hidden lg:flex flex-col w-52 shrink-0 mt-0">
+          <div className="font-mono text-[9px] text-text-tertiary uppercase tracking-widest mb-3">
+            Engagement Phases
+          </div>
+          {[
+            { n: "01", label: "Scope & Mode", icon: "target", active: step === 1, done: step > 1 },
+            { n: "02", label: "Mission Brief", icon: "description", active: step === 2, done: step > 2 },
+            { n: "03", label: "Authorization", icon: "verified_user", active: step === 3, done: false },
+          ].map((p) => (
+            <div
+              key={p.n}
+              className={`flex items-center gap-3 px-3 py-2.5 border-l-2 mb-1 ${
+                p.active
+                  ? "border-primary bg-primary/5 text-primary"
+                  : p.done
+                    ? "border-secondary/40 text-secondary"
+                    : "border-border-subtle text-text-tertiary"
+              }`}
+            >
+              <span className="material-symbols-outlined text-[16px]">{p.icon}</span>
+              <div>
+                <div className="font-mono text-[9px] text-text-tertiary uppercase tracking-widest">
+                  Phase {p.n}
+                </div>
+                <div className="font-mono text-[11px] font-semibold uppercase">{p.label}</div>
+              </div>
+              {p.done && (
+                <span className="material-symbols-outlined text-[14px] ml-auto text-secondary">
+                  check_circle
+                </span>
+              )}
+            </div>
+          ))}
+
+          <div className="mt-6 p-3 border border-border-subtle bg-surface-secondary font-mono text-[10px] text-text-tertiary space-y-1">
+            <div className="text-primary uppercase tracking-wider mb-2">SOX_COMPLIANCE</div>
+            <div>Protocol: 4.2</div>
+            <div>Logging: Active</div>
+            <div>Audit: Chained</div>
+          </div>
+        </div>
+
+        <div className="flex-1 max-w-[640px] bg-surface-secondary border border-border-subtle">
           <header className="px-6 py-4 border-b border-border-subtle flex items-center justify-between">
             <div>
               <div className="font-mono text-[10px] text-text-tertiary uppercase tracking-widest">

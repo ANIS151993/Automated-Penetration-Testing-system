@@ -145,12 +145,11 @@ export default function AuditPage() {
         )}
 
         <div className="border border-border-subtle bg-surface-secondary">
-          <div className="px-4 py-2 grid grid-cols-[1fr_auto_auto] gap-4 border-b border-border-subtle bg-surface-tertiary font-display text-[10px] uppercase tracking-widest text-text-tertiary">
+          <div className="px-4 h-10 grid grid-cols-[1fr_auto] gap-4 border-b border-border-subtle bg-surface-tertiary font-mono text-[10px] uppercase tracking-widest text-text-tertiary items-center">
             <span>Timestamp / Actor</span>
-            <span>Result</span>
-            <span className="w-24 text-right">Hash</span>
+            <span className="text-right">Result</span>
           </div>
-          <div className="divide-y divide-border-subtle/50 max-h-[55vh] overflow-y-auto">
+          <div className="divide-y divide-border-subtle/50 max-h-[55vh] overflow-y-auto custom-scrollbar">
             {filteredEvents.length === 0 && (
               <div className="px-4 py-8 font-mono text-[11px] text-text-tertiary text-center">
                 {events.length === 0
@@ -164,24 +163,24 @@ export default function AuditPage() {
               return (
                 <div
                   key={ev.evidence_hash}
-                  className="px-4 py-3 grid grid-cols-[1fr_auto_auto] gap-4 items-center hover:bg-surface-tertiary/40"
+                  className="px-4 h-row-dense grid grid-cols-[1fr_auto] gap-4 items-center hover:bg-surface-tertiary/40"
                 >
-                  <div>
-                    <div className="font-mono text-[11px] text-text-primary">
+                  <div className="flex flex-col">
+                    <span className="font-mono text-[11px] text-text-primary">
                       {new Date(ev.occurred_at).toISOString()}
-                    </div>
-                    <div className="font-mono text-[10px] text-text-tertiary uppercase mt-0.5">
-                      Actor: {ev.actor ?? "SYS_DAEMON"} · {ev.event_type}
-                    </div>
+                    </span>
+                    <span className="font-mono text-[10px] text-text-tertiary uppercase mt-0.5">
+                      ACTOR: {ev.actor ?? "SYS_DAEMON"} · {ev.event_type}
+                    </span>
                   </div>
-                  <span
-                    className={`px-2 py-0.5 font-display text-[10px] uppercase tracking-widest font-bold ${tone.bg} ${tone.fg}`}
-                  >
-                    {status}
-                  </span>
-                  <span className="font-mono text-[10px] text-text-secondary w-24 text-right">
-                    {shortHash(ev.evidence_hash)}
-                  </span>
+                  <div className="flex flex-col items-end gap-0.5">
+                    <span className={`inline-flex items-center px-2 py-0.5 border font-mono text-[10px] uppercase font-bold tracking-wider ${tone.bg} ${tone.fg} border-current/30`}>
+                      {status}
+                    </span>
+                    <span className="font-mono text-[9px] text-text-tertiary">
+                      HASH: {shortHash(ev.evidence_hash)}
+                    </span>
+                  </div>
                 </div>
               );
             })}
