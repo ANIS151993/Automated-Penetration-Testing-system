@@ -37,6 +37,17 @@ def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
     )
 
     with TestClient(app) as test_client:
+        app.state.user_service.create_user(
+            email="tester@pentai.local",
+            password="test-password-123",
+            display_name="Tester",
+            role="admin",
+        )
+        login_response = test_client.post(
+            "/api/v1/auth/login",
+            json={"email": "tester@pentai.local", "password": "test-password-123"},
+        )
+        assert login_response.status_code == 200, login_response.text
         yield test_client
 
     get_settings.cache_clear()
@@ -198,6 +209,70 @@ def test_approval_flow_and_tool_validation(client: TestClient) -> None:
     assert validated.json()["risk_level"] == "high"
     assert validated.json()["operation"] == "os_detection"
     assert validated.json()["invocation_id"] is not None
+
+
+def test_list_approvals_status_filter(client: TestClient) -> None:
+    engagement = client.post(
+        "/api/v1/engagements",
+        json={
+            "name": "Approval filter",
+            "description": "list filter",
+            "scope_cidrs": ["172.20.32.59/32"],
+            "authorization_confirmed": True,
+            "authorizer_name": "Lab Owner",
+            "operator_name": "Analyst One",
+        },
+    ).json()
+
+    pending = client.post(
+        f"/api/v1/engagements/{engagement['id']}/approvals",
+        json={
+            "requested_action": "exploit-prep:nuclei.targeted_scan",
+            "requested_by": "agent",
+            "tool_name": "nuclei",
+            "operation_name": "targeted_scan",
+            "args": {"target": "http://172.20.32.59/"},
+        },
+    ).json()
+
+    decided_seed = client.post(
+        f"/api/v1/engagements/{engagement['id']}/approvals",
+        json={
+            "requested_action": "exploit-prep:gobuster.dir",
+            "requested_by": "agent",
+            "tool_name": "gobuster",
+            "operation_name": "dir",
+            "args": {"target": "http://172.20.32.59/"},
+        },
+    ).json()
+    client.patch(
+        f"/api/v1/approvals/{decided_seed['id']}",
+        json={
+            "approved": True,
+            "approved_by": "Lab Owner",
+            "decision_reason": "ok",
+        },
+    )
+
+    all_rows = client.get(
+        f"/api/v1/engagements/{engagement['id']}/approvals"
+    ).json()
+    assert len(all_rows) == 2
+
+    pending_rows = client.get(
+        f"/api/v1/engagements/{engagement['id']}/approvals?status=pending"
+    ).json()
+    assert [r["id"] for r in pending_rows] == [pending["id"]]
+
+    decided_rows = client.get(
+        f"/api/v1/engagements/{engagement['id']}/approvals?status=decided"
+    ).json()
+    assert [r["id"] for r in decided_rows] == [decided_seed["id"]]
+
+    bad = client.get(
+        f"/api/v1/engagements/{engagement['id']}/approvals?status=bogus"
+    )
+    assert bad.status_code == 400
 
 
 def test_low_risk_tool_validation_succeeds(client: TestClient) -> None:
@@ -402,6 +477,10 @@ def test_report_generation_round_trip(client: TestClient) -> None:
     assert any(
         item["event_type"] == "report_generated" for item in audit_events.json()
     )
+    assert "agent_runs" in payload
+    assert "agent_findings" in payload
+    assert payload["summary"]["agent_runs_total"] == 0
+    assert payload["summary"]["agent_findings_total"] == 0
 
 
 def test_execute_stream_round_trip(client: TestClient) -> None:

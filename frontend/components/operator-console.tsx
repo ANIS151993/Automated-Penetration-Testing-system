@@ -1860,7 +1860,7 @@ export function OperatorConsole() {
                 <div>
                   <div className="text-xs uppercase tracking-[0.24em] text-white/46">Finding Suggestions</div>
                   <div className="mt-2 text-sm text-white/68">
-                    Suggestions are derived from persisted execution artifacts and still require operator review before they become real findings.
+                    Suggestions are derived from execution-artifact parsers and from agent vuln-mapper runs. They still require operator review before they become real findings.
                   </div>
                 </div>
                 <span className={`rounded-full px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName("neutral")}`}>
@@ -1871,14 +1871,25 @@ export function OperatorConsole() {
               <div className="mt-4 grid gap-3">
                 {findingSuggestions.length === 0 ? (
                   <div className="rounded-2xl border border-dashed border-white/10 bg-black/20 px-4 py-5 text-sm text-white/58">
-                    No parser-derived suggestions yet. Execute a validated request to populate this panel.
+                    No suggestions yet. Execute a validated request or run the agent vuln-mapper to populate this panel.
                   </div>
                 ) : (
                   findingSuggestions.map((suggestion) => (
                     <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4" key={suggestion.suggestion_id}>
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                          <div className="text-sm font-semibold text-white">{suggestion.title}</div>
+                          <div className="flex items-center gap-2">
+                            <div className="text-sm font-semibold text-white">{suggestion.title}</div>
+                            {suggestion.suggestion_id.startsWith("agent-run:") ? (
+                              <span className="rounded-full bg-accent/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
+                                Agent
+                              </span>
+                            ) : (
+                              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/64">
+                                Parser
+                              </span>
+                            )}
+                          </div>
                           <div className="mt-1 text-xs uppercase tracking-[0.22em] text-white/44">
                             execution {suggestion.execution_id}
                           </div>

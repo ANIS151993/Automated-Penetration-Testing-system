@@ -36,6 +36,7 @@ export default function AuditPage() {
   const [selectedId, setSelectedId] = useState<string>("");
   const [events, setEvents] = useState<AuditEvent[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [typeFilter, setTypeFilter] = useState<string>("all");
 
   useEffect(() => {
     listEngagements()
@@ -65,6 +66,20 @@ export default function AuditPage() {
   }, [events]);
 
   const recentChain = useMemo(() => events.slice(-6), [events]);
+
+  const eventTypes = useMemo(() => {
+    const set = new Set<string>();
+    events.forEach((e) => set.add(e.event_type));
+    return Array.from(set).sort();
+  }, [events]);
+
+  const filteredEvents = useMemo(() => {
+    if (typeFilter === "all") return events;
+    if (typeFilter === "agent_runs") {
+      return events.filter((e) => e.event_type === "agent_run_completed");
+    }
+    return events.filter((e) => e.event_type === typeFilter);
+  }, [events, typeFilter]);
 
   return (
     <AppShell>
@@ -100,6 +115,26 @@ export default function AuditPage() {
                 ))}
               </select>
             </div>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[10px] text-text-tertiary uppercase tracking-widest">
+                Event:
+              </span>
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                className="bg-surface-secondary border border-border-subtle px-2 py-1 font-mono text-[11px] text-text-primary"
+              >
+                <option value="all">all</option>
+                <option value="agent_runs">agent_run_completed</option>
+                {eventTypes
+                  .filter((t) => t !== "agent_run_completed")
+                  .map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -116,12 +151,14 @@ export default function AuditPage() {
             <span className="w-24 text-right">Hash</span>
           </div>
           <div className="divide-y divide-border-subtle/50 max-h-[55vh] overflow-y-auto">
-            {events.length === 0 && (
+            {filteredEvents.length === 0 && (
               <div className="px-4 py-8 font-mono text-[11px] text-text-tertiary text-center">
-                No audit events for this engagement yet.
+                {events.length === 0
+                  ? "No audit events for this engagement yet."
+                  : "No events match this filter."}
               </div>
             )}
-            {[...events].reverse().map((ev) => {
+            {[...filteredEvents].reverse().map((ev) => {
               const status = classify(ev.event_type);
               const tone = STATUS_TONE[status];
               return (

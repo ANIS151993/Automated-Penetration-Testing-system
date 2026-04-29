@@ -19,6 +19,7 @@ class PlannedStep:
     args: dict
     reason: str
     phase: Phase
+    citations: list[str] = field(default_factory=list)
 
 
 @dataclass(slots=True)

@@ -1,14 +1,25 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { FormEvent, Suspense, useEffect, useState } from "react";
+
+import { login } from "@/lib/api";
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [operatorId, setOperatorId] = useState("");
-  const [accessKey, setAccessKey] = useState("");
+  return (
+    <Suspense>
+      <LoginInner />
+    </Suspense>
+  );
+}
+
+function LoginInner() {
+  const searchParams = useSearchParams();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [persist, setPersist] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [bootClock, setBootClock] = useState("00:00:00:00");
 
   useEffect(() => {
@@ -25,13 +36,22 @@ export default function LoginPage() {
     return () => clearInterval(tick);
   }, []);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setBusy(true);
-    if (persist && typeof window !== "undefined") {
-      window.localStorage.setItem("pentai.operator", operatorId);
+    setError(null);
+    try {
+      await login(email, password);
+      if (persist && typeof window !== "undefined") {
+        window.localStorage.setItem("pentai.operator", email);
+      }
+      const next = searchParams.get("next") || "/";
+      window.location.assign(next);
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : "login_failed";
+      setError(detail === "invalid_credentials" ? "Invalid email or password." : detail);
+      setBusy(false);
     }
-    setTimeout(() => router.push("/"), 400);
   }
 
   return (
@@ -55,13 +75,14 @@ export default function LoginPage() {
             <div className="mt-2 h-0.5 w-16 bg-primary" />
           </div>
 
-          <Field label="Operator ID">
+          <Field label="Operator Email">
             <input
-              type="text"
+              type="email"
               required
-              value={operatorId}
-              onChange={(e) => setOperatorId(e.target.value)}
-              placeholder="NODE_ID_..."
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="operator@pentai.local"
+              autoComplete="username"
               className="w-full bg-surface-secondary border border-border-subtle px-3 py-2.5 font-mono text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-primary"
             />
           </Field>
@@ -70,12 +91,19 @@ export default function LoginPage() {
             <input
               type="password"
               required
-              value={accessKey}
-              onChange={(e) => setAccessKey(e.target.value)}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
+              autoComplete="current-password"
               className="w-full bg-surface-secondary border border-border-subtle px-3 py-2.5 font-mono text-[13px] text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-primary"
             />
           </Field>
+
+          {error && (
+            <div className="border border-red-600/60 bg-red-900/20 px-3 py-2 font-mono text-[11px] text-red-300">
+              {error}
+            </div>
+          )}
 
           <div className="flex items-center justify-between">
             <label className="flex items-center gap-2 cursor-pointer">

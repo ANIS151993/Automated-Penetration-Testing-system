@@ -14,6 +14,7 @@ MODEL_ROUTING: dict[str, str] = {
     "plan_exploit": "qwen2.5:7b-instruct-q4_K_M",
     "write_finding": "qwen2.5:7b-instruct-q4_K_M",
     "plan_recon": "qwen2.5:7b-instruct-q4_K_M",
+    "plan_enumeration": "qwen2.5:7b-instruct-q4_K_M",
     "embed": "nomic-embed-text",
 }
 

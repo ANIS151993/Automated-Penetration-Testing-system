@@ -10,6 +10,7 @@ class ApprovalCreate(BaseModel):
     tool_name: str = Field(min_length=2, max_length=120)
     operation_name: str = Field(min_length=2, max_length=120)
     args: dict
+    agent_run_id: UUID | None = None
 
 
 class ApprovalDecision(BaseModel):
@@ -32,3 +33,4 @@ class ApprovalRead(BaseModel):
     args: dict
     created_at: datetime
     decided_at: datetime | None
+    agent_run_id: UUID | None = None

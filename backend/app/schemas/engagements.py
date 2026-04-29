@@ -45,3 +45,5 @@ class HealthResponse(BaseModel):
     allowed_network: str
     weapon_node_url: str
     database_status: str
+    ollama_status: str = "unknown"
+    ollama_models: list[str] = []

@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { useEffect, useMemo, useState } from "react";
 
 import {
+  AgentRunSummary,
+  Approval,
   Engagement,
   EngagementStatus,
   Finding,
@@ -12,6 +15,8 @@ import {
   Inventory,
   getHealth,
   getInventory,
+  listAgentRuns,
+  listApprovals,
   listEngagements,
   listFindings,
 } from "@/lib/api";
@@ -21,6 +26,8 @@ type DashboardData = {
   engagements: Engagement[];
   findingsByEngagement: Record<string, Finding[]>;
   inventoryByEngagement: Record<string, Inventory>;
+  agentRunsByEngagement: Record<string, AgentRunSummary[]>;
+  pendingApprovalsByEngagement: Record<string, Approval[]>;
 };
 
 const SEVERITY_RANK: Record<FindingSeverity, number> = {
@@ -83,6 +90,8 @@ export function DashboardScreen() {
     engagements: [],
     findingsByEngagement: {},
     inventoryByEngagement: {},
+    agentRunsByEngagement: {},
+    pendingApprovalsByEngagement: {},
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -117,12 +126,31 @@ export function DashboardScreen() {
               .then((inv) => [eng.id, inv] as const),
           ),
         );
+        const agentRunEntries = await Promise.all(
+          engagements.map((eng) =>
+            listAgentRuns(eng.id)
+              .catch(() => [] as AgentRunSummary[])
+              .then((runs) => [eng.id, runs] as const),
+          ),
+        );
+        const pendingApprovalEntries = await Promise.all(
+          engagements.map((eng) =>
+            listApprovals(eng.id, { status: "pending" })
+              .catch(() => [] as Approval[])
+              .then((items) => [
+                eng.id,
+                items.filter((a) => a.requested_action.startsWith("exploit-prep:")),
+              ] as const),
+          ),
+        );
         if (cancelled) return;
         setData({
           health,
           engagements,
           findingsByEngagement: Object.fromEntries(findingsEntries),
           inventoryByEngagement: Object.fromEntries(inventoryEntries),
+          agentRunsByEngagement: Object.fromEntries(agentRunEntries),
+          pendingApprovalsByEngagement: Object.fromEntries(pendingApprovalEntries),
         });
       } catch (err) {
         if (!cancelled)
@@ -208,6 +236,8 @@ export function DashboardScreen() {
         <OperationalQueue
           engagements={topEngagements}
           findingsByEngagement={data.findingsByEngagement}
+          agentRunsByEngagement={data.agentRunsByEngagement}
+          pendingApprovalsByEngagement={data.pendingApprovalsByEngagement}
           loading={loading}
           error={error}
         />
@@ -354,6 +384,8 @@ function KpiCard({
 type OperationalQueueProps = {
   engagements: Engagement[];
   findingsByEngagement: Record<string, Finding[]>;
+  agentRunsByEngagement: Record<string, AgentRunSummary[]>;
+  pendingApprovalsByEngagement: Record<string, Approval[]>;
   loading: boolean;
   error: string | null;
 };
@@ -361,6 +393,8 @@ type OperationalQueueProps = {
 function OperationalQueue({
   engagements,
   findingsByEngagement,
+  agentRunsByEngagement,
+  pendingApprovalsByEngagement,
   loading,
   error,
 }: OperationalQueueProps) {
@@ -401,24 +435,30 @@ function OperationalQueue({
               <th className="px-4 py-2 font-label-caps text-[9px] text-text-tertiary uppercase">
                 Age
               </th>
+              <th className="px-4 py-2 font-label-caps text-[9px] text-text-tertiary uppercase">
+                Agent
+              </th>
+              <th className="px-4 py-2 font-label-caps text-[9px] text-text-tertiary uppercase">
+                Approve
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border-subtle font-mono text-[11px]">
             {loading && engagements.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-text-tertiary text-[10px] uppercase tracking-widest">
+                <td colSpan={7} className="px-4 py-6 text-center text-text-tertiary text-[10px] uppercase tracking-widest">
                   Loading registry…
                 </td>
               </tr>
             ) : error ? (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-severity-critical text-[10px] uppercase tracking-widest">
+                <td colSpan={7} className="px-4 py-6 text-center text-severity-critical text-[10px] uppercase tracking-widest">
                   {error}
                 </td>
               </tr>
             ) : engagements.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-text-tertiary text-[10px] uppercase tracking-widest">
+                <td colSpan={7} className="px-4 py-6 text-center text-text-tertiary text-[10px] uppercase tracking-widest">
                   No engagements registered.
                 </td>
               </tr>
@@ -431,6 +471,9 @@ function OperationalQueue({
                   ? SEVERITY_BORDER[sev]
                   : "border-border-subtle text-text-tertiary";
                 const sevLabel = sev ? sev.toUpperCase() : "NONE";
+                const runs = agentRunsByEngagement[eng.id] ?? [];
+                const latestRun = runs[0];
+                const pendingCount = (pendingApprovalsByEngagement[eng.id] ?? []).length;
                 return (
                   <tr
                     key={eng.id}
@@ -469,6 +512,30 @@ function OperationalQueue({
                     <td className="px-4 py-2 text-text-tertiary">
                       {relativeTtl(eng.updated_at)}
                     </td>
+                    <td className="px-4 py-2">
+                      {runs.length > 0 ? (
+                        <Link
+                          href={"/engagements/agent" as Route}
+                          className="text-[9px] font-mono text-primary hover:underline"
+                        >
+                          {runs.length}× {latestRun?.current_phase ?? "—"}
+                        </Link>
+                      ) : (
+                        <span className="text-[9px] text-text-tertiary">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2">
+                      {pendingCount > 0 ? (
+                        <Link
+                          href={"/engagements/agent" as Route}
+                          className="px-1.5 border border-severity-critical/50 text-[9px] font-bold uppercase text-severity-critical hover:bg-severity-critical/10"
+                        >
+                          {pendingCount} pending
+                        </Link>
+                      ) : (
+                        <span className="text-[9px] text-text-tertiary">—</span>
+                      )}
+                    </td>
                   </tr>
                 );
               })
@@ -489,6 +556,10 @@ function CoreHealthCard({ health }: CoreHealthCardProps) {
     health?.database_status?.toLowerCase() === "ok" ||
     health?.database_status?.toLowerCase() === "healthy";
   const apiOk = health?.status?.toLowerCase() === "ok" || !!health;
+  const ollamaOk = health?.ollama_status === "ok";
+  const requiredModels = ["llama3.2:3b-instruct-q4_K_M", "qwen2.5:7b-instruct-q4_K_M"];
+  const pulledModels = health?.ollama_models ?? [];
+  const missingModels = requiredModels.filter((m) => !pulledModels.includes(m));
   return (
     <div className="bg-surface border border-border-subtle p-padding-card">
       <h3 className="font-label-caps text-label-caps uppercase text-text-primary mb-3 flex items-center gap-2">
@@ -516,6 +587,21 @@ function CoreHealthCard({ health }: CoreHealthCardProps) {
           detail={health?.weapon_node_url ?? "—"}
           ok={!!health?.weapon_node_url}
         />
+        <HealthRow
+          icon="smart_toy"
+          label="Ollama_LLM"
+          detail={
+            ollamaOk
+              ? `${pulledModels.length} model${pulledModels.length === 1 ? "" : "s"} ready`
+              : (health?.ollama_status ?? "UNKNOWN")
+          }
+          ok={ollamaOk}
+        />
+        {missingModels.length > 0 && (
+          <div className="px-2 py-1.5 border border-severity-medium/40 bg-severity-medium/5 font-mono text-[9px] text-severity-medium">
+            MISSING: {missingModels.join(", ")}
+          </div>
+        )}
       </div>
     </div>
   );

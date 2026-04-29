@@ -80,6 +80,52 @@ async def test_plan_recon_rejects_out_of_scope_target():
             await plan_recon(state, PlannerDeps(llm=llm))
 
 
+class _FakeKnowledge:
+    def __init__(self, chunks: list) -> None:
+        self._chunks = chunks
+        self.queries: list[str] = []
+
+    async def search(self, query: str, *, top_k: int, min_score: float):
+        self.queries.append(query)
+        return self._chunks
+
+
+@pytest.mark.asyncio
+async def test_plan_recon_stamps_default_citations_from_kb():
+    from app.knowledge.retrieval import RetrievedChunk
+
+    chunks = [
+        RetrievedChunk(
+            source_path="docs/playbooks/recon.md",
+            title="Recon Playbook",
+            content="Use nmap service scan to enumerate.",
+            score=0.9,
+            chunk_metadata={},
+        )
+    ]
+    steps = [
+        {
+            "tool_name": "nmap",
+            "operation_name": "service_scan",
+            "args": {"target": "172.20.32.59", "ports": "22,80,443"},
+            "reason": "Identify live services on the target.",
+            "phase": "reconnaissance",
+        }
+    ]
+    async with httpx.AsyncClient(transport=_mock_plan(steps)) as http:
+        llm = LLMClient("http://ollama", client=http)
+        kb = _FakeKnowledge(chunks)
+        state = EngagementState(
+            engagement_id="eng-1",
+            scope_cidrs=["172.20.32.0/18"],
+            operator_goal="recon the target",
+            intent="recon_and_enum",
+        )
+        out = await plan_recon(state, PlannerDeps(llm=llm, knowledge=kb))
+        assert out.planned_steps[0].citations == ["docs/playbooks/recon.md"]
+        assert kb.queries, "knowledge service should have been queried"
+
+
 @pytest.mark.asyncio
 async def test_plan_recon_rejects_unknown_tool():
     steps = [

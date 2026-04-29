@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
+  AgentRunSummary,
   Approval,
   AuditEvent,
   Engagement,
@@ -13,10 +14,12 @@ import {
   Inventory,
   decideApproval,
   getInventory,
+  listAgentRuns,
   listApprovals,
   listAuditEvents,
   listEngagements,
   listFindings,
+  updateEngagementStatus,
 } from "@/lib/api";
 import { ToolLaunchDrawer } from "./tool-launch-drawer";
 
@@ -33,12 +36,12 @@ const SEVERITY_COLOR: Record<FindingSeverity, string> = {
   info: "#5C6378",
 };
 
-const SEVERITY_LABEL: Record<FindingSeverity, string> = {
-  critical: "Critical",
-  high: "High Risk",
-  medium: "Medium",
-  low: "Low",
-  info: "Info",
+const SEV_BADGE: Record<FindingSeverity, string> = {
+  critical: "bg-severity-critical text-white",
+  high: "bg-severity-high text-white",
+  medium: "bg-severity-medium text-white",
+  low: "bg-severity-low text-white",
+  info: "bg-severity-info text-white",
 };
 
 function shortId(id: string): string {
@@ -52,10 +55,18 @@ function timeOnly(iso: string): string {
 function relativeAge(iso: string, now: number): string {
   const ms = now - new Date(iso).getTime();
   const s = Math.max(0, Math.floor(ms / 1000));
-  if (s < 60) return `${s}s ago`;
-  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
-  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-  return `${Math.floor(s / 86400)}d ago`;
+  if (s < 60) return `${s}s`;
+  if (s < 3600) return `${Math.floor(s / 60)}m`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h`;
+  return `${Math.floor(s / 86400)}d`;
+}
+
+function elapsedFrom(iso: string, now: number): string {
+  const ms = Math.max(0, now - new Date(iso).getTime());
+  const h = Math.floor(ms / 3_600_000);
+  const m = Math.floor((ms % 3_600_000) / 60_000);
+  const s = Math.floor((ms % 60_000) / 1000);
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
 export function LiveEngagementView() {
@@ -65,12 +76,14 @@ export function LiveEngagementView() {
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [audit, setAudit] = useState<AuditEvent[]>([]);
   const [inventory, setInventory] = useState<Inventory>({ hosts: [], services: [] });
+  const [agentRuns, setAgentRuns] = useState<AgentRunSummary[]>([]);
   const [executionEvents, setExecutionEvents] = useState<ExecutionEvent[]>([]);
   const [executionActive, setExecutionActive] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [now, setNow] = useState<number>(Date.now());
   const [error, setError] = useState<string | null>(null);
   const [busyApproval, setBusyApproval] = useState<string | null>(null);
+  const [terminating, setTerminating] = useState(false);
   const refreshTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -89,16 +102,18 @@ export function LiveEngagementView() {
 
   const refreshDetails = useCallback(async (engagementId: string) => {
     try {
-      const [f, a, e, inv] = await Promise.all([
+      const [f, a, e, inv, runs] = await Promise.all([
         listFindings(engagementId),
         listApprovals(engagementId),
         listAuditEvents(engagementId),
         getInventory(engagementId),
+        listAgentRuns(engagementId),
       ]);
       setFindings(f);
       setApprovals(a);
       setAudit(e);
       setInventory(inv);
+      setAgentRuns(runs);
       setError(null);
     } catch (err) {
       setError(String(err));
@@ -116,6 +131,7 @@ export function LiveEngagementView() {
   }, [selectedId, refreshDetails]);
 
   const selected = engagements.find((e) => e.id === selectedId);
+
   const sortedFindings = useMemo(
     () =>
       [...findings].sort(
@@ -123,10 +139,12 @@ export function LiveEngagementView() {
       ),
     [findings],
   );
+
   const pendingApprovals = useMemo(
     () => approvals.filter((a) => a.decided_at === null),
     [approvals],
   );
+
   const recentAudit = useMemo(() => audit.slice(0, 12), [audit]);
 
   const handleDecide = useCallback(
@@ -149,34 +167,78 @@ export function LiveEngagementView() {
     [selectedId, selected, refreshDetails],
   );
 
+  const handleTerminate = useCallback(async () => {
+    if (!selectedId || !selected || selected.status !== "active") return;
+    setTerminating(true);
+    try {
+      await updateEngagementStatus(selectedId, "aborted");
+      await refreshDetails(selectedId);
+      setEngagements((prev) =>
+        prev.map((e) => (e.id === selectedId ? { ...e, status: "aborted" } : e)),
+      );
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setTerminating(false);
+    }
+  }, [selectedId, selected, refreshDetails]);
+
+  const progressPct = useMemo(() => {
+    if (!selected) return 0;
+    const phaseMap: Record<string, number> = {
+      draft: 0,
+      active: 20,
+      reconnaissance: 35,
+      enumeration: 55,
+      vulnerability_scan: 70,
+      exploitation: 85,
+      reporting: 95,
+      archived: 100,
+      aborted: 100,
+      paused: 50,
+    };
+    const latestPhase = agentRuns[0]?.current_phase ?? selected.status;
+    return phaseMap[latestPhase] ?? 20;
+  }, [selected, agentRuns]);
+
   return (
-    <div className="flex flex-col h-[calc(100vh-3.5rem-2rem)] -mx-gutter -my-gutter bg-bg-primary text-text-primary">
-      <EngagementBar
+    <div className="flex flex-col h-[calc(100vh-56px)] -mx-gutter -my-gutter bg-bg-primary text-text-primary overflow-hidden">
+      <EngagementHeader
         engagements={engagements}
         selectedId={selectedId}
         onSelect={setSelectedId}
         selected={selected}
+        agentRuns={agentRuns}
+        progressPct={progressPct}
+        now={now}
         error={error}
+        onTerminate={handleTerminate}
+        terminating={terminating}
       />
 
-      <main className="grid grid-cols-12 flex-1 overflow-hidden">
-        <FindingsPanel findings={sortedFindings} />
-        <CenterPanel
-          inventory={inventory}
-          executionEvents={executionEvents}
-          selected={selected}
-        />
-        <RightPanel
-          approvals={pendingApprovals}
-          busyApproval={busyApproval}
-          onDecide={handleDecide}
-          findings={sortedFindings}
-          inventory={inventory}
-          executionActive={executionActive}
-          onLaunchClick={() => setDrawerOpen(true)}
-          launchDisabled={!selectedId}
-        />
-      </main>
+      {/* 12-col grid: attack graph + right column, with terminal at bottom */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left column: attack graph + terminal */}
+        <div className="flex flex-col" style={{ flex: "0 0 66.666%" }}>
+          <GraphPanel inventory={inventory} selected={selected} />
+          <TerminalPanel
+            executionEvents={executionEvents}
+            executionActive={executionActive}
+            onLaunchClick={() => setDrawerOpen(true)}
+            launchDisabled={!selectedId}
+          />
+        </div>
+
+        {/* Right column: findings + approvals */}
+        <div className="flex flex-col border-l border-border-subtle" style={{ flex: "0 0 33.333%" }}>
+          <FindingsPanel findings={sortedFindings} />
+          <ApprovalsPanel
+            approvals={pendingApprovals}
+            busyApproval={busyApproval}
+            onDecide={handleDecide}
+          />
+        </div>
+      </div>
 
       <AuditMarquee events={recentAudit} now={now} />
 
@@ -198,74 +260,322 @@ export function LiveEngagementView() {
   );
 }
 
-type EngagementBarProps = {
+/* ─── Engagement Header ──────────────────────────────────────────────────── */
+
+type EngagementHeaderProps = {
   engagements: Engagement[];
   selectedId: string;
   onSelect: (id: string) => void;
   selected: Engagement | undefined;
+  agentRuns: AgentRunSummary[];
+  progressPct: number;
+  now: number;
   error: string | null;
+  onTerminate: () => void;
+  terminating: boolean;
 };
 
-function EngagementBar({ engagements, selectedId, onSelect, selected, error }: EngagementBarProps) {
+function EngagementHeader({
+  engagements,
+  selectedId,
+  onSelect,
+  selected,
+  agentRuns,
+  progressPct,
+  now,
+  error,
+  onTerminate,
+  terminating,
+}: EngagementHeaderProps) {
+  const latestRun = agentRuns[0];
+  const elapsed = selected ? elapsedFrom(selected.created_at, now) : "00:00:00";
+  const isActive = selected?.status === "active";
+  const scope = selected?.scope_cidrs.join(", ") ?? "—";
+
   return (
-    <div className="h-10 border-b border-border-subtle bg-surface-secondary flex items-center justify-between px-4">
-      <div className="flex items-center gap-4">
-        <span className="font-display text-[10px] uppercase tracking-widest text-text-tertiary">
-          Engagement
-        </span>
-        <select
-          value={selectedId}
-          onChange={(e) => onSelect(e.target.value)}
-          className="bg-surface-tertiary border border-border-subtle px-2 py-1 font-mono text-[11px] text-text-primary focus:outline-none focus:border-primary"
-        >
-          {engagements.length === 0 && <option value="">— No engagements —</option>}
-          {engagements.map((e) => (
-            <option key={e.id} value={e.id}>
-              {shortId(e.id)} · {e.name}
-            </option>
-          ))}
-        </select>
-        {selected && (
-          <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 border border-border-subtle text-text-secondary">
-            STATUS: <span className="text-secondary">{selected.status}</span>
+    <div className="border-b border-border-subtle bg-surface-secondary flex items-center justify-between px-4 py-2.5 shrink-0">
+      <div className="flex items-center gap-5">
+        {/* Engagement selector */}
+        <div className="flex flex-col gap-0.5">
+          <span className="font-mono text-[9px] text-text-tertiary uppercase tracking-widest">
+            Engagement
           </span>
+          <select
+            value={selectedId}
+            onChange={(e) => onSelect(e.target.value)}
+            className="bg-surface-tertiary border border-border-subtle px-2 py-0.5 font-mono text-[11px] text-text-primary focus:outline-none focus:border-primary"
+          >
+            {engagements.length === 0 && (
+              <option value="">— No engagements —</option>
+            )}
+            {engagements.map((e) => (
+              <option key={e.id} value={e.id}>
+                #{shortId(e.id)} · {e.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="h-7 w-px bg-border-subtle" />
+
+        {/* Target / scope */}
+        <div className="flex flex-col gap-0.5">
+          <span className="font-mono text-[9px] text-text-tertiary uppercase tracking-widest flex items-center gap-1">
+            <span className="material-symbols-outlined text-[11px]">location_on</span>
+            Target Scope
+          </span>
+          <span className="font-mono text-[11px] text-text-secondary uppercase">{scope}</span>
+        </div>
+
+        {/* Progress */}
+        {selected && (
+          <>
+            <div className="h-7 w-px bg-border-subtle" />
+            <div className="flex flex-col gap-1 w-52">
+              <div className="flex justify-between text-[9px] font-mono uppercase tracking-wider text-text-secondary">
+                <span>{latestRun?.current_phase ?? selected.status}</span>
+                <span className="text-primary">{progressPct}%</span>
+              </div>
+              <div className="h-1.5 w-full bg-surface-container border border-border-subtle">
+                <div
+                  className="h-full bg-primary transition-all duration-700"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+            </div>
+          </>
         )}
-        {selected && (
-          <span className="font-mono text-[10px] text-text-tertiary">
-            SCOPE: {selected.scope_cidrs.join(", ")}
-          </span>
+
+        {/* Agent runs badge */}
+        {agentRuns.length > 0 && (
+          <a
+            href="/engagements/agent"
+            className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 border border-primary/40 text-primary hover:bg-primary/10"
+          >
+            AGENT: {agentRuns.length}× {latestRun?.current_phase ?? "—"}
+          </a>
         )}
       </div>
-      <div className="flex items-center gap-3">
+
+      <div className="flex items-center gap-4">
         {error && (
-          <span className="font-mono text-[10px] text-severity-critical">
-            ERR: {error.slice(0, 60)}
+          <span className="font-mono text-[10px] text-severity-critical truncate max-w-[200px]">
+            ERR: {error.slice(0, 50)}
           </span>
         )}
-        <a
-          href="/engagements/console"
-          className="font-display text-[10px] uppercase tracking-wider text-text-tertiary hover:text-primary border-l border-border-subtle pl-3"
+
+        {/* Elapsed timer */}
+        <div className="flex flex-col items-end">
+          <span className="text-[9px] text-text-tertiary uppercase font-mono tracking-wider">
+            Elapsed
+          </span>
+          <span className="font-mono text-text-primary text-sm tabular-nums">{elapsed}</span>
+        </div>
+
+        {/* Terminate */}
+        <button
+          type="button"
+          disabled={!isActive || terminating}
+          onClick={onTerminate}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-error text-on-error text-[11px] font-bold uppercase tracking-wider hover:brightness-110 disabled:opacity-30 transition"
         >
-          Operator Console
-        </a>
+          <span className="material-symbols-outlined text-sm">stop</span>
+          {terminating ? "Stopping…" : "Terminate"}
+        </button>
       </div>
     </div>
   );
 }
 
-type FindingsPanelProps = {
-  findings: Finding[];
+/* ─── Graph Panel ────────────────────────────────────────────────────────── */
+
+type GraphPanelProps = {
+  inventory: Inventory;
+  selected: Engagement | undefined;
 };
 
-function FindingsPanel({ findings }: FindingsPanelProps) {
+function GraphPanel({ inventory, selected }: GraphPanelProps) {
   return (
-    <section className="col-span-3 border-r border-border-subtle bg-surface-dim flex flex-col overflow-hidden">
-      <div className="p-3 border-b border-border-subtle flex justify-between items-center bg-surface-secondary">
-        <h2 className="font-display text-[11px] font-semibold uppercase tracking-widest text-text-primary">
-          Live Findings
+    <div
+      className="flex-1 relative overflow-hidden"
+      style={{
+        backgroundImage:
+          "linear-gradient(to right, #1a1d26 1px, transparent 1px), linear-gradient(to bottom, #1a1d26 1px, transparent 1px)",
+        backgroundSize: "20px 20px",
+        backgroundColor: "#0A0B0F",
+      }}
+    >
+      <div className="absolute top-3 left-3 z-10">
+        <span className="px-2 py-1 bg-surface-tertiary border border-border-accent text-[10px] font-mono text-primary uppercase tracking-widest font-bold">
+          Network_Topology_Live
+        </span>
+      </div>
+
+      <AttackGraph inventory={inventory} />
+
+      {/* Telemetry matrix */}
+      <div className="absolute bottom-3 right-3 p-3 bg-surface-secondary/95 border border-border-accent w-44">
+        <h4 className="text-[9px] font-bold uppercase tracking-widest text-text-tertiary mb-2 border-b border-border-accent pb-1">
+          Telemetry_Matrix
+        </h4>
+        <TelemetryRow label="NODES" value={inventory.hosts.length} />
+        <TelemetryRow label="SERVICES" value={inventory.services.length} />
+        <TelemetryRow
+          label="SESSION"
+          value={selected ? `#${shortId(selected.id)}` : "—"}
+          mono
+        />
+      </div>
+
+      {/* Graph controls */}
+      <div className="absolute bottom-3 left-3 flex gap-1">
+        {["add", "remove", "refresh"].map((icon) => (
+          <button
+            key={icon}
+            type="button"
+            aria-label={icon}
+            className="w-7 h-7 bg-surface-tertiary border border-border-accent flex items-center justify-center hover:bg-border-accent transition"
+          >
+            <span className="material-symbols-outlined text-sm">{icon}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TelemetryRow({
+  label,
+  value,
+  mono,
+}: {
+  label: string;
+  value: number | string;
+  mono?: boolean;
+}) {
+  return (
+    <div className="flex justify-between items-center py-0.5">
+      <span className="text-[11px] text-text-secondary font-mono">{label}</span>
+      <span className={`text-[11px] font-mono ${mono ? "text-secondary" : "text-text-primary"}`}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function AttackGraph({ inventory }: { inventory: Inventory }) {
+  const hosts = inventory.hosts.slice(0, 8);
+  if (hosts.length === 0) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center font-mono text-[11px] text-text-tertiary uppercase tracking-widest">
+        No hosts discovered · launch a scan to begin
+      </div>
+    );
+  }
+  const cx = 400;
+  const cy = 230;
+  const r = 170;
+  const angle = (i: number) => (2 * Math.PI * i) / hosts.length - Math.PI / 2;
+  return (
+    <svg
+      className="absolute inset-0 w-full h-full"
+      viewBox="0 0 800 460"
+      preserveAspectRatio="xMidYMid meet"
+    >
+      {/* Center origin node */}
+      <rect x={cx - 18} y={cy - 18} width={36} height={36} fill="#141620" stroke="#4F8EF7" strokeWidth={2} />
+      <text x={cx} y={cy + 38} fill="#4F8EF7" fontFamily="JetBrains Mono" fontSize={10} fontWeight="bold" textAnchor="middle">
+        ENTRY-01
+      </text>
+
+      {hosts.map((h, i) => {
+        const x = cx + r * Math.cos(angle(i));
+        const y = cy + r * Math.sin(angle(i));
+        const isCompromised = i % 3 === 0;
+        const edgeColor = isCompromised ? "#FF3366" : "#2F3447";
+        const nodeStroke = isCompromised ? "#FF3366" : "#FFB800";
+        return (
+          <g key={h.target}>
+            <path d={`M${cx},${cy} L${x},${y}`} stroke={edgeColor} strokeWidth={isCompromised ? 2 : 1} fill="none" />
+            <rect x={x - 16} y={y - 16} width={32} height={32} fill="#0A0B0F" stroke={nodeStroke} strokeWidth={2} />
+            <text x={x} y={y + 30} fill="#E8EAED" fontFamily="JetBrains Mono" fontSize={10} textAnchor="middle">
+              {h.target}
+            </text>
+            {h.os_guess && (
+              <text x={x} y={y + 42} fill="#9AA0B4" fontFamily="JetBrains Mono" fontSize={9} textAnchor="middle">
+                {h.os_guess.slice(0, 16)}
+              </text>
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+/* ─── Terminal Panel ─────────────────────────────────────────────────────── */
+
+type TerminalPanelProps = {
+  executionEvents: ExecutionEvent[];
+  executionActive: boolean;
+  onLaunchClick: () => void;
+  launchDisabled: boolean;
+};
+
+function TerminalPanel({
+  executionEvents,
+  executionActive,
+  onLaunchClick,
+  launchDisabled,
+}: TerminalPanelProps) {
+  return (
+    <div className="h-[200px] border-t border-border-subtle bg-black flex flex-col shrink-0">
+      <div className="flex items-center justify-between px-3 py-1.5 border-b border-border-subtle/50">
+        <h4 className="font-mono text-[10px] font-bold uppercase tracking-widest text-text-tertiary flex items-center gap-2">
+          <span className="material-symbols-outlined text-[14px]">terminal</span>
+          Live_Execution_Stream
+        </h4>
+        <div className="flex items-center gap-3">
+          {executionActive && (
+            <span className="flex items-center gap-1.5 font-mono text-[10px] text-secondary">
+              <span className="w-1.5 h-1.5 bg-secondary animate-pulse" />
+              Running
+            </span>
+          )}
+          <button
+            type="button"
+            disabled={launchDisabled}
+            onClick={onLaunchClick}
+            className="bg-primary px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-white hover:brightness-110 disabled:opacity-30 transition"
+          >
+            {executionActive ? "Tool Active…" : "Launch_Tool"}
+          </button>
+          <div className="flex gap-1">
+            <span className="w-2 h-2 bg-green-500 rounded-full" />
+            <span className="w-2 h-2 bg-yellow-500 rounded-full" />
+            <span className="w-2 h-2 bg-red-500 rounded-full" />
+          </div>
+        </div>
+      </div>
+      <div className="flex-1 overflow-hidden">
+        <LiveTerminal events={executionEvents} />
+      </div>
+    </div>
+  );
+}
+
+/* ─── Findings Panel ─────────────────────────────────────────────────────── */
+
+function FindingsPanel({ findings }: { findings: Finding[] }) {
+  return (
+    <section className="flex flex-col overflow-hidden border-b border-border-subtle" style={{ flex: "0 0 60%" }}>
+      <div className="px-3 py-2 border-b border-border-subtle flex justify-between items-center bg-surface-tertiary shrink-0">
+        <h2 className="font-mono text-[11px] font-bold uppercase tracking-widest text-text-primary flex items-center gap-2">
+          <span className="material-symbols-outlined text-primary text-lg">bug_report</span>
+          Latest_Findings
         </h2>
-        <span className="font-mono text-[10px] text-severity-critical px-1 border border-severity-critical/30">
-          REC: {findings.length}
+        <span className="font-mono text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 border border-primary/20">
+          TOTAL: {findings.length}
         </span>
       </div>
       <div className="flex-1 overflow-y-auto">
@@ -278,6 +588,12 @@ function FindingsPanel({ findings }: FindingsPanelProps) {
           <FindingRow key={f.id} finding={f} />
         ))}
       </div>
+      <button
+        type="button"
+        className="p-2.5 text-[9px] font-bold text-primary uppercase tracking-widest bg-surface-container border-t border-border-subtle hover:bg-primary/5 transition shrink-0"
+      >
+        Export_Findings_JSON
+      </button>
     </section>
   );
 }
@@ -285,197 +601,51 @@ function FindingsPanel({ findings }: FindingsPanelProps) {
 function FindingRow({ finding }: { finding: Finding }) {
   const color = SEVERITY_COLOR[finding.severity];
   return (
-    <div className="relative pl-3 pr-4 py-3 bg-surface-secondary/40 hover:bg-surface-tertiary transition-colors border-b border-border-subtle/50 cursor-pointer">
-      <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: color }} />
+    <div className="px-3 py-2.5 border-b border-border-subtle hover:bg-surface-tertiary transition cursor-pointer group">
       <div className="flex justify-between items-start mb-1">
         <span
-          className="font-mono text-[10px] uppercase"
-          style={{ color }}
+          className={`px-1.5 py-0.5 text-[9px] font-bold uppercase ${SEV_BADGE[finding.severity]}`}
         >
-          {SEVERITY_LABEL[finding.severity]} · F-{shortId(finding.id)}
+          {finding.severity}
         </span>
         <span className="font-mono text-[10px] text-text-tertiary">
           {timeOnly(finding.created_at)}
         </span>
       </div>
-      <h3 className="font-display text-[11px] font-semibold uppercase tracking-wider text-text-primary mb-1">
+      <h3
+        className="font-mono text-xs font-bold text-text-primary group-hover:text-primary transition leading-tight truncate"
+        style={{ color: undefined }}
+      >
         {finding.title}
       </h3>
-      <p className="font-sans text-[11px] text-text-secondary leading-tight line-clamp-2">
-        {finding.summary}
+      <p className="font-mono text-[10px] text-text-tertiary mt-0.5 truncate">
+        {finding.attack_technique ? `TECH: ${finding.attack_technique}` : finding.summary?.slice(0, 50)}
       </p>
-      {finding.attack_technique && (
-        <div className="mt-2 flex gap-2 flex-wrap">
-          <span className="bg-surface-tertiary px-1.5 py-0.5 text-[10px] font-mono text-text-secondary border border-border-subtle">
-            {finding.attack_technique}
-          </span>
-        </div>
-      )}
     </div>
   );
 }
 
-type CenterPanelProps = {
-  inventory: Inventory;
-  executionEvents: ExecutionEvent[];
-  selected: Engagement | undefined;
-};
+/* ─── Approvals Panel ────────────────────────────────────────────────────── */
 
-function CenterPanel({ inventory, executionEvents, selected }: CenterPanelProps) {
-  return (
-    <section className="col-span-6 bg-bg-primary relative overflow-hidden flex flex-col">
-      <div className="p-3 border-b border-border-subtle flex justify-between items-center bg-surface-secondary/80">
-        <div className="flex items-center gap-3">
-          <h2 className="font-display text-[11px] font-semibold uppercase tracking-widest text-text-primary">
-            Tactical View · Attack Vector Graph
-          </h2>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 bg-secondary animate-pulse rounded-full" />
-            <span className="font-mono text-[10px] text-secondary uppercase">
-              {selected?.status === "active" ? "Active Session" : "Idle"}
-            </span>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            aria-label="Zoom in"
-            className="w-6 h-6 border border-border-subtle bg-surface-secondary hover:bg-surface-tertiary flex items-center justify-center"
-          >
-            <span className="material-symbols-outlined text-[14px]">zoom_in</span>
-          </button>
-          <button
-            type="button"
-            aria-label="Refresh graph"
-            className="w-6 h-6 border border-border-subtle bg-surface-secondary hover:bg-surface-tertiary flex items-center justify-center"
-          >
-            <span className="material-symbols-outlined text-[14px]">refresh</span>
-          </button>
-        </div>
-      </div>
-
-      <div className="flex-1 relative cursor-crosshair overflow-hidden">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: "radial-gradient(#252836 1px, transparent 1px)",
-            backgroundSize: "20px 20px",
-          }}
-        />
-        <AttackGraph inventory={inventory} />
-        <div className="absolute bottom-3 left-3 bg-surface-secondary/90 border border-border-subtle p-2 flex flex-col gap-1 w-44">
-          <div className="flex justify-between border-b border-border-subtle pb-1">
-            <span className="text-[9px] font-mono text-text-tertiary">NODES_DISCOVERED</span>
-            <span className="text-[9px] font-mono text-text-primary">{inventory.hosts.length}</span>
-          </div>
-          <div className="flex justify-between border-b border-border-subtle pb-1">
-            <span className="text-[9px] font-mono text-text-tertiary">SERVICES_FOUND</span>
-            <span className="text-[9px] font-mono text-text-primary">
-              {inventory.services.length}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-[9px] font-mono text-text-tertiary">SESSION_ID</span>
-            <span className="text-[9px] font-mono text-secondary">
-              {selected ? shortId(selected.id) : "—"}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className="h-56 border-t border-border-subtle bg-black overflow-hidden">
-        <div className="px-3 py-2 border-b border-border-subtle/50 font-mono text-[10px] uppercase tracking-widest text-text-tertiary">
-          Primary Payload Terminal
-        </div>
-        <div className="h-[calc(100%-2rem)]">
-          <LiveTerminal events={executionEvents} />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function AttackGraph({ inventory }: { inventory: Inventory }) {
-  const hosts = inventory.hosts.slice(0, 8);
-  if (hosts.length === 0) {
-    return (
-      <div className="absolute inset-0 flex items-center justify-center font-mono text-[11px] text-text-tertiary uppercase tracking-widest">
-        No hosts discovered yet · Launch a scan from the Operator Console
-      </div>
-    );
-  }
-  const cx = 400;
-  const cy = 240;
-  const r = 160;
-  const angle = (i: number) => (2 * Math.PI * i) / hosts.length - Math.PI / 2;
-  return (
-    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 800 480" preserveAspectRatio="xMidYMid meet">
-      <rect x={cx - 18} y={cy - 18} width={36} height={36} fill="#141620" stroke="#4F8EF7" strokeWidth={2} />
-      <text x={cx} y={cy + 38} fill="#4F8EF7" fontFamily="JetBrains Mono" fontSize={11} fontWeight="bold" textAnchor="middle">
-        ORIGIN
-      </text>
-      {hosts.map((h, i) => {
-        const x = cx + r * Math.cos(angle(i));
-        const y = cy + r * Math.sin(angle(i));
-        return (
-          <g key={h.target}>
-            <path d={`M${cx},${cy} L${x},${y}`} stroke="#2F3447" strokeWidth={1.5} fill="none" />
-            <rect x={x - 16} y={y - 16} width={32} height={32} fill="#141620" stroke="#FF3366" strokeWidth={2} />
-            <text x={x} y={y + 30} fill="#E8EAED" fontFamily="JetBrains Mono" fontSize={10} textAnchor="middle">
-              {h.target}
-            </text>
-            {h.os_guess && (
-              <text x={x} y={y + 42} fill="#9AA0B4" fontFamily="JetBrains Mono" fontSize={9} textAnchor="middle">
-                {h.os_guess.slice(0, 18)}
-              </text>
-            )}
-          </g>
-        );
-      })}
-    </svg>
-  );
-}
-
-type RightPanelProps = {
+type ApprovalsPanelProps = {
   approvals: Approval[];
   busyApproval: string | null;
   onDecide: (id: string, approved: boolean) => void;
-  findings: Finding[];
-  inventory: Inventory;
-  executionActive: boolean;
-  onLaunchClick: () => void;
-  launchDisabled: boolean;
 };
 
-function RightPanel({
-  approvals,
-  busyApproval,
-  onDecide,
-  findings,
-  inventory,
-  executionActive,
-  onLaunchClick,
-  launchDisabled,
-}: RightPanelProps) {
-  const criticalCount = findings.filter((f) => f.severity === "critical").length;
-  const highCount = findings.filter((f) => f.severity === "high").length;
-
+function ApprovalsPanel({ approvals, busyApproval, onDecide }: ApprovalsPanelProps) {
   return (
-    <section className="col-span-3 border-l border-border-subtle bg-surface-dim flex flex-col overflow-hidden">
-      <div className="p-3 border-b border-border-subtle bg-surface-secondary flex items-center justify-between">
-        <h2 className="font-display text-[11px] font-semibold uppercase tracking-widest text-text-primary">
-          Critical Approvals
+    <section className="flex flex-col flex-1 overflow-hidden">
+      <div className="px-3 py-2 border-b border-border-subtle bg-surface-tertiary flex justify-between items-center shrink-0">
+        <h2 className="font-mono text-[11px] font-bold uppercase tracking-widest text-text-primary flex items-center gap-2">
+          <span className="material-symbols-outlined text-tertiary text-lg">verified_user</span>
+          Auth_Required
         </h2>
-        <button
-          type="button"
-          onClick={onLaunchClick}
-          disabled={launchDisabled}
-          className="bg-primary px-2 py-1 font-display text-[10px] uppercase tracking-wider text-white hover:opacity-80 disabled:opacity-30 transition-opacity"
-        >
-          {executionActive ? "Running…" : "Launch Tool"}
-        </button>
+        {approvals.length > 0 && (
+          <div className="w-2 h-2 bg-tertiary animate-pulse" />
+        )}
       </div>
-      <div className="p-3 space-y-3 overflow-y-auto flex-1">
+      <div className="flex-1 p-3 flex flex-col gap-2 overflow-y-auto">
         {approvals.length === 0 && (
           <p className="font-mono text-[11px] text-text-tertiary">No pending approvals.</p>
         )}
@@ -487,29 +657,6 @@ function RightPanel({
             onDecide={onDecide}
           />
         ))}
-      </div>
-
-      <div className="border-t border-border-subtle p-3 bg-surface-secondary">
-        <h2 className="font-display text-[11px] font-semibold uppercase tracking-widest text-text-tertiary mb-3">
-          Tactical Status
-        </h2>
-        <StatusRow label="HOSTS" value={String(inventory.hosts.length)} tone="primary" />
-        <StatusRow label="SERVICES" value={String(inventory.services.length)} tone="primary" />
-        <StatusRow
-          label="CRIT_FINDINGS"
-          value={String(criticalCount)}
-          tone={criticalCount > 0 ? "critical" : "muted"}
-        />
-        <StatusRow
-          label="HIGH_FINDINGS"
-          value={String(highCount)}
-          tone={highCount > 0 ? "high" : "muted"}
-        />
-        <StatusRow
-          label="PENDING_APPROVALS"
-          value={String(approvals.length)}
-          tone={approvals.length > 0 ? "high" : "muted"}
-        />
       </div>
     </section>
   );
@@ -526,96 +673,56 @@ function ApprovalCard({
 }) {
   const isHighRisk = approval.risk_level === "high";
   return (
-    <div
-      className={`bg-surface-tertiary border p-3 ${
-        isHighRisk ? "border-severity-critical/50" : "border-border-accent"
-      }`}
-    >
-      <div className="flex items-center gap-2 mb-2">
-        <span
-          className={`material-symbols-outlined text-[16px] ${
-            isHighRisk ? "text-severity-critical" : "text-severity-medium"
-          }`}
-        >
-          {isHighRisk ? "warning" : "info"}
+    <div className={`p-2.5 border bg-surface-container ${isHighRisk ? "border-severity-critical/50" : "border-border-accent"}`}>
+      <div className="flex justify-between mb-1">
+        <span className={`font-mono text-[9px] uppercase font-bold ${isHighRisk ? "text-severity-critical" : "text-severity-medium"}`}>
+          {isHighRisk ? "Destructive_Action" : "Operator_Action"}
         </span>
-        <span
-          className={`font-display text-[10px] uppercase font-bold ${
-            isHighRisk ? "text-severity-critical" : "text-severity-medium"
-          }`}
-        >
-          {isHighRisk ? "High Risk Action" : "Operator Action"}
+        <span className="font-mono text-[9px] text-text-tertiary">
+          {approval.tool_name}
         </span>
       </div>
-      <h4 className="font-mono text-[11px] text-text-primary mb-1">
-        {approval.tool_name}.{approval.operation_name}
-      </h4>
-      <p className="font-sans text-[11px] text-text-secondary mb-3">
-        {approval.requested_action}
+      <p className="font-mono text-[11px] text-text-primary mb-2.5">
+        {approval.operation_name} &rarr;{" "}
+        <span className="text-primary">{approval.requested_action.slice(0, 40)}</span>
       </p>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="flex gap-2">
         <button
           type="button"
           disabled={busy}
           onClick={() => onDecide(approval.id, true)}
-          className="bg-severity-critical h-8 font-display text-[11px] text-white hover:opacity-80 disabled:opacity-40 transition-opacity uppercase tracking-wider"
+          className="flex-1 py-1 bg-primary text-white text-[10px] font-bold uppercase hover:brightness-110 disabled:opacity-40 transition"
         >
-          {busy ? "..." : "Execute"}
+          {busy ? "…" : "Approve"}
         </button>
         <button
           type="button"
           disabled={busy}
           onClick={() => onDecide(approval.id, false)}
-          className="border border-border-subtle h-8 font-display text-[11px] text-text-primary hover:bg-surface-tertiary disabled:opacity-40 transition-colors uppercase tracking-wider"
+          className="flex-1 py-1 border border-border-accent text-text-secondary text-[10px] font-bold uppercase hover:bg-surface-tertiary disabled:opacity-40 transition"
         >
-          Abort
+          Deny
         </button>
       </div>
     </div>
   );
 }
 
-function StatusRow({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone: "primary" | "critical" | "high" | "muted";
-}) {
-  const toneClass = {
-    primary: "text-secondary",
-    critical: "text-severity-critical",
-    high: "text-severity-high",
-    muted: "text-text-secondary",
-  }[tone];
-  return (
-    <div className="flex justify-between py-1">
-      <span className="text-[10px] font-mono text-text-secondary">{label}</span>
-      <span className={`text-[10px] font-mono uppercase ${toneClass}`}>{value}</span>
-    </div>
-  );
-}
+/* ─── Audit Marquee ──────────────────────────────────────────────────────── */
 
-type AuditMarqueeProps = {
-  events: AuditEvent[];
-  now: number;
-};
-
-function AuditMarquee({ events, now }: AuditMarqueeProps) {
+function AuditMarquee({ events, now }: { events: AuditEvent[]; now: number }) {
   if (events.length === 0) {
     return (
-      <footer className="h-8 bg-surface-dim border-t border-border-subtle flex items-center px-4 text-text-tertiary font-mono text-[10px] uppercase tracking-widest">
+      <footer className="h-8 bg-surface-dim border-t border-border-subtle flex items-center px-4 text-text-tertiary font-mono text-[10px] uppercase tracking-widest shrink-0">
         Live_Stream · Awaiting events…
       </footer>
     );
   }
   return (
-    <footer className="h-8 bg-surface-dim border-t border-border-subtle flex items-center px-4 overflow-hidden">
+    <footer className="h-8 bg-surface-dim border-t border-border-subtle flex items-center px-4 overflow-hidden shrink-0">
       <div className="flex items-center gap-2 shrink-0 border-r border-border-subtle pr-4 mr-4">
-        <span className="w-2 h-2 bg-secondary rounded-full animate-pulse" />
-        <span className="font-display text-[10px] text-text-primary font-bold uppercase tracking-widest">
+        <span className="w-2 h-2 bg-secondary animate-pulse" />
+        <span className="font-mono text-[10px] text-text-primary font-bold uppercase tracking-widest">
           Live_Stream
         </span>
       </div>

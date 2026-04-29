@@ -52,6 +52,196 @@ NMAP = Tool(
             command_template=["nmap", "-Pn", "-O", "-p", "{ports}", "{target}"],
             default_timeout=180,
         ),
+        ToolOperation(
+            name="host_discovery",
+            argument_schema={
+                "type": "object",
+                "required": ["target"],
+                "additionalProperties": False,
+                "properties": {"target": {"type": "string"}},
+            },
+            command_template=["nmap", "-sn", "-n", "{target}"],
+            default_timeout=120,
+        ),
+        ToolOperation(
+            name="top_ports",
+            argument_schema={
+                "type": "object",
+                "required": ["target", "top_n"],
+                "additionalProperties": False,
+                "properties": {
+                    "target": {"type": "string"},
+                    "top_n": {"type": "string"},
+                },
+            },
+            command_template=["nmap", "-Pn", "-sV", "--top-ports", "{top_n}", "{target}"],
+            default_timeout=240,
+        ),
+    ),
+)
+
+
+WHATWEB = Tool(
+    name="whatweb",
+    phase="enumeration",
+    risk_level="low",
+    operations=(
+        ToolOperation(
+            name="fingerprint",
+            argument_schema={
+                "type": "object",
+                "required": ["url"],
+                "additionalProperties": False,
+                "properties": {"url": {"type": "string"}},
+            },
+            command_template=["whatweb", "--no-errors", "-a", "1", "{url}"],
+            default_timeout=60,
+        ),
+    ),
+)
+
+
+HTTPX = Tool(
+    name="httpx",
+    phase="enumeration",
+    risk_level="low",
+    operations=(
+        ToolOperation(
+            name="probe",
+            argument_schema={
+                "type": "object",
+                "required": ["url"],
+                "additionalProperties": False,
+                "properties": {"url": {"type": "string"}},
+            },
+            command_template=[
+                "httpx",
+                "-u",
+                "{url}",
+                "-silent",
+                "-status-code",
+                "-title",
+                "-tech-detect",
+                "-no-color",
+            ],
+            default_timeout=60,
+        ),
+    ),
+)
+
+
+SSLSCAN = Tool(
+    name="sslscan",
+    phase="enumeration",
+    risk_level="low",
+    operations=(
+        ToolOperation(
+            name="tls_audit",
+            argument_schema={
+                "type": "object",
+                "required": ["target", "port"],
+                "additionalProperties": False,
+                "properties": {
+                    "target": {"type": "string"},
+                    "port": {"type": "string"},
+                },
+            },
+            command_template=["sslscan", "--no-colour", "{target}:{port}"],
+            default_timeout=120,
+        ),
+    ),
+)
+
+
+DNSX = Tool(
+    name="dnsx",
+    phase="enumeration",
+    risk_level="low",
+    operations=(
+        ToolOperation(
+            name="resolve",
+            argument_schema={
+                "type": "object",
+                "required": ["target"],
+                "additionalProperties": False,
+                "properties": {"target": {"type": "string"}},
+            },
+            command_template=[
+                "dnsx",
+                "-silent",
+                "-resp",
+                "-a",
+                "-aaaa",
+                "-cname",
+                "-d",
+                "{target}",
+            ],
+            default_timeout=60,
+        ),
+    ),
+)
+
+
+NUCLEI = Tool(
+    name="nuclei",
+    phase="vulnerability_scan",
+    risk_level="high",
+    operations=(
+        ToolOperation(
+            name="targeted_scan",
+            argument_schema={
+                "type": "object",
+                "required": ["url", "severity"],
+                "additionalProperties": False,
+                "properties": {
+                    "url": {"type": "string"},
+                    "severity": {"type": "string"},
+                },
+            },
+            command_template=[
+                "nuclei",
+                "-u",
+                "{url}",
+                "-severity",
+                "{severity}",
+                "-silent",
+                "-no-color",
+                "-disable-update-check",
+            ],
+            default_timeout=900,
+        ),
+    ),
+)
+
+
+GOBUSTER = Tool(
+    name="gobuster",
+    phase="enumeration",
+    risk_level="high",
+    operations=(
+        ToolOperation(
+            name="dir",
+            argument_schema={
+                "type": "object",
+                "required": ["url", "wordlist"],
+                "additionalProperties": False,
+                "properties": {
+                    "url": {"type": "string"},
+                    "wordlist": {"type": "string"},
+                },
+            },
+            command_template=[
+                "gobuster",
+                "dir",
+                "-u",
+                "{url}",
+                "-w",
+                "{wordlist}",
+                "-q",
+                "--no-error",
+            ],
+            default_timeout=900,
+        ),
     ),
 )
 
@@ -79,6 +269,12 @@ HTTP_PROBE = Tool(
 REGISTRY: dict[str, Tool] = {
     NMAP.name: NMAP,
     HTTP_PROBE.name: HTTP_PROBE,
+    WHATWEB.name: WHATWEB,
+    HTTPX.name: HTTPX,
+    SSLSCAN.name: SSLSCAN,
+    DNSX.name: DNSX,
+    NUCLEI.name: NUCLEI,
+    GOBUSTER.name: GOBUSTER,
 }
 
 

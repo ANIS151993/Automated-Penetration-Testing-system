@@ -147,3 +147,85 @@ def test_enrich_execution_document_parses_root_required_diagnostic() -> None:
     assert enriched["parsed"]["diagnostics"][0]["code"] == "root_required"
     assert enriched["parsed"]["diagnostics"][0]["kind"] == "permissions"
     assert enriched["parsed"]["diagnostics"][0]["target"] == "172.20.32.59"
+
+
+def test_enrich_execution_document_parses_httpx_probe() -> None:
+    document = {
+        "tool_name": "httpx",
+        "operation_name": "probe",
+        "invocation": {
+            "id": "inv-h1",
+            "tool_name": "httpx",
+            "operation_name": "probe",
+            "targets": ["172.20.32.59"],
+            "created_at": "2026-04-26T00:00:00+00:00",
+            "args": {"url": "http://172.20.32.59"},
+        },
+        "events": [
+            {"type": "stdout", "line": "http://172.20.32.59 [200] [Welcome] [nginx,php]"},
+            {"type": "completed", "status": "completed"},
+        ],
+    }
+
+    enriched = enrich_execution_document(document)
+
+    assert enriched["parsed"]["web"][0]["status_code"] == 200
+    assert enriched["parsed"]["fingerprints"][0]["running"] == "nginx, php"
+    assert enriched["parsed"]["suggested_findings"][0]["attack_technique"] == "T1592"
+
+
+def test_enrich_execution_document_parses_whatweb_fingerprint() -> None:
+    document = {
+        "tool_name": "whatweb",
+        "operation_name": "fingerprint",
+        "invocation": {
+            "id": "inv-w1",
+            "tool_name": "whatweb",
+            "operation_name": "fingerprint",
+            "targets": ["172.20.32.59"],
+            "created_at": "2026-04-26T00:00:00+00:00",
+            "args": {"url": "http://172.20.32.59"},
+        },
+        "events": [
+            {
+                "type": "stdout",
+                "line": "http://172.20.32.59 [200 OK] HTTPServer[nginx/1.24.0], PHP[8.3.0]",
+            },
+            {"type": "completed", "status": "completed"},
+        ],
+    }
+
+    enriched = enrich_execution_document(document)
+    fp = enriched["parsed"]["fingerprints"][0]
+    assert "HTTPServer" in fp["running"]
+    assert "PHP" in fp["running"]
+    assert enriched["parsed"]["suggested_findings"][0]["severity"] == "info"
+
+
+def test_enrich_execution_document_parses_nuclei_critical() -> None:
+    document = {
+        "tool_name": "nuclei",
+        "operation_name": "targeted_scan",
+        "invocation": {
+            "id": "inv-n1",
+            "tool_name": "nuclei",
+            "operation_name": "targeted_scan",
+            "targets": ["172.20.32.59"],
+            "created_at": "2026-04-26T00:00:00+00:00",
+            "args": {"url": "http://172.20.32.59", "severity": "critical"},
+        },
+        "events": [
+            {
+                "type": "stdout",
+                "line": "[CVE-2023-1234] [http] [critical] http://172.20.32.59/admin [admin panel]",
+            },
+            {"type": "completed", "status": "completed"},
+        ],
+    }
+
+    enriched = enrich_execution_document(document)
+    findings = enriched["parsed"]["suggested_findings"]
+    assert len(findings) == 1
+    assert findings[0]["severity"] == "critical"
+    assert findings[0]["attack_technique"] == "T1190"
+    assert "CVE-2023-1234" in findings[0]["title"]

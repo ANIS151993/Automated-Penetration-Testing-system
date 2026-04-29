@@ -36,3 +36,4 @@ class ApprovalModel(Base):
         DateTime(timezone=True),
         nullable=True,
     )
+    agent_run_id: Mapped[UUID | None] = mapped_column(Uuid, nullable=True)

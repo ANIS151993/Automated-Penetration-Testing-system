@@ -25,6 +25,12 @@ class Settings(BaseSettings):
     gateway_client_key_path: str = "/workspace/certs/command-client-key.pem"
     artifacts_root: str = "/app/artifacts"
     operator_name: str = "lab-operator"
+    auth_jwt_secret: str = "replace-this-before-use-with-32-plus-bytes-secret"
+    auth_jwt_ttl_seconds: int = 60 * 60 * 12
+    auth_cookie_name: str = "pentai_session"
+    auth_cookie_secure: bool = False
+    cors_allow_origins: str = "http://localhost:3000"
+    knowledge_uploads_root: str = "/app/artifacts/knowledge"
 
 
 @lru_cache

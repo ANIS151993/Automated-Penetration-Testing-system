@@ -18,6 +18,10 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/engagements/new", label: "New Engagement", icon: "add_circle" },
   { href: "/audit", label: "Audit Log", icon: "receipt_long" },
   { href: "/engagements/console", label: "Op Console", icon: "terminal" },
+  { href: "/engagements/agent", label: "Agent Run", icon: "smart_toy" },
+  { href: "/knowledge", label: "Knowledge Base", icon: "library_books" },
+  { href: "/reports", label: "Reports", icon: "summarize" },
+  { href: "/users", label: "Users", icon: "manage_accounts" },
 ];
 
 type AppShellProps = {

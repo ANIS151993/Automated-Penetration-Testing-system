@@ -11,6 +11,8 @@ export type HealthResponse = {
   allowed_network: string;
   weapon_node_url: string;
   database_status: string;
+  ollama_status: string;
+  ollama_models: string[];
 };
 
 export type EngagementStatus = "draft" | "active" | "paused" | "aborted" | "archived";
@@ -42,6 +44,7 @@ export type Approval = {
   args: Record<string, string>;
   created_at: string;
   decided_at: string | null;
+  agent_run_id: string | null;
 };
 
 export type FindingSeverity = "info" | "low" | "medium" | "high" | "critical";
@@ -268,15 +271,28 @@ export type ReportCreatePayload = {
   report_format?: "json";
 };
 
+function handleUnauthorized() {
+  if (typeof window === "undefined") return;
+  if (window.location.pathname.startsWith("/login")) return;
+  const next = encodeURIComponent(window.location.pathname + window.location.search);
+  window.location.replace(`/login?next=${next}`);
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${apiBaseUrl}${path}`, {
     cache: "no-store",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...(init?.headers ?? {}),
     },
     ...init,
   });
+
+  if (response.status === 401) {
+    handleUnauthorized();
+    throw new Error("not_authenticated");
+  }
 
   if (!response.ok) {
     let detail = `Request failed with status ${response.status}`;
@@ -289,7 +305,129 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new Error(detail);
   }
 
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
   return response.json() as Promise<T>;
+}
+
+export type AuthUser = {
+  id: string;
+  email: string;
+  display_name: string;
+  role: string;
+  is_active: boolean;
+};
+
+export type LoginResponse = {
+  user: AuthUser;
+  expires_at: string;
+};
+
+export function login(email: string, password: string) {
+  return request<LoginResponse>("/api/v1/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export function logout() {
+  return request<void>("/api/v1/auth/logout", { method: "POST" });
+}
+
+export type KnowledgeIngestResponse = {
+  source_path: string;
+  chunks_written: number;
+  skipped: boolean;
+};
+
+export type KnowledgeHit = {
+  source_path: string;
+  title: string;
+  content: string;
+  score: number;
+};
+
+export type KnowledgeSearchResponse = {
+  query: string;
+  hits: KnowledgeHit[];
+};
+
+export function ingestKnowledgeSource(
+  filename: string,
+  content: string,
+  metadata?: Record<string, unknown>,
+) {
+  return request<KnowledgeIngestResponse>("/api/v1/knowledge/sources", {
+    method: "POST",
+    body: JSON.stringify({ filename, content, metadata }),
+  });
+}
+
+export type KnowledgeSource = {
+  source_path: string;
+  source_kind: string;
+  embedding_model: string;
+  chunk_count: number;
+  updated_at: string | null;
+};
+
+export function listKnowledgeSources() {
+  return request<KnowledgeSource[]>("/api/v1/knowledge/sources");
+}
+
+export function deleteKnowledgeSource(sourcePath: string) {
+  const params = new URLSearchParams({ source_path: sourcePath });
+  return request<{ source_path: string; chunks_deleted: number }>(
+    `/api/v1/knowledge/sources?${params.toString()}`,
+    { method: "DELETE" },
+  );
+}
+
+export function searchKnowledge(query: string, topK = 5, minScore = 0) {
+  const params = new URLSearchParams({
+    q: query,
+    top_k: String(topK),
+    min_score: String(minScore),
+  });
+  return request<KnowledgeSearchResponse>(
+    `/api/v1/knowledge/search?${params.toString()}`,
+  );
+}
+
+export function getCurrentUser() {
+  return request<AuthUser>("/api/v1/auth/me");
+}
+
+export function listUsers() {
+  return request<AuthUser[]>("/api/v1/auth/users");
+}
+
+export function createUser(payload: {
+  email: string;
+  password: string;
+  display_name: string;
+  role: string;
+}) {
+  return request<AuthUser>("/api/v1/auth/users", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function setUserPassword(userId: string, newPassword: string) {
+  return request<void>(`/api/v1/auth/users/${userId}/password`, {
+    method: "PATCH",
+    body: JSON.stringify({ new_password: newPassword }),
+  });
+}
+
+export function setUserActive(userId: string, active: boolean) {
+  return request<AuthUser>(`/api/v1/auth/users/${userId}/active`, {
+    method: "PATCH",
+    body: JSON.stringify({ active }),
+  });
 }
 
 export function getHealth() {
@@ -298,6 +436,84 @@ export function getHealth() {
 
 export function listEngagements() {
   return request<Engagement[]>("/api/v1/engagements");
+}
+
+export type AgentPlannedStep = {
+  tool_name: string;
+  operation_name: string;
+  args: Record<string, unknown>;
+  reason: string;
+  phase: string;
+  citations: string[];
+};
+
+export type AgentStepResult = {
+  tool_name: string;
+  operation_name: string;
+  args: Record<string, unknown>;
+  status: string;
+  exit_code: number | null;
+  stdout: string;
+  stderr: string;
+  invocation_id: string | null;
+  execution_id: string | null;
+  error: string | null;
+};
+
+export type AgentFinding = {
+  title: string;
+  severity: FindingSeverity;
+  attack_technique: string;
+  summary: string;
+  evidence_refs: string[];
+  citations: string[];
+};
+
+export type AgentRunResponse = {
+  id: string;
+  engagement_id: string;
+  operator_goal: string;
+  created_at: string;
+  intent: string;
+  current_phase: string;
+  planned_steps: AgentPlannedStep[];
+  step_results: AgentStepResult[];
+  executed_step_ids: string[];
+  findings: AgentFinding[];
+  errors: string[];
+};
+
+export type AgentRunSummary = {
+  id: string;
+  engagement_id: string;
+  operator_goal: string;
+  intent: string;
+  current_phase: string;
+  created_at: string;
+  planned_steps_count: number;
+  step_results_count: number;
+  findings_count: number;
+  errors_count: number;
+};
+
+export function listAgentRuns(engagementId: string) {
+  return request<AgentRunSummary[]>(
+    `/api/v1/engagements/${engagementId}/agent-runs`,
+  );
+}
+
+export function getAgentRun(runId: string) {
+  return request<AgentRunResponse>(`/api/v1/agent-runs/${runId}`);
+}
+
+export function runAgent(engagementId: string, operatorGoal: string) {
+  return request<AgentRunResponse>(
+    `/api/v1/engagements/${engagementId}/agent-runs`,
+    {
+      method: "POST",
+      body: JSON.stringify({ operator_goal: operatorGoal }),
+    },
+  );
 }
 
 export function createEngagement(payload: EngagementCreatePayload) {
@@ -314,8 +530,14 @@ export function updateEngagementStatus(engagementId: string, status: EngagementS
   });
 }
 
-export function listApprovals(engagementId: string) {
-  return request<Approval[]>(`/api/v1/engagements/${engagementId}/approvals`);
+export function listApprovals(
+  engagementId: string,
+  options?: { status?: "pending" | "decided" },
+) {
+  const qs = options?.status ? `?status=${options.status}` : "";
+  return request<Approval[]>(
+    `/api/v1/engagements/${engagementId}/approvals${qs}`,
+  );
 }
 
 export function createApproval(
@@ -478,8 +700,14 @@ export async function streamToolExecution(
     {
       method: "POST",
       cache: "no-store",
+      credentials: "include",
     },
   );
+
+  if (response.status === 401) {
+    handleUnauthorized();
+    throw new Error("not_authenticated");
+  }
 
   if (!response.ok) {
     let detail = `Request failed with status ${response.status}`;

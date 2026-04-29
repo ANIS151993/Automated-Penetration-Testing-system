@@ -1,9 +1,13 @@
 import json
+import logging
 from uuid import UUID
 
 from fastapi import (
     APIRouter,
+    BackgroundTasks,
+    Depends,
     HTTPException,
+    Query,
     Request,
     WebSocket,
     WebSocketDisconnect,
@@ -11,10 +15,16 @@ from fastapi import (
 )
 from fastapi.responses import StreamingResponse
 
+_log = logging.getLogger(__name__)
+
 from app.core.ws_tickets import TicketError, TicketScope, WSTicketStore
 from app.websocket.execution_bus import ExecutionBus
 
+from app.agents.runner import AgentRunDeps, AgentRunError, run_agent_pipeline, serialize_state
+from app.core.agent_runs import AgentRunService
 from app.core.approvals import ApprovalService
+from app.core.llm_client import LLMError
+from app.schemas.agent_runs import AgentRunRequest, AgentRunResponse, AgentRunSummary
 from app.core.audit_service import AuditService
 from app.core.config import get_settings
 from app.core.database import check_database_health
@@ -90,6 +100,10 @@ def get_report_service(request: Request) -> ReportService:
     return request.app.state.report_service
 
 
+def get_agent_run_service(request: Request) -> AgentRunService:
+    return request.app.state.agent_run_service
+
+
 def get_ticket_store(request: Request) -> WSTicketStore:
     return request.app.state.ws_ticket_store
 
@@ -100,13 +114,28 @@ def get_execution_bus(request: Request) -> ExecutionBus:
 
 @router.get("/healthz", response_model=HealthResponse)
 async def healthz(request: Request) -> HealthResponse:
+    import httpx as _httpx
     settings = get_settings()
+    ollama_status = "unknown"
+    ollama_models: list[str] = []
+    try:
+        async with _httpx.AsyncClient(timeout=3.0) as hc:
+            r = await hc.get(f"{settings.ollama_url}/api/tags")
+        if r.status_code == 200:
+            ollama_status = "ok"
+            ollama_models = [m["name"] for m in r.json().get("models", [])]
+        else:
+            ollama_status = f"error:{r.status_code}"
+    except Exception as exc:
+        ollama_status = f"unreachable:{type(exc).__name__}"
     return HealthResponse(
         status="ok",
         environment=settings.environment,
         allowed_network=settings.allowed_network,
         weapon_node_url=settings.weapon_node_url,
         database_status=check_database_health(request.app.state.db_session_factory),
+        ollama_status=ollama_status,
+        ollama_models=ollama_models,
     )
 
 
@@ -345,11 +374,22 @@ async def get_report_document(
 async def list_approvals(
     engagement_id: UUID,
     request: Request,
+    status_filter: str | None = Query(default=None, alias="status"),
 ) -> list[ApprovalRead]:
     engagement = get_engagement_service(request).get_engagement(engagement_id)
     if engagement is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
-    return get_approval_service(request).list_for_engagement(engagement_id)
+    if status_filter is not None and status_filter not in {"pending", "decided"}:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="status must be one of: pending, decided",
+        )
+    rows = get_approval_service(request).list_for_engagement(engagement_id)
+    if status_filter == "pending":
+        rows = [r for r in rows if r.decided_at is None]
+    elif status_filter == "decided":
+        rows = [r for r in rows if r.decided_at is not None]
+    return rows
 
 
 @router.post(
@@ -378,11 +418,74 @@ async def create_approval(
     )
 
 
+def _execute_approved_step(
+    *,
+    approval_id: UUID,
+    engagement_id: UUID,
+    tool_name: str,
+    operation_name: str,
+    args: dict,
+    agent_run_id: UUID | None,
+    gateway_service: GatewayValidationService,
+    agent_run_service: AgentRunService | None,
+) -> None:
+    """Background task: validate + execute a just-approved exploit-prep step."""
+    try:
+        invocation = gateway_service.validate_tool_invocation(
+            engagement_id=engagement_id,
+            payload=ToolInvocationRequest(
+                tool_name=tool_name,
+                operation_name=operation_name,
+                args=args,
+            ),
+        )
+        if invocation.invocation_id is None:
+            _log.warning("No invocation_id returned for approval %s", approval_id)
+            return
+
+        stdout_chunks: list[str] = []
+        stderr_chunks: list[str] = []
+        final_status = "unknown"
+        exit_code: int | None = None
+
+        for raw in gateway_service.stream_tool_execution(
+            engagement_id=engagement_id,
+            invocation_id=invocation.invocation_id,
+        ):
+            event = json.loads(raw)
+            if event.get("type") == "stdout":
+                stdout_chunks.append(event.get("line", ""))
+            elif event.get("type") == "stderr":
+                stderr_chunks.append(event.get("line", ""))
+            if event.get("type") in {"completed", "failed", "cancelled", "timed_out"}:
+                final_status = str(event.get("status", event["type"]))
+                if event.get("exit_code") is not None:
+                    exit_code = int(event["exit_code"])
+
+        if agent_run_id is not None and agent_run_service is not None:
+            agent_run_service.append_step_result(
+                agent_run_id,
+                {
+                    "tool_name": tool_name,
+                    "operation_name": operation_name,
+                    "status": final_status,
+                    "exit_code": exit_code,
+                    "stdout": "\n".join(stdout_chunks),
+                    "stderr": "\n".join(stderr_chunks),
+                    "error": None,
+                    "invocation_id": str(invocation.invocation_id),
+                },
+            )
+    except Exception:
+        _log.exception("Background execution failed for approval %s", approval_id)
+
+
 @router.patch("/approvals/{approval_id}", response_model=ApprovalRead)
 async def decide_approval(
     approval_id: UUID,
     payload: ApprovalDecision,
     request: Request,
+    background_tasks: BackgroundTasks,
 ) -> ApprovalRead:
     approval = get_approval_service(request).decide(
         approval_id=approval_id,
@@ -390,6 +493,24 @@ async def decide_approval(
     )
     if approval is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not found")
+
+    if (
+        payload.approved
+        and approval.requested_action.startswith("exploit-prep:")
+        and approval.agent_run_id is not None
+    ):
+        background_tasks.add_task(
+            _execute_approved_step,
+            approval_id=approval_id,
+            engagement_id=approval.engagement_id,
+            tool_name=approval.tool_name,
+            operation_name=approval.operation_name,
+            args=approval.args,
+            agent_run_id=approval.agent_run_id,
+            gateway_service=get_gateway_validation_service(request),
+            agent_run_service=getattr(request.app.state, "agent_run_service", None),
+        )
+
     return approval
 
 
@@ -491,6 +612,111 @@ async def issue_stream_ticket(
         engagement_id=engagement_id,
         execution_id=execution_id,
         expires_in_seconds=60,
+    )
+
+
+@router.post(
+    "/engagements/{engagement_id}/agent-runs",
+    response_model=AgentRunResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def run_agent(
+    engagement_id: UUID,
+    payload: AgentRunRequest,
+    request: Request,
+) -> AgentRunResponse:
+    deps = AgentRunDeps(
+        engagement_service=get_engagement_service(request),
+        gateway_service=get_gateway_validation_service(request),
+        llm=request.app.state.llm_client,
+        knowledge=getattr(request.app.state, "knowledge_service", None),
+    )
+    try:
+        state = await run_agent_pipeline(
+            engagement_id=engagement_id,
+            operator_goal=payload.operator_goal,
+            deps=deps,
+        )
+    except AgentRunError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
+        ) from exc
+    except LLMError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+        ) from exc
+    response = serialize_state(state)
+    engagement = get_engagement_service(request).get_engagement(engagement_id)
+    record = get_agent_run_service(request).persist(
+        engagement_id=engagement_id,
+        operator_goal=payload.operator_goal,
+        response=response,
+        actor=engagement.operator_name if engagement else None,
+    )
+    response.id = record.id
+    response.operator_goal = record.operator_goal
+    response.created_at = record.created_at
+
+    if response.current_phase == "exploitation" and response.planned_steps:
+        approval_service = request.app.state.approval_service
+        actor = engagement.operator_name if engagement else "agent"
+        for step in response.planned_steps:
+            policy = get_tool_policy(step.tool_name, step.operation_name)
+            if not policy.requires_approval:
+                continue
+            approval_service.create(
+                engagement_id=engagement_id,
+                payload=ApprovalCreate(
+                    requested_action=(
+                        f"exploit-prep:{step.tool_name}.{step.operation_name}"
+                    ),
+                    requested_by=actor,
+                    tool_name=step.tool_name,
+                    operation_name=step.operation_name,
+                    args={k: str(v) for k, v in step.args.items()},
+                    agent_run_id=record.id,
+                ),
+                risk_level=policy.risk_level,
+            )
+    return response
+
+
+@router.get(
+    "/engagements/{engagement_id}/agent-runs",
+    response_model=list[AgentRunSummary],
+)
+def list_agent_runs(
+    engagement_id: UUID,
+    service: AgentRunService = Depends(get_agent_run_service),
+) -> list[AgentRunSummary]:
+    return service.list_for_engagement(engagement_id)
+
+
+@router.get(
+    "/agent-runs/{run_id}",
+    response_model=AgentRunResponse,
+)
+def get_agent_run(
+    run_id: UUID,
+    service: AgentRunService = Depends(get_agent_run_service),
+) -> AgentRunResponse:
+    record = service.get(run_id)
+    if record is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Agent run not found"
+        )
+    return AgentRunResponse(
+        id=record.id,
+        engagement_id=str(record.engagement_id),
+        intent=record.intent,
+        current_phase=record.current_phase,
+        operator_goal=record.operator_goal,
+        created_at=record.created_at,
+        planned_steps=record.planned_steps,  # type: ignore[arg-type]
+        step_results=record.step_results,  # type: ignore[arg-type]
+        executed_step_ids=record.executed_step_ids,
+        findings=record.findings,  # type: ignore[arg-type]
+        errors=record.errors,
     )
 
 

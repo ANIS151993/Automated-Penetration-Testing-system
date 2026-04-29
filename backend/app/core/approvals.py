@@ -29,6 +29,7 @@ class ApprovalEntity:
     args: dict
     created_at: datetime
     decided_at: datetime | None
+    agent_run_id: UUID | None = None
 
     def to_read_model(self) -> ApprovalRead:
         return ApprovalRead(
@@ -45,6 +46,7 @@ class ApprovalEntity:
             args=self.args,
             created_at=self.created_at,
             decided_at=self.decided_at,
+            agent_run_id=self.agent_run_id,
         )
 
 
@@ -80,6 +82,7 @@ def _to_entity(model: ApprovalModel) -> ApprovalEntity:
         args=dict(model.args),
         created_at=model.created_at,
         decided_at=model.decided_at,
+        agent_run_id=model.agent_run_id,
     )
 
 
@@ -120,6 +123,7 @@ class SqlAlchemyApprovalRepository:
             existing.args = approval.args
             existing.created_at = approval.created_at
             existing.decided_at = approval.decided_at
+            existing.agent_run_id = approval.agent_run_id
 
             session.commit()
             session.refresh(existing)
@@ -186,6 +190,7 @@ class ApprovalService:
             args=payload.args,
             created_at=now,
             decided_at=None,
+            agent_run_id=payload.agent_run_id,
         )
         saved = self._repository.save(approval).to_read_model()
         if self._audit_service is not None:
@@ -227,6 +232,7 @@ class ApprovalService:
             args=current.args,
             created_at=current.created_at,
             decided_at=datetime.now(timezone.utc),
+            agent_run_id=current.agent_run_id,
         )
         saved = self._repository.save(updated).to_read_model()
         if self._audit_service is not None:

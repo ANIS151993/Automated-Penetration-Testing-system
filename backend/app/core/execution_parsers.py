@@ -76,6 +76,27 @@ def enrich_execution_document(document: dict[str, Any]) -> dict[str, Any]:
             operation_label=operation_label,
             observed_at=observed_at,
         )
+    elif tool_name == "httpx" and operation_name == "probe":
+        parsed = _parse_httpx_probe(
+            invocation=invocation,
+            stdout_lines=stdout_lines,
+            operation_label=operation_label,
+            observed_at=observed_at,
+        )
+    elif tool_name == "whatweb" and operation_name == "fingerprint":
+        parsed = _parse_whatweb(
+            invocation=invocation,
+            stdout_lines=stdout_lines,
+            operation_label=operation_label,
+            observed_at=observed_at,
+        )
+    elif tool_name == "nuclei" and operation_name == "targeted_scan":
+        parsed = _parse_nuclei(
+            invocation=invocation,
+            stdout_lines=stdout_lines,
+            operation_label=operation_label,
+            observed_at=observed_at,
+        )
     parsed["diagnostics"] = _parse_execution_diagnostics(
         stderr_lines=stderr_lines,
         tool_name=tool_name,
@@ -324,6 +345,185 @@ def _parse_http_headers(
         "fingerprints": [],
         "suggested_findings": suggestions,
         "diagnostics": [],
+    }
+
+
+_HTTPX_LINE = re.compile(
+    r"^(?P<url>https?://\S+)"
+    r"(?:\s+\[(?P<status>\d{3})\])?"
+    r"(?:\s+\[(?P<title>[^\]]*)\])?"
+    r"(?:\s+\[(?P<tech>[^\]]*)\])?",
+)
+_NUCLEI_LINE = re.compile(
+    r"^\[(?P<template>[^\]]+)\]\s+"
+    r"\[(?P<protocol>[^\]]+)\]\s+"
+    r"\[(?P<severity>info|low|medium|high|critical)\]\s+"
+    r"(?P<target>\S+)"
+    r"(?:\s+\[(?P<extra>[^\]]+)\])?",
+    re.IGNORECASE,
+)
+_NUCLEI_SEVERITY_MAP = {
+    "info": "info",
+    "low": "low",
+    "medium": "medium",
+    "high": "high",
+    "critical": "critical",
+}
+
+
+def _parse_httpx_probe(
+    *,
+    invocation: dict[str, Any],
+    stdout_lines: list[str],
+    operation_label: str,
+    observed_at: str | None,
+) -> dict[str, Any]:
+    web: list[dict[str, Any]] = []
+    fingerprints: list[dict[str, Any]] = []
+    suggestions: list[dict[str, Any]] = []
+    for line in stdout_lines:
+        match = _HTTPX_LINE.match(line.strip())
+        if match is None:
+            continue
+        url = match.group("url")
+        parsed_url = urlparse(url)
+        target = parsed_url.hostname or url
+        status = match.group("status")
+        title = match.group("title")
+        tech = match.group("tech")
+        web.append(
+            {
+                "url": url,
+                "status_line": f"HTTP/1.1 {status}" if status else None,
+                "status_code": int(status) if status else None,
+                "headers": {},
+                "server": None,
+                "x_powered_by": None,
+                "missing_security_headers": [],
+                "operation": operation_label,
+                "last_observed_at": observed_at,
+            }
+        )
+        if tech:
+            tech_items = [item.strip() for item in tech.split(",") if item.strip()]
+            fingerprints.append(
+                {
+                    "target": target,
+                    "running": ", ".join(tech_items) if tech_items else None,
+                    "os_details": None,
+                    "device_type": None,
+                    "cpe": [],
+                    "operation": operation_label,
+                    "last_observed_at": observed_at,
+                }
+            )
+            if tech_items:
+                suggestions.append(
+                    {
+                        "title": f"Web technology disclosed at {url}",
+                        "severity": "info",
+                        "attack_technique": "T1592",
+                        "summary": (
+                            f"httpx fingerprinted {url} as: {', '.join(tech_items)}."
+                            + (f" Title: {title}." if title else "")
+                        ),
+                        "evidence": [line],
+                    }
+                )
+    return {
+        "hosts": [],
+        "services": [],
+        "web": web,
+        "fingerprints": fingerprints,
+        "suggested_findings": suggestions,
+    }
+
+
+def _parse_whatweb(
+    *,
+    invocation: dict[str, Any],
+    stdout_lines: list[str],
+    operation_label: str,
+    observed_at: str | None,
+) -> dict[str, Any]:
+    fingerprints: list[dict[str, Any]] = []
+    suggestions: list[dict[str, Any]] = []
+    for line in stdout_lines:
+        stripped = line.strip()
+        if not stripped or " " not in stripped:
+            continue
+        url_part, _, rest = stripped.partition(" ")
+        if not url_part.startswith(("http://", "https://")):
+            continue
+        target = urlparse(url_part).hostname or url_part
+        plugin_names = re.findall(r"([A-Za-z][A-Za-z0-9_-]*)\[", rest)
+        if not plugin_names:
+            continue
+        fingerprints.append(
+            {
+                "target": target,
+                "running": ", ".join(plugin_names),
+                "os_details": None,
+                "device_type": None,
+                "cpe": [],
+                "operation": operation_label,
+                "last_observed_at": observed_at,
+            }
+        )
+        suggestions.append(
+            {
+                "title": f"Web technology fingerprint for {target}",
+                "severity": "info",
+                "attack_technique": "T1592",
+                "summary": f"whatweb identified {len(plugin_names)} component(s) at {url_part}.",
+                "evidence": [stripped],
+            }
+        )
+    return {
+        "hosts": [],
+        "services": [],
+        "web": [],
+        "fingerprints": fingerprints,
+        "suggested_findings": suggestions,
+    }
+
+
+def _parse_nuclei(
+    *,
+    invocation: dict[str, Any],
+    stdout_lines: list[str],
+    operation_label: str,
+    observed_at: str | None,
+) -> dict[str, Any]:
+    suggestions: list[dict[str, Any]] = []
+    for line in stdout_lines:
+        match = _NUCLEI_LINE.match(line.strip())
+        if match is None:
+            continue
+        severity = _NUCLEI_SEVERITY_MAP.get(match.group("severity").lower(), "info")
+        template = match.group("template")
+        target = match.group("target")
+        extra = match.group("extra")
+        summary = (
+            f"nuclei template '{template}' triggered on {target} (severity={severity})."
+        )
+        if extra:
+            summary += f" Detail: {extra}."
+        suggestions.append(
+            {
+                "title": f"nuclei: {template} on {target}",
+                "severity": severity,
+                "attack_technique": "T1190",
+                "summary": summary,
+                "evidence": [line],
+            }
+        )
+    return {
+        "hosts": [],
+        "services": [],
+        "web": [],
+        "fingerprints": [],
+        "suggested_findings": suggestions,
     }
 
 

@@ -10,6 +10,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
+from app.core.agent_runs import AgentRunService
 from app.core.approvals import ApprovalService
 from app.core.audit_service import AuditService
 from app.core.engagements import EngagementService
@@ -103,6 +104,7 @@ class ReportService:
         inventory_service: InventoryService,
         audit_service: AuditService,
         artifacts_root: str,
+        agent_run_service: AgentRunService | None = None,
     ) -> None:
         self._repository = repository
         self._engagement_service = engagement_service
@@ -114,6 +116,7 @@ class ReportService:
         self._inventory_service = inventory_service
         self._audit_service = audit_service
         self._artifacts_root = Path(artifacts_root)
+        self._agent_run_service = agent_run_service
 
     def list_for_engagement(self, engagement_id: UUID) -> list[ReportRead]:
         return [
@@ -184,6 +187,19 @@ class ReportService:
 
         approvals = self._approval_service.list_for_engagement(engagement_id)
         findings = self._finding_service.list_for_engagement(engagement_id)
+        agent_runs = (
+            self._agent_run_service.list_for_engagement(engagement_id)
+            if self._agent_run_service is not None
+            else []
+        )
+        # Collect all agent-pipeline findings across runs, tagged with source run id
+        agent_findings: list[dict] = []
+        for run in agent_runs:
+            full = self._agent_run_service.get(run.id)  # type: ignore[union-attr]
+            if full is None:
+                continue
+            for finding in full.findings:
+                agent_findings.append({"agent_run_id": str(run.id), **finding})
         finding_suggestions = self._finding_suggestion_service.list_for_engagement(
             engagement_id
         )
@@ -240,6 +256,8 @@ class ReportService:
             "engagement": engagement.model_dump(mode="json"),
             "summary": {
                 "findings_total": len(findings),
+                "agent_findings_total": len(agent_findings),
+                "agent_runs_total": len(agent_runs),
                 "suggested_findings_total": len(finding_suggestions),
                 "findings_by_severity": finding_severity_counts,
                 "approved_actions": len([item for item in approvals if item.approved]),
@@ -262,6 +280,8 @@ class ReportService:
                 "audit_events": len(audit_events),
             },
             "findings": [item.model_dump(mode="json") for item in findings],
+            "agent_runs": [item.model_dump(mode="json") for item in agent_runs],
+            "agent_findings": agent_findings,
             "finding_suggestions": [
                 item.model_dump(mode="json") for item in finding_suggestions
             ],

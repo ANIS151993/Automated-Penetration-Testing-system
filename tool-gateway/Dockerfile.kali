@@ -6,8 +6,15 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         python3 python3-pip python3-venv \
         nmap curl \
+        whatweb sslscan \
+        nuclei \
+        gobuster \
+        golang-go \
         ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && GOPATH=/usr/local /usr/bin/go install -ldflags="-s -w" github.com/projectdiscovery/httpx/cmd/httpx@latest \
+    && GOPATH=/usr/local /usr/bin/go install -ldflags="-s -w" github.com/projectdiscovery/dnsx/cmd/dnsx@latest \
+    && rm -rf /usr/local/pkg /root/.cache/go-build
 
 COPY pyproject.toml /app/pyproject.toml
 COPY uv.lock /app/uv.lock
