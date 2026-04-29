@@ -218,40 +218,59 @@ export function DashboardScreen() {
   }, [stats.allFindings]);
 
   return (
-    <div className="space-y-4">
-      <DashboardHeader
-        operator={data.engagements[0]?.operator_name ?? "—"}
-        now={now}
-        activeOps={stats.activeOps}
-      />
-
-      <KpiGrid
-        activeOps={stats.activeOps}
-        critFindings={stats.critFindings}
-        totalNodes={stats.totalNodes}
-        postureIndex={stats.postureIndex}
-      />
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-        <OperationalQueue
-          engagements={topEngagements}
-          findingsByEngagement={data.findingsByEngagement}
-          agentRunsByEngagement={data.agentRunsByEngagement}
-          pendingApprovalsByEngagement={data.pendingApprovalsByEngagement}
-          loading={loading}
-          error={error}
+    <>
+      <div className="space-y-4">
+        <DashboardHeader
+          operator={data.engagements[0]?.operator_name ?? "—"}
+          now={now}
+          activeOps={stats.activeOps}
         />
-        <aside className="lg:col-span-4 space-y-4">
-          <CoreHealthCard health={data.health} />
-          <LiveIntelCard findings={liveIntel} />
-        </aside>
+
+        <KpiGrid
+          activeOps={stats.activeOps}
+          critFindings={stats.critFindings}
+          totalNodes={stats.totalNodes}
+          postureIndex={stats.postureIndex}
+        />
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+          <OperationalQueue
+            engagements={topEngagements}
+            findingsByEngagement={data.findingsByEngagement}
+            agentRunsByEngagement={data.agentRunsByEngagement}
+            pendingApprovalsByEngagement={data.pendingApprovalsByEngagement}
+            loading={loading}
+            error={error}
+          />
+          <aside className="lg:col-span-4 space-y-4">
+            <CoreHealthCard health={data.health} />
+            <LiveIntelCard findings={liveIntel} />
+          </aside>
+        </div>
+
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-gutter">
+          <ScanPerimeterCard activeOps={stats.activeOps} />
+          <RiskDistributionCard buckets={riskBuckets} />
+        </section>
       </div>
 
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-gutter">
-        <ScanPerimeterCard activeOps={stats.activeOps} />
-        <RiskDistributionCard buckets={riskBuckets} />
-      </section>
-    </div>
+      {/* Tactical FAB */}
+      <Link
+        href="/engagements/new"
+        className="fixed bottom-6 right-6 w-12 h-12 bg-primary text-white border border-white/20 flex items-center justify-center hover:brightness-110 z-50 group"
+        aria-label="New engagement"
+      >
+        <span
+          className="material-symbols-outlined text-2xl"
+          style={{ fontVariationSettings: "'FILL' 1" }}
+        >
+          bolt
+        </span>
+        <div className="absolute bottom-full right-0 mb-2 bg-surface border border-border-subtle px-2 py-1 text-[9px] font-mono uppercase tracking-widest opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap">
+          NEW_ENGAGEMENT
+        </div>
+      </Link>
+    </>
   );
 }
 

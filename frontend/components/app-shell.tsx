@@ -2,8 +2,9 @@
 
 import type { Route } from "next";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 type NavItem = {
   href: string;
@@ -14,7 +15,7 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Dashboard", icon: "dashboard", match: (p) => p === "/" },
-  { href: "/engagements", label: "Engagements", icon: "security" },
+  { href: "/engagements", label: "Engagements", icon: "security", match: (p) => p === "/engagements" },
   { href: "/engagements/new", label: "New Engagement", icon: "add_circle" },
   { href: "/audit", label: "Audit Log", icon: "receipt_long" },
   { href: "/engagements/console", label: "Op Console", icon: "terminal" },
@@ -49,6 +50,42 @@ type TopBarProps = {
 };
 
 function TopBar({ search, onSearchChange }: TopBarProps) {
+  const router = useRouter();
+  const [userInitial, setUserInitial] = useState("?");
+  const [userEmail, setUserEmail] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      const name: string =
+        user.user_metadata?.display_name ||
+        user.email ||
+        "?";
+      setUserInitial(name[0].toUpperCase());
+      setUserEmail(user.email ?? "");
+    });
+  }, []);
+
+  useEffect(() => {
+    function handleOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, []);
+
+  async function handleSignOut() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }
+
   return (
     <header className="fixed top-0 inset-x-0 h-14 border-b border-border-subtle bg-bg-primary z-50 flex items-center justify-between px-4">
       <div className="flex items-center gap-6">
@@ -62,7 +99,7 @@ function TopBar({ search, onSearchChange }: TopBarProps) {
           <input
             type="text"
             value={search}
-            onChange={(event) => onSearchChange(event.target.value)}
+            onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search infrastructure..."
             className="bg-transparent border-none outline-none focus:ring-0 text-xs text-text-secondary w-full placeholder:text-text-tertiary font-mono"
           />
@@ -79,12 +116,14 @@ function TopBar({ search, onSearchChange }: TopBarProps) {
             System Online
           </span>
         </div>
-        <button
-          type="button"
+
+        <Link
+          href="/engagements/new"
           className="bg-primary text-white px-3 py-1 font-display font-bold text-[11px] uppercase tracking-wider hover:brightness-110 active:brightness-95 transition"
         >
           Deploy Agent
-        </button>
+        </Link>
+
         <div className="flex items-center gap-3 ml-1 border-l border-border-subtle pl-3">
           <button
             type="button"
@@ -93,15 +132,47 @@ function TopBar({ search, onSearchChange }: TopBarProps) {
           >
             <span className="material-symbols-outlined">notifications</span>
           </button>
-          <button
-            type="button"
+          <Link
+            href={"/users" as Route}
             aria-label="Settings"
             className="text-text-secondary hover:text-text-primary transition"
           >
             <span className="material-symbols-outlined">settings</span>
-          </button>
-          <div className="w-6 h-6 border border-primary bg-surface-tertiary flex items-center justify-center text-[10px] font-display font-bold text-primary">
-            A
+          </Link>
+
+          {/* User avatar + dropdown */}
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              aria-label="Account menu"
+              onClick={() => setMenuOpen((o) => !o)}
+              className="w-6 h-6 border border-primary bg-surface-tertiary flex items-center justify-center text-[10px] font-display font-bold text-primary hover:brightness-125 transition"
+            >
+              {userInitial}
+            </button>
+
+            {menuOpen && (
+              <div className="absolute right-0 top-8 w-48 bg-surface-secondary border border-border-subtle z-50 shadow-lg">
+                <div className="px-3 py-2 border-b border-border-subtle">
+                  <p className="font-mono text-[9px] text-text-tertiary uppercase tracking-widest">
+                    Signed in as
+                  </p>
+                  <p className="font-mono text-[10px] text-text-primary truncate mt-0.5">
+                    {userEmail || "—"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="w-full flex items-center gap-2 px-3 py-2 font-mono text-[10px] text-text-secondary hover:text-severity-critical hover:bg-severity-critical/5 transition uppercase tracking-wider"
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>
+                    logout
+                  </span>
+                  Sign Out
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -142,18 +213,18 @@ function SideNav({ pathname }: SideNavProps) {
         </div>
       </div>
 
-      <nav className="flex-1">
+      <nav className="flex-1 overflow-y-auto custom-scrollbar">
         {NAV_ITEMS.map((item) => {
           const active = isActive(item, pathname);
-          const base = "flex items-center gap-3 px-4 py-2 transition border-r-2";
-          const activeCls = "bg-surface-secondary text-primary border-primary";
-          const idleCls =
-            "text-text-tertiary border-transparent hover:bg-surface-secondary hover:text-text-primary";
           return (
             <Link
               key={item.href}
               href={item.href as Route}
-              className={`${base} ${active ? activeCls : idleCls}`}
+              className={`flex items-center gap-3 px-4 py-2 border-r-2 transition-none ${
+                active
+                  ? "bg-surface-secondary text-primary border-primary"
+                  : "text-text-tertiary border-transparent hover:bg-surface-secondary hover:text-text-primary"
+              }`}
             >
               <span className="material-symbols-outlined text-[18px]">
                 {item.icon}
@@ -171,12 +242,8 @@ function SideNav({ pathname }: SideNavProps) {
           href={"/audit" as Route}
           className="flex items-center gap-3 px-4 py-1.5 text-text-tertiary hover:text-text-primary transition"
         >
-          <span className="material-symbols-outlined text-[16px]">
-            receipt_long
-          </span>
-          <span className="text-[9px] font-medium uppercase tracking-widest">
-            SysLogs
-          </span>
+          <span className="material-symbols-outlined text-[16px]">receipt_long</span>
+          <span className="text-[9px] font-medium uppercase tracking-widest">SysLogs</span>
         </Link>
       </div>
     </aside>
