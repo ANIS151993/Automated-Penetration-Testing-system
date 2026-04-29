@@ -1,4 +1,17 @@
+import { createClient } from "./supabase/client";
+
 const apiBaseUrl = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
+
+async function getSupabaseToken(): Promise<string | null> {
+  if (typeof window === "undefined") return null;
+  try {
+    const supabase = createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token ?? null;
+  } catch {
+    return null;
+  }
+}
 
 type ApiErrorPayload = {
   detail?: string;
@@ -279,11 +292,13 @@ function handleUnauthorized() {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = await getSupabaseToken();
   const response = await fetch(`${apiBaseUrl}${path}`, {
     cache: "no-store",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init?.headers ?? {}),
     },
     ...init,
@@ -325,16 +340,7 @@ export type LoginResponse = {
   expires_at: string;
 };
 
-export function login(email: string, password: string) {
-  return request<LoginResponse>("/api/v1/auth/login", {
-    method: "POST",
-    body: JSON.stringify({ email, password }),
-  });
-}
-
-export function logout() {
-  return request<void>("/api/v1/auth/logout", { method: "POST" });
-}
+// login / logout are handled by Supabase — see lib/supabase/client.ts
 
 export type KnowledgeIngestResponse = {
   source_path: string;

@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     auth_jwt_ttl_seconds: int = 60 * 60 * 12
     auth_cookie_name: str = "pentai_session"
     auth_cookie_secure: bool = False
+    supabase_jwt_secret: str = "replace-with-supabase-project-jwt-secret"
     cors_allow_origins: str = "http://localhost:3000"
     knowledge_uploads_root: str = "/app/artifacts/knowledge"
 

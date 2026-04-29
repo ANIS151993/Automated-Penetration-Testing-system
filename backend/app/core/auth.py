@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import secrets
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any
 from uuid import UUID
 
 import jwt
-from fastapi import Cookie, Depends, HTTPException, Request, status
+from fastapi import Depends, HTTPException, Request, status
 from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
@@ -52,6 +53,21 @@ def _encode_token(user: UserModel, settings: Settings) -> tuple[str, datetime]:
 def _decode_token(token: str, settings: Settings) -> dict[str, Any]:
     try:
         return jwt.decode(token, settings.auth_jwt_secret, algorithms=["HS256"])
+    except jwt.PyJWTError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="invalid_token",
+        ) from exc
+
+
+def _decode_supabase_token(token: str, settings: Settings) -> dict[str, Any]:
+    try:
+        return jwt.decode(
+            token,
+            settings.supabase_jwt_secret,
+            algorithms=["HS256"],
+            audience="authenticated",
+        )
     except jwt.PyJWTError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -142,34 +158,71 @@ def get_current_user(
     user_service: UserService = Depends(get_user_service),
 ) -> AuthenticatedUser:
     settings = get_settings()
-    token = request.cookies.get(settings.auth_cookie_name)
-    if not token:
-        auth_header = request.headers.get("authorization")
-        if auth_header and auth_header.lower().startswith("bearer "):
-            token = auth_header.split(" ", 1)[1].strip()
-    if not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="not_authenticated",
+
+    auth_header = request.headers.get("authorization", "")
+    if auth_header.lower().startswith("bearer "):
+        bearer_token = auth_header.split(" ", 1)[1].strip()
+        # Supabase tokens carry audience="authenticated"; custom tokens do not.
+        # Try Supabase first; fall back to custom JWT.
+        try:
+            payload = _decode_supabase_token(bearer_token, settings)
+            email: str = payload.get("email", "")
+            if not email:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid_token")
+            user = user_service.get_by_email(email)
+            if user is None:
+                # First Supabase login — provision a local user record.
+                display_name: str = (
+                    (payload.get("user_metadata") or {}).get("display_name")
+                    or email.split("@")[0]
+                )
+                user = user_service.create_user(
+                    email=email,
+                    password=secrets.token_hex(32),
+                    display_name=display_name,
+                    role="operator",
+                )
+            if not user.is_active:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="not_authenticated")
+            return AuthenticatedUser(
+                id=user.id,
+                email=user.email,
+                display_name=user.display_name,
+                role=user.role,
+                is_active=user.is_active,
+            )
+        except HTTPException:
+            raise
+        except Exception:
+            # Not a Supabase token — try legacy custom JWT below.
+            pass
+
+        try:
+            payload = _decode_token(bearer_token, settings)
+            user_id = UUID(payload["sub"])
+        except (KeyError, ValueError, HTTPException) as exc:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid_token") from exc
+        user = user_service.get_by_id(user_id)
+        if user is None or not user.is_active:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="not_authenticated")
+        return AuthenticatedUser(
+            id=user.id, email=user.email, display_name=user.display_name,
+            role=user.role, is_active=user.is_active,
         )
-    payload = _decode_token(token, settings)
+
+    # Cookie fallback (legacy / server-side requests)
+    cookie_token = request.cookies.get(settings.auth_cookie_name)
+    if not cookie_token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="not_authenticated")
+    payload = _decode_token(cookie_token, settings)
     try:
         user_id = UUID(payload["sub"])
     except (KeyError, ValueError) as exc:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="invalid_token",
-        ) from exc
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid_token") from exc
     user = user_service.get_by_id(user_id)
     if user is None or not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="not_authenticated",
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="not_authenticated")
     return AuthenticatedUser(
-        id=user.id,
-        email=user.email,
-        display_name=user.display_name,
-        role=user.role,
-        is_active=user.is_active,
+        id=user.id, email=user.email, display_name=user.display_name,
+        role=user.role, is_active=user.is_active,
     )
