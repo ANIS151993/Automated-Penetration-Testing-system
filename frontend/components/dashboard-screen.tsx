@@ -257,7 +257,7 @@ export function DashboardScreen() {
       {/* Tactical FAB */}
       <Link
         href="/engagements/new"
-        className="fixed bottom-6 right-6 w-12 h-12 bg-primary text-white border border-white/20 flex items-center justify-center hover:brightness-110 z-50 group"
+        className="fixed bottom-6 right-6 w-12 h-12 bg-primary text-white border border-border-subtle flex items-center justify-center hover:brightness-110 z-50 group"
         aria-label="New engagement"
       >
         <span

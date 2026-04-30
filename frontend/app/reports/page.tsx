@@ -37,12 +37,12 @@ type ReportSummary = {
   inventory_services: number;
 };
 
-const SEVERITY_COLOR: Record<string, string> = {
-  critical: "text-rose-400",
-  high: "text-orange-400",
-  medium: "text-amber-300",
-  low: "text-blue-400",
-  info: "text-white/48",
+const SEVERITY_TONE: Record<string, string> = {
+  critical: "text-severity-critical",
+  high: "text-severity-high",
+  medium: "text-severity-medium",
+  low: "text-primary",
+  info: "text-text-tertiary",
 };
 
 export default function ReportsPage() {
@@ -95,132 +95,153 @@ export default function ReportsPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-5xl space-y-6 p-6">
-        <header>
-          <h1 className="text-2xl font-semibold text-white">Reports</h1>
-          <p className="mt-1 text-sm text-white/60">
+      <div className="space-y-gutter">
+        <div>
+          <div className="font-mono text-[10px] text-text-tertiary uppercase tracking-widest">
+            Intelligence Output
+          </div>
+          <h1 className="font-display text-[24px] font-semibold text-text-primary uppercase tracking-tight">
+            Reports · v1
+          </h1>
+          <p className="mt-2 font-mono text-[11px] text-text-tertiary max-w-2xl leading-relaxed">
             Generate and review pentest reports including agent-discovered findings.
           </p>
-        </header>
+        </div>
+
+        {error && (
+          <div className="border border-severity-critical/50 bg-severity-critical/10 p-2 font-mono text-[11px] text-severity-critical">
+            {error}
+          </div>
+        )}
 
         {/* Controls */}
-        <section className="rounded-[24px] border border-white/10 bg-white/5 p-5 shadow-panel">
-          <label className="block text-xs uppercase tracking-[0.3em] text-white/48">
-            Engagement
-          </label>
-          <select
-            value={selectedId}
-            onChange={(e) => { setSelectedId(e.target.value); setDoc(null); }}
-            className="mt-2 w-full rounded-md border border-white/10 bg-black/30 p-2 text-sm text-white"
-          >
-            <option value="">Select an engagement</option>
-            {engagements.map((e) => (
-              <option key={e.id} value={e.id}>
-                {e.name} — {e.scope_cidrs.join(", ")}
-              </option>
-            ))}
-          </select>
-          <button
-            type="button"
-            onClick={onGenerate}
-            disabled={generating || !selectedId}
-            className="mt-4 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-black disabled:opacity-50"
-          >
-            {generating ? "Generating…" : "Generate report"}
-          </button>
-          {error ? <p className="mt-3 text-sm text-rose-400">{error}</p> : null}
+        <section className="border border-border-subtle bg-surface-secondary p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="font-display text-[11px] uppercase tracking-widest text-text-primary font-semibold">
+              Generate Report
+            </span>
+            <span className="material-symbols-outlined text-[18px] text-text-tertiary">summarize</span>
+          </div>
+          <div className="grid grid-cols-[1fr_auto] gap-3 items-end">
+            <div>
+              <span className="font-mono text-[10px] uppercase tracking-widest text-text-tertiary block mb-1.5">
+                Engagement
+              </span>
+              <select
+                value={selectedId}
+                onChange={(e) => { setSelectedId(e.target.value); setDoc(null); }}
+                className="w-full bg-surface-tertiary border border-border-subtle px-3 py-2 font-mono text-[12px] text-text-primary focus:outline-none focus:border-primary"
+              >
+                <option value="">Select an engagement</option>
+                {engagements.map((e) => (
+                  <option key={e.id} value={e.id}>
+                    {e.name} — {e.scope_cidrs.join(", ")}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="button"
+              onClick={onGenerate}
+              disabled={generating || !selectedId}
+              className="bg-primary px-4 py-2 font-display text-[11px] uppercase tracking-widest text-white hover:opacity-80 disabled:opacity-30"
+            >
+              {generating ? "Generating…" : "Generate"}
+            </button>
+          </div>
         </section>
 
         {/* History */}
-        {reports.length > 0 ? (
-          <section className="rounded-[24px] border border-white/10 bg-white/5 p-5 shadow-panel">
-            <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/72">
-              Report history ({reports.length})
-            </h2>
-            <ul className="mt-3 space-y-2">
+        {reports.length > 0 && (
+          <section className="border border-border-subtle bg-surface-secondary">
+            <div className="px-4 h-10 flex items-center border-b border-border-subtle">
+              <span className="font-display text-[11px] uppercase tracking-widest text-text-primary font-semibold">
+                Report History ({reports.length})
+              </span>
+            </div>
+            <div className="divide-y divide-border-subtle/50">
               {reports.map((r) => (
-                <li key={r.id}>
-                  <button
-                    type="button"
-                    onClick={() => onLoad(r.id)}
-                    className="w-full rounded-md border border-white/10 bg-black/30 p-3 text-left text-sm transition hover:border-accent/60 hover:bg-black/40"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-xs text-accent">
-                        {r.report_format.toUpperCase()}
-                      </span>
-                      <span className="text-xs text-white/48">
-                        {new Date(r.created_at).toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="mt-1 truncate font-mono text-xs text-white/40">
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => onLoad(r.id)}
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-surface-tertiary/40 transition-none"
+                >
+                  <div className="flex flex-col items-start gap-0.5">
+                    <span className="font-mono text-[11px] text-primary uppercase">
+                      {r.report_format.toUpperCase()}
+                    </span>
+                    <span className="font-mono text-[10px] text-text-tertiary truncate max-w-[320px]">
                       {r.id}
-                    </div>
-                  </button>
-                </li>
+                    </span>
+                  </div>
+                  <span className="font-mono text-[10px] text-text-tertiary">
+                    {new Date(r.created_at).toISOString().slice(0, 19)}
+                  </span>
+                </button>
               ))}
-            </ul>
+            </div>
           </section>
-        ) : null}
+        )}
 
         {/* Document */}
-        {doc ? (
-          <div className="space-y-5">
-            {/* Summary */}
-            {summary ? (
-              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5 shadow-panel">
-                <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/72">
+        {doc && (
+          <div className="space-y-gutter">
+            {summary && (
+              <section className="border border-border-subtle bg-surface-secondary p-4 space-y-3">
+                <span className="font-display text-[11px] uppercase tracking-widest text-text-primary font-semibold block">
                   Summary
-                </h2>
-                <div className="mt-4 grid grid-cols-3 gap-4 text-sm">
-                  <Stat label="Confirmed Findings" value={summary.findings_total} accent />
-                  <Stat label="Agent Findings" value={summary.agent_findings_total} accent />
-                  <Stat label="Agent Runs" value={summary.agent_runs_total} />
-                  <Stat label="Suggested Findings" value={summary.suggested_findings_total} />
-                  <Stat label="Approved Actions" value={summary.approved_actions} />
-                  <Stat label="Pending Approvals" value={summary.pending_approvals} warn={summary.pending_approvals > 0} />
-                  <Stat label="Validated Requests" value={summary.validated_requests} />
-                  <Stat label="Executions" value={summary.executions_total} />
-                  <Stat label="Failed Executions" value={summary.failed_executions} warn={summary.failed_executions > 0} />
-                  <Stat label="Inventory Hosts" value={summary.inventory_hosts} />
-                  <Stat label="Inventory Services" value={summary.inventory_services} />
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  <StatCard label="Findings" value={summary.findings_total} accent />
+                  <StatCard label="Agent Findings" value={summary.agent_findings_total} accent />
+                  <StatCard label="Agent Runs" value={summary.agent_runs_total} />
+                  <StatCard label="Suggested" value={summary.suggested_findings_total} />
+                  <StatCard label="Approved" value={summary.approved_actions} />
+                  <StatCard label="Pending" value={summary.pending_approvals} warn={summary.pending_approvals > 0} />
+                  <StatCard label="Validated Reqs" value={summary.validated_requests} />
+                  <StatCard label="Executions" value={summary.executions_total} />
+                  <StatCard label="Failed Exec" value={summary.failed_executions} warn={summary.failed_executions > 0} />
+                  <StatCard label="Inv. Hosts" value={summary.inventory_hosts} />
+                  <StatCard label="Inv. Services" value={summary.inventory_services} />
                 </div>
               </section>
-            ) : null}
+            )}
 
-            {/* Agent Findings */}
-            {agentFindings.length > 0 ? (
-              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5 shadow-panel">
-                <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/72">
-                  Agent-discovered findings ({agentFindings.length})
-                </h2>
-                <ul className="mt-3 space-y-3">
+            {agentFindings.length > 0 && (
+              <section className="border border-border-subtle bg-surface-secondary">
+                <div className="px-4 h-10 flex items-center border-b border-border-subtle">
+                  <span className="font-display text-[11px] uppercase tracking-widest text-text-primary font-semibold">
+                    Agent-Discovered Findings ({agentFindings.length})
+                  </span>
+                </div>
+                <div className="divide-y divide-border-subtle/50">
                   {agentFindings.map((f, i) => (
-                    <FindingCard key={i} finding={f} />
+                    <FindingRow key={i} finding={f} />
                   ))}
-                </ul>
+                </div>
               </section>
-            ) : null}
+            )}
 
-            {/* Confirmed Findings */}
-            {findings.length > 0 ? (
-              <section className="rounded-[24px] border border-white/10 bg-white/5 p-5 shadow-panel">
-                <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/72">
-                  Confirmed findings ({findings.length})
-                </h2>
-                <ul className="mt-3 space-y-3">
+            {findings.length > 0 && (
+              <section className="border border-border-subtle bg-surface-secondary">
+                <div className="px-4 h-10 flex items-center border-b border-border-subtle">
+                  <span className="font-display text-[11px] uppercase tracking-widest text-text-primary font-semibold">
+                    Confirmed Findings ({findings.length})
+                  </span>
+                </div>
+                <div className="divide-y divide-border-subtle/50">
                   {findings.map((f, i) => (
-                    <FindingCard key={i} finding={f} />
+                    <FindingRow key={i} finding={f} />
                   ))}
-                </ul>
+                </div>
               </section>
-            ) : null}
+            )}
 
-            {/* Raw JSON download */}
-            <section className="rounded-[24px] border border-white/10 bg-white/5 p-5 shadow-panel">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/72">
-                Raw document
-              </h2>
+            <section className="border border-border-subtle bg-surface-secondary p-4">
+              <span className="font-display text-[11px] uppercase tracking-widest text-text-primary font-semibold block mb-3">
+                Raw Document
+              </span>
               <button
                 type="button"
                 onClick={() => {
@@ -235,19 +256,19 @@ export default function ReportsPage() {
                   a.click();
                   URL.revokeObjectURL(url);
                 }}
-                className="mt-3 rounded-md border border-white/10 px-4 py-2 text-sm text-white/80 hover:border-accent/60 hover:text-accent"
+                className="px-4 py-2 border border-border-subtle font-display text-[11px] uppercase tracking-widest text-text-primary hover:bg-surface-tertiary"
               >
-                Download JSON
+                Export_Report_JSON
               </button>
             </section>
           </div>
-        ) : null}
+        )}
       </div>
     </AppShell>
   );
 }
 
-function Stat({
+function StatCard({
   label,
   value,
   accent,
@@ -259,11 +280,11 @@ function Stat({
   warn?: boolean;
 }) {
   return (
-    <div className="rounded-md border border-white/10 bg-black/30 p-3">
-      <div className="text-xs text-white/48">{label}</div>
+    <div className="border border-border-subtle bg-surface-tertiary p-3">
+      <div className="font-mono text-[10px] text-text-tertiary uppercase tracking-widest">{label}</div>
       <div
-        className={`mt-1 text-xl font-semibold ${
-          warn ? "text-rose-400" : accent ? "text-accent" : "text-white"
+        className={`mt-1.5 font-display text-[22px] font-bold ${
+          warn ? "text-severity-critical" : accent ? "text-secondary" : "text-text-primary"
         }`}
       >
         {value}
@@ -272,30 +293,32 @@ function Stat({
   );
 }
 
-function FindingCard({ finding }: { finding: AgentFinding }) {
-  const color = SEVERITY_COLOR[finding.severity] ?? "text-white/60";
+function FindingRow({ finding }: { finding: AgentFinding }) {
+  const color = SEVERITY_TONE[finding.severity] ?? "text-text-secondary";
   return (
-    <li className="rounded-md border border-white/10 bg-black/30 p-3 text-sm text-white/80">
+    <div className="px-4 py-3 space-y-1.5">
       <div className="flex items-center justify-between">
-        <span className="font-semibold text-white">{finding.title}</span>
-        <span className={`font-mono text-xs uppercase ${color}`}>
+        <span className="font-mono text-[12px] text-text-primary">{finding.title}</span>
+        <span className={`font-mono text-[10px] uppercase tracking-widest font-bold ${color}`}>
           {finding.severity}
         </span>
       </div>
-      {finding.attack_technique ? (
-        <div className="mt-1 text-xs text-white/48">{finding.attack_technique}</div>
-      ) : null}
-      <p className="mt-2 text-sm text-white/80">{finding.summary}</p>
-      {finding.evidence_refs?.length > 0 ? (
-        <p className="mt-2 text-xs text-white/40">
+      {finding.attack_technique && (
+        <div className="font-mono text-[10px] text-text-tertiary uppercase tracking-wider">
+          {finding.attack_technique}
+        </div>
+      )}
+      <p className="font-mono text-[11px] text-text-secondary leading-relaxed">{finding.summary}</p>
+      {finding.evidence_refs?.length > 0 && (
+        <p className="font-mono text-[10px] text-text-tertiary">
           Evidence: {finding.evidence_refs.join(", ")}
         </p>
-      ) : null}
-      {finding.agent_run_id ? (
-        <p className="mt-1 text-xs text-white/40">
+      )}
+      {finding.agent_run_id && (
+        <p className="font-mono text-[10px] text-text-tertiary">
           Run: {finding.agent_run_id.split("-")[0]}
         </p>
-      ) : null}
-    </li>
+      )}
+    </div>
   );
 }

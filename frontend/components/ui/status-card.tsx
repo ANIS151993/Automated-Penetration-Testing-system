@@ -6,10 +6,10 @@ type StatusCardProps = {
 
 export function StatusCard({ title, value, detail }: StatusCardProps) {
   return (
-    <article className="rounded-[24px] border border-white/10 bg-white/5 p-5 shadow-panel">
-      <p className="text-xs uppercase tracking-[0.3em] text-white/48">{title}</p>
-      <div className="mt-4 text-2xl font-semibold text-accent">{value}</div>
-      <p className="mt-3 text-sm leading-7 text-white/72">{detail}</p>
+    <article className="border border-border-subtle bg-surface-secondary p-4">
+      <p className="font-mono text-[10px] uppercase tracking-widest text-text-tertiary">{title}</p>
+      <div className="mt-3 font-display text-[22px] font-bold text-secondary">{value}</div>
+      <p className="mt-2 font-mono text-[11px] leading-relaxed text-text-secondary">{detail}</p>
     </article>
   );
 }

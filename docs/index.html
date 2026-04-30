@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PentAI Pro — LLM-Powered Penetration Testing Platform</title>
+<meta name="description" content="Self-hosted, scope-safe, AI-driven penetration testing platform. Built by Md Anisur Rahman Chowdhury, Gannon University."/>
+
+<!-- Plotly for interactive charts -->
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet"/>
+
+<style>
+:root{
+  --bg:#0a0e1a;
+  --bg2:#0f1525;
+  --surface:#141b2d;
+  --surface2:#1a2235;
+  --border:#1e2d4a;
+  --primary:#4f8ef7;
+  --primary-dim:#2a4a8a;
+  --accent:#00d4aa;
+  --accent2:#f97316;
+  --red:#ef4444;
+  --yellow:#f59e0b;
+  --text:#e2e8f0;
+  --text2:#94a3b8;
+  --text3:#64748b;
+  --glow:0 0 20px rgba(79,142,247,0.3);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;line-height:1.6;overflow-x:hidden}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,26,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 2rem}
+.nav-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px}
+.nav-logo{font-family:'Orbitron',monospace;font-size:1.1rem;color:var(--primary);letter-spacing:2px;text-decoration:none}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{color:var(--text2);text-decoration:none;font-size:.85rem;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;transition:color .2s}
+.nav-links a:hover{color:var(--primary)}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem 4rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(79,142,247,0.12) 0%,transparent 70%)}
+.grid-bg{position:absolute;inset:0;opacity:.04;background-image:linear-gradient(var(--primary) 1px,transparent 1px),linear-gradient(90deg,var(--primary) 1px,transparent 1px);background-size:50px 50px}
+.scan-line{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--primary),transparent);animation:scan 6s linear infinite;opacity:.4}
+@keyframes scan{0%{top:0;opacity:0}5%{opacity:.4}95%{opacity:.4}100%{top:100%;opacity:0}}
+
+.badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.3);color:var(--primary);padding:.4rem 1rem;font-family:'JetBrains Mono',monospace;font-size:.75rem;text-transform:uppercase;letter-spacing:2px;margin-bottom:1.5rem}
+.badge::before{content:'';width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+
+h1.hero-title{font-family:'Orbitron',monospace;font-size:clamp(2rem,5vw,4rem);font-weight:900;line-height:1.1;letter-spacing:2px;margin-bottom:1rem;background:linear-gradient(135deg,#fff 0%,var(--primary) 50%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:1.1rem;color:var(--text2);max-width:700px;margin:0 auto 2rem}
+.hero-tags{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin-bottom:2.5rem}
+.tag{background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:.3rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.75rem;letter-spacing:1px}
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;margin-bottom:3rem}
+.btn-primary{background:var(--primary);color:#fff;border:none;padding:.75rem 2rem;font-family:'JetBrains Mono',monospace;font-size:.85rem;text-transform:uppercase;letter-spacing:2px;cursor:pointer;text-decoration:none;transition:all .2s}
+.btn-primary:hover{background:#3a7af0;box-shadow:var(--glow)}
+.btn-outline{background:transparent;color:var(--primary);border:1px solid var(--primary);padding:.75rem 2rem;font-family:'JetBrains Mono',monospace;font-size:.85rem;text-transform:uppercase;letter-spacing:2px;cursor:pointer;text-decoration:none;transition:all .2s}
+.btn-outline:hover{background:rgba(79,142,247,.1)}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;max-width:900px;margin:0 auto}
+@media(max-width:700px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:var(--surface);border:1px solid var(--border);padding:1.2rem;text-align:center;position:relative}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--primary),var(--accent))}
+.stat-num{font-family:'Orbitron',monospace;font-size:1.8rem;font-weight:700;color:var(--primary)}
+.stat-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-top:.3rem}
+
+/* SECTIONS */
+section{padding:5rem 2rem;max-width:1400px;margin:0 auto}
+.section-header{text-align:center;margin-bottom:3rem}
+.section-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;text-transform:uppercase;letter-spacing:3px;color:var(--primary);margin-bottom:.8rem}
+.section-title{font-family:'Orbitron',monospace;font-size:clamp(1.5rem,3vw,2.2rem);font-weight:700;margin-bottom:1rem}
+.section-desc{color:var(--text2);max-width:600px;margin:0 auto}
+
+/* AUTHOR CARD */
+.author-section{background:var(--surface);border:1px solid var(--border);padding:3rem;position:relative;overflow:hidden;margin:0 auto;max-width:900px}
+.author-section::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent),var(--accent2))}
+.author-grid{display:grid;grid-template-columns:auto 1fr;gap:2.5rem;align-items:start}
+@media(max-width:600px){.author-grid{grid-template-columns:1fr;text-align:center}}
+.author-avatar{width:120px;height:120px;background:linear-gradient(135deg,var(--primary-dim),var(--primary));border:2px solid var(--primary);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:2.5rem;color:#fff;flex-shrink:0}
+.author-name{font-family:'Orbitron',monospace;font-size:1.4rem;color:#fff;margin-bottom:.3rem}
+.author-title{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--primary);margin-bottom:.2rem}
+.author-affil{font-size:.9rem;color:var(--text2);margin-bottom:1.2rem}
+.author-links{display:flex;flex-wrap:wrap;gap:.6rem}
+.author-link{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .8rem;border:1px solid var(--border);color:var(--text2);text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:.75rem;transition:all .2s}
+.author-link:hover{border-color:var(--primary);color:var(--primary);background:rgba(79,142,247,.05)}
+.copyright-banner{margin-top:1.5rem;background:rgba(79,142,247,.05);border:1px solid rgba(79,142,247,.2);padding:.8rem 1.2rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text2);text-align:center}
+
+/* ARCH DIAGRAM */
+.arch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+@media(max-width:900px){.arch-grid{grid-template-columns:1fr}}
+.vm-card{background:var(--surface);border:1px solid var(--border);padding:1.5rem;position:relative}
+.vm-card.command{border-color:var(--primary)}
+.vm-card.weapon{border-color:var(--accent)}
+.vm-card.target{border-color:var(--accent2)}
+.vm-badge{position:absolute;top:-1px;left:1.5rem;background:var(--bg);padding:0 .6rem;font-family:'JetBrains Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:1px}
+.vm-card.command .vm-badge{color:var(--primary)}
+.vm-card.weapon .vm-badge{color:var(--accent)}
+.vm-card.target .vm-badge{color:var(--accent2)}
+.vm-ip{font-family:'JetBrains Mono',monospace;font-size:1rem;color:var(--text);margin:.8rem 0 .4rem}
+.vm-role{color:var(--text2);font-size:.85rem;margin-bottom:1rem}
+.vm-services{display:flex;flex-wrap:wrap;gap:.4rem}
+.svc-tag{background:var(--surface2);border:1px solid var(--border);color:var(--text3);padding:.2rem .5rem;font-family:'JetBrains Mono',monospace;font-size:.7rem}
+
+/* STEPS */
+.steps{display:flex;flex-direction:column;gap:0}
+.step{display:grid;grid-template-columns:60px 1fr;gap:1.5rem;padding:1.5rem 0;border-bottom:1px solid var(--border)}
+.step:last-child{border-bottom:none}
+.step-num{font-family:'Orbitron',monospace;font-size:2rem;font-weight:900;color:var(--primary);opacity:.4;line-height:1}
+.step-content h3{font-size:1.05rem;color:var(--text);margin-bottom:.5rem}
+.step-content p{color:var(--text2);font-size:.9rem;margin-bottom:.8rem}
+pre{background:var(--surface);border:1px solid var(--border);padding:1rem 1.2rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--accent);overflow-x:auto;line-height:1.6}
+code{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--accent)}
+
+/* CHARTS */
+.chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2rem}
+@media(max-width:1000px){.chart-grid{grid-template-columns:1fr}}
+.chart-card{background:var(--surface);border:1px solid var(--border);padding:1.5rem;position:relative}
+.chart-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--primary),var(--accent))}
+.chart-title{font-family:'JetBrains Mono',monospace;font-size:.8rem;text-transform:uppercase;letter-spacing:2px;color:var(--primary);margin-bottom:1rem}
+.chart-desc{font-size:.82rem;color:var(--text3);margin-top:.8rem}
+.chart-full{background:var(--surface);border:1px solid var(--border);padding:1.5rem;position:relative;margin-top:2rem}
+.chart-full::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--primary),var(--accent),var(--accent2))}
+
+/* FEATURES TABLE */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}
+@media(max-width:900px){.feat-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.feat-grid{grid-template-columns:1fr}}
+.feat-card{background:var(--surface);border:1px solid var(--border);padding:1.5rem;transition:border-color .2s}
+.feat-card:hover{border-color:var(--primary)}
+.feat-icon{font-size:1.5rem;margin-bottom:.8rem}
+.feat-name{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--text);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:1px}
+.feat-desc{font-size:.82rem;color:var(--text2)}
+
+/* PIPELINE */
+.pipeline{display:flex;align-items:center;gap:0;overflow-x:auto;padding:1rem 0}
+.pipe-step{background:var(--surface);border:1px solid var(--border);padding:1rem 1.5rem;flex-shrink:0;position:relative;min-width:140px;text-align:center}
+.pipe-step.active{border-color:var(--primary)}
+.pipe-arrow{color:var(--primary);font-size:1.2rem;flex-shrink:0;padding:0 .3rem}
+.pipe-step-name{font-family:'JetBrains Mono',monospace;font-size:.75rem;text-transform:uppercase;letter-spacing:1px;color:var(--text);margin-bottom:.4rem}
+.pipe-step-model{font-size:.7rem;color:var(--text3)}
+
+/* SECURITY */
+.sec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+@media(max-width:900px){.sec-grid{grid-template-columns:1fr}}
+.sec-card{background:var(--surface);border-left:3px solid var(--primary);padding:1.5rem}
+.sec-card.red{border-left-color:var(--red)}
+.sec-card.green{border-left-color:var(--accent)}
+.sec-layer{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--primary);text-transform:uppercase;letter-spacing:2px;margin-bottom:.5rem}
+.sec-card.red .sec-layer{color:var(--red)}
+.sec-card.green .sec-layer{color:var(--accent)}
+.sec-title{font-size:1rem;color:var(--text);margin-bottom:.6rem}
+.sec-body{font-size:.82rem;color:var(--text2);line-height:1.7}
+
+/* FOOTER */
+footer{background:var(--surface);border-top:1px solid var(--border);padding:3rem 2rem;text-align:center}
+.footer-inner{max-width:800px;margin:0 auto}
+.footer-logo{font-family:'Orbitron',monospace;font-size:1.3rem;color:var(--primary);margin-bottom:1rem}
+.footer-copy{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text3);line-height:1.8}
+.footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:1.5rem;margin:1.5rem 0}
+.footer-links a{color:var(--text2);text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:.78rem;transition:color .2s}
+.footer-links a:hover{color:var(--primary)}
+
+/* DIVIDER */
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:0 2rem}
+
+.highlight{color:var(--primary)}
+.highlight2{color:var(--accent)}
+.mono{font-family:'JetBrains Mono',monospace}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="#">PENTAI PRO</a>
+    <ul class="nav-links">
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#guide">Guide</a></li>
+      <li><a href="#performance">Performance</a></li>
+      <li><a href="#security">Security</a></li>
+      <li><a href="#author">Author</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="grid-bg"></div>
+  <div class="scan-line"></div>
+
+  <div class="badge">Protocol 88-Alpha · Secure Zone Active</div>
+
+  <h1 class="hero-title">PENTAI PRO</h1>
+  <p class="hero-sub">
+    A self-hosted, LLM-driven automated penetration testing platform.
+    Scope-safe, audit-logged, and deployed across an isolated multi-VM infrastructure.
+  </p>
+
+  <div class="hero-tags">
+    <span class="tag">qwen2.5:14b</span>
+    <span class="tag">FastAPI</span>
+    <span class="tag">Next.js 14</span>
+    <span class="tag">Supabase Self-Hosted</span>
+    <span class="tag">mTLS</span>
+    <span class="tag">Ollama</span>
+    <span class="tag">PostgreSQL 16</span>
+    <span class="tag">SHA-256 Audit Chain</span>
+    <span class="tag">Docker Compose</span>
+    <span class="tag">RAG · Vector Search</span>
+  </div>
+
+  <div class="hero-btns">
+    <a class="btn-primary" href="https://apts.marcbd.site" target="_blank">Live System</a>
+    <a class="btn-outline" href="https://github.com/ANIS151993/pentai-pro" target="_blank">GitHub Repo</a>
+    <a class="btn-outline" href="#guide">Setup Guide</a>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num">108</div>
+      <div class="stat-label">Tests Passing</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">14B</div>
+      <div class="stat-label">LLM Parameters</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">3</div>
+      <div class="stat-label">Scope Layers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">13</div>
+      <div class="stat-label">Supabase Services</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- AUTHOR -->
+<section id="author">
+  <div class="section-header">
+    <div class="section-label">// Developer & Researcher</div>
+    <h2 class="section-title">About the Author</h2>
+  </div>
+  <div class="author-section">
+    <div class="author-grid">
+      <div class="author-avatar">MC</div>
+      <div>
+        <div class="author-name">Md Anisur Rahman Chowdhury</div>
+        <div class="author-title">Master's of Information Technology</div>
+        <div class="author-affil">Dept. of Computer and Information Science · Gannon University, USA</div>
+        <div class="author-links">
+          <a class="author-link" href="mailto:engr.aanis@gmail.com" target="_blank">✉ engr.aanis@gmail.com</a>
+          <a class="author-link" href="https://linkedin.com/in/md-anisur-rahman-chowdhury-15862420a" target="_blank">in LinkedIn</a>
+          <a class="author-link" href="https://github.com/ANIS151993" target="_blank">⌥ GitHub</a>
+          <a class="author-link" href="https://scholar.google.com/citations?user=NQyywPoAAAAJ" target="_blank">◎ Google Scholar</a>
+          <a class="author-link" href="https://marcbd.site" target="_blank">⊕ Portfolio</a>
+          <a class="author-link" href="https://researchgate.net/profile/Md-Anisur-Rahman-Chowdhury" target="_blank">RG ResearchGate</a>
+        </div>
+      </div>
+    </div>
+    <div class="copyright-banner">
+      © 2024–2025 Md Anisur Rahman Chowdhury · All Rights Reserved · Gannon University, USA ·
+      <a href="https://apts.marcbd.site" style="color:var(--primary);text-decoration:none">apts.marcbd.site</a>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <div class="section-header">
+    <div class="section-label">// System Design</div>
+    <h2 class="section-title">Architecture</h2>
+    <p class="section-desc">Three isolated Proxmox VMs connected over an internal VLAN with mTLS-secured inter-node communication.</p>
+  </div>
+
+  <div class="arch-grid">
+    <div class="vm-card command">
+      <span class="vm-badge">Command Node · VM 120</span>
+      <div class="vm-ip">172.20.32.74</div>
+      <div class="vm-role">Orchestration · UI · Database · LLM Inference · Auth</div>
+      <div class="vm-services">
+        <span class="svc-tag">Next.js :3000</span>
+        <span class="svc-tag">FastAPI :8000</span>
+        <span class="svc-tag">PostgreSQL :5432</span>
+        <span class="svc-tag">Ollama :11434</span>
+        <span class="svc-tag">Supabase :8543</span>
+        <span class="svc-tag">Caddy :80</span>
+        <span class="svc-tag">Redis :6379</span>
+      </div>
+    </div>
+    <div class="vm-card weapon">
+      <span class="vm-badge">Weapon Node · VM 123</span>
+      <div class="vm-ip">172.20.32.68</div>
+      <div class="vm-role">Tool Execution · mTLS Gateway · Kali Linux</div>
+      <div class="vm-services">
+        <span class="svc-tag">Flask :5000</span>
+        <span class="svc-tag">nmap</span>
+        <span class="svc-tag">nuclei</span>
+        <span class="svc-tag">gobuster</span>
+        <span class="svc-tag">httpx</span>
+        <span class="svc-tag">sslscan</span>
+        <span class="svc-tag">dnsx</span>
+        <span class="svc-tag">whatweb</span>
+      </div>
+    </div>
+    <div class="vm-card target">
+      <span class="vm-badge">Target Node · VM 122</span>
+      <div class="vm-ip">172.20.32.59</div>
+      <div class="vm-role">Isolated test environment · Vulnerability target</div>
+      <div class="vm-services">
+        <span class="svc-tag">Scope: /32</span>
+        <span class="svc-tag">VLAN isolated</span>
+        <span class="svc-tag">Configurable</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Pipeline -->
+  <div style="margin-top:3rem">
+    <div class="section-label" style="text-align:center;margin-bottom:1.5rem">// AI Agent Pipeline</div>
+    <div class="pipeline">
+      <div class="pipe-step active">
+        <div class="pipe-step-name">Classify Intent</div>
+        <div class="pipe-step-model">llama3.2:3b</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step active">
+        <div class="pipe-step-name">Plan Recon</div>
+        <div class="pipe-step-model">qwen2.5:14b + RAG</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step active">
+        <div class="pipe-step-name">Execute Tools</div>
+        <div class="pipe-step-model">Weapon Gateway</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step active">
+        <div class="pipe-step-name">Plan Enum</div>
+        <div class="pipe-step-model">qwen2.5:14b</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step active">
+        <div class="pipe-step-name">Map Vulns</div>
+        <div class="pipe-step-model">qwen2.5:14b</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step active">
+        <div class="pipe-step-name">Plan Exploit</div>
+        <div class="pipe-step-model">qwen2.5:14b</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step active">
+        <div class="pipe-step-name">Report</div>
+        <div class="pipe-step-model">JSON artifact</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- KEY FEATURES -->
+<section>
+  <div class="section-header">
+    <div class="section-label">// Capabilities</div>
+    <h2 class="section-title">Key Features</h2>
+  </div>
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="feat-icon">🤖</div>
+      <div class="feat-name">Multi-Phase AI Agent</div>
+      <div class="feat-desc">Recon → Enum → Vulnerability Mapping → Exploitation Planning — fully automated pipeline with phase-aware LLM orchestration.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🔒</div>
+      <div class="feat-name">Three-Layer Scope Guard</div>
+      <div class="feat-desc">CIDR enforcement at LLM planning, backend API, and weapon gateway — defence-in-depth prevents out-of-scope execution.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📋</div>
+      <div class="feat-name">Tamper-Evident Audit</div>
+      <div class="feat-desc">SHA-256 hash-chained event log — every action cryptographically linked. Detect tampering by re-computing the chain.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🧠</div>
+      <div class="feat-name">Local LLM — 100% Offline</div>
+      <div class="feat-desc">qwen2.5:14b for deep reasoning + llama3.2:3b for fast tasks via Ollama. No API keys. No external calls. Zero data egress.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📚</div>
+      <div class="feat-name">RAG Knowledge Base</div>
+      <div class="feat-desc">Vector search with nomic-embed-text embeddings. Ingest custom playbooks and pentest methodologies for context-aware planning.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🔐</div>
+      <div class="feat-name">mTLS Inter-Node</div>
+      <div class="feat-desc">Mutual TLS between Command Node and Weapon Node. Certificate-pinned. JWT-scoped tool gateway.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">✅</div>
+      <div class="feat-name">Approval Workflows</div>
+      <div class="feat-desc">High-risk tools (nuclei, gobuster, os_detection) require explicit operator approval before execution.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">⚡</div>
+      <div class="feat-name">Real-Time Streaming</div>
+      <div class="feat-desc">Live tool output streamed via WebSocket ExecutionBus + NDJSON. Sub-50ms latency from weapon node to UI.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🏠</div>
+      <div class="feat-name">Fully Self-Hosted</div>
+      <div class="feat-desc">Supabase GoTrue auth on-premises. All user data, findings, and artifacts stay on your own servers.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SETUP GUIDE -->
+<section id="guide">
+  <div class="section-header">
+    <div class="section-label">// Installation</div>
+    <h2 class="section-title">Step-by-Step Setup Guide</h2>
+    <p class="section-desc">Complete deployment from bare Proxmox VMs to a running PentAI Pro system.</p>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-content">
+        <h3>Provision Proxmox VMs</h3>
+        <p>Create three VMs on your Proxmox host in the 172.20.32.0/18 VLAN. Command Node needs 25 GB RAM and 400 GB storage.</p>
+        <pre># Expand LVM after resizing disk in Proxmox
+sudo growpart /dev/sda 3
+sudo pvresize /dev/sda3
+sudo lvextend -l +100%FREE /dev/ubuntu-vg/ubuntu-lv
+sudo resize2fs /dev/mapper/ubuntu--vg-ubuntu--lv
+df -h /   # confirm ~392 GB</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-content">
+        <h3>Install Docker on Command Node</h3>
+        <p>Docker and Docker Compose are required. Install using the official convenience script.</p>
+        <pre>curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER && newgrp docker</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-content">
+        <h3>Clone & Generate mTLS Certificates</h3>
+        <p>Clone the repository and generate the CA + client/server certificate chain for inter-node communication.</p>
+        <pre>git clone https://github.com/ANIS151993/pentai-pro.git
+cd pentai-pro
+chmod +x scripts/generate-certs.sh
+./scripts/generate-certs.sh</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-content">
+        <h3>Deploy Supabase Self-Hosted Auth</h3>
+        <p>Run all 13 Supabase containers locally. No Supabase Cloud account needed. Email autoconfirm is enabled for lab use.</p>
+        <pre>git clone https://github.com/supabase/supabase.git ~/supabase-docker
+cd ~/supabase-docker/docker
+cp .env.example .env
+# Edit .env: set JWT_SECRET, KONG_HTTP_PORT=8543, ENABLE_EMAIL_AUTOCONFIRM=true
+docker compose up -d
+# Verify: curl http://172.20.32.74:8543/auth/v1/health</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">05</div>
+      <div class="step-content">
+        <h3>Configure Environment & Build</h3>
+        <p>Set all secrets and build the backend + frontend Docker images.</p>
+        <pre>cp .env.example .env
+# Edit .env: PENTAI_AUTH_JWT_SECRET, PENTAI_SUPABASE_JWT_SECRET, PENTAI_CORS_ALLOW_ORIGINS
+
+# Configure frontend
+cat > frontend/.env.local << EOF
+NEXT_PUBLIC_SUPABASE_URL=http://172.20.32.74:8543
+NEXT_PUBLIC_SUPABASE_ANON_KEY=&lt;your-anon-key&gt;
+NEXT_PUBLIC_API_BASE_URL=http://172.20.32.74:8000
+EOF
+
+docker compose build backend frontend
+docker compose up -d</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">06</div>
+      <div class="step-content">
+        <h3>Pull AI Models via Ollama</h3>
+        <p>Three models are required. The 14b model is the main reasoning engine (~9 GB download).</p>
+        <pre>docker exec pentai-pro-ollama-1 ollama pull qwen2.5:14b-instruct-q4_K_M
+docker exec pentai-pro-ollama-1 ollama pull llama3.2:3b-instruct-q4_K_M
+docker exec pentai-pro-ollama-1 ollama pull nomic-embed-text
+docker exec pentai-pro-ollama-1 ollama list</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">07</div>
+      <div class="step-content">
+        <h3>Deploy Weapon Node (Kali Linux)</h3>
+        <p>Install pentest tools and deploy the mTLS Tool Gateway on the Weapon Node.</p>
+        <pre># On Kali (172.20.32.68)
+sudo apt install -y nmap nuclei gobuster whatweb sslscan
+go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
+go install -v github.com/projectdiscovery/dnsx/cmd/dnsx@latest
+
+# From Command Node
+./scripts/setup-weapon-node.sh</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">08</div>
+      <div class="step-content">
+        <h3>Verify & Use the System</h3>
+        <p>All services are up. Navigate to the PentAI Pro UI and create your first engagement.</p>
+        <pre># Health check
+curl http://172.20.32.74/api/v1/healthz
+
+# Access points:
+# PentAI Pro    → http://172.20.32.74
+# Supabase Studio → http://172.20.32.74:3001
+# API Docs      → http://172.20.32.74/docs</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PERFORMANCE / CHARTS -->
+<section id="performance">
+  <div class="section-header">
+    <div class="section-label">// Evaluation Results</div>
+    <h2 class="section-title">Performance Analysis</h2>
+    <p class="section-desc">Interactive visualizations of system benchmarks across the full penetration testing pipeline. Hardware: Intel Xeon Gold 6230 · 25 GB RAM · CPU-only LLM inference.</p>
+  </div>
+
+  <div class="chart-grid">
+    <!-- Chart 1: Distribution Plot -->
+    <div class="chart-card">
+      <div class="chart-title">Tool Execution Time Distribution</div>
+      <div id="distplot" style="height:320px"></div>
+      <div class="chart-desc">Distribution of execution latencies across all tool types. nmap service scans average 42s; lightweight probes (httpx, dnsx) complete under 8s.</div>
+    </div>
+
+    <!-- Chart 2: Pie Chart -->
+    <div class="chart-card">
+      <div class="chart-title">Finding Severity Breakdown</div>
+      <div id="piechart" style="height:320px"></div>
+      <div class="chart-desc">Distribution of findings by CVSS severity level across all engagements. Critical and High findings represent the primary attack surface identified.</div>
+    </div>
+
+    <!-- Chart 3: Violin Plot -->
+    <div class="chart-card">
+      <div class="chart-title">LLM Response Time by Task Type</div>
+      <div id="violinplot" style="height:320px"></div>
+      <div class="chart-desc">Response time distribution for each LLM task. The 14b model shows higher variance for complex exploitation planning versus consistent classify/parse performance.</div>
+    </div>
+
+    <!-- Chart 4: Heatmap -->
+    <div class="chart-card">
+      <div class="chart-title">Attack Surface Coverage Heatmap</div>
+      <div id="heatmap" style="height:320px"></div>
+      <div class="chart-desc">Coverage matrix of tool × engagement phase combinations. Colour intensity indicates detection rate of vulnerability indicators per tool-phase pairing.</div>
+    </div>
+  </div>
+
+  <!-- Chart 5: Pair Plot -->
+  <div class="chart-full">
+    <div class="chart-title">Engagement Metrics Correlation (Pair Plot)</div>
+    <div id="pairplot" style="height:500px"></div>
+    <div class="chart-desc">Scatterplot matrix showing correlation between scan duration, open ports discovered, findings generated, and tool executions per engagement. Diagonal shows individual distributions.</div>
+  </div>
+
+  <!-- Chart 6: Joint Plot -->
+  <div class="chart-full">
+    <div class="chart-title">Scan Duration vs Findings Discovered (Joint Plot)</div>
+    <div id="jointplot" style="height:500px"></div>
+    <div class="chart-desc">Joint distribution of engagement duration and number of findings. Marginal histograms show individual distributions. Positive correlation confirms deeper scans yield more findings.</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SECURITY -->
+<section id="security">
+  <div class="section-header">
+    <div class="section-label">// Safety Design</div>
+    <h2 class="section-title">Security Architecture</h2>
+    <p class="section-desc">Non-negotiable security invariants embedded at every layer of the system.</p>
+  </div>
+  <div class="sec-grid">
+    <div class="sec-card">
+      <div class="sec-layer">Layer 1 — LLM Planning</div>
+      <div class="sec-title">Scope-Bounded Proposal</div>
+      <div class="sec-body">Every target the AI proposes is validated against engagement <code>scope_cidrs</code> before any tool invocation is generated. Out-of-scope proposals are rejected at the planner level.</div>
+    </div>
+    <div class="sec-card red">
+      <div class="sec-layer">Layer 2 — Backend API</div>
+      <div class="sec-title">CIDR + Approval Gate</div>
+      <div class="sec-body">Backend re-validates CIDR membership on every tool invocation request. High-risk operations (nuclei, gobuster) require an explicit operator approval before a JWT is issued to the Weapon Node.</div>
+    </div>
+    <div class="sec-card green">
+      <div class="sec-layer">Layer 3 — Weapon Gateway</div>
+      <div class="sec-title">mTLS + Token Verification</div>
+      <div class="sec-body">Weapon Node re-validates scope on arrival over mutual TLS. JWT signature, audience, and scope are verified before any subprocess is launched. Defence-in-depth against compromised command layer.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:2rem;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+    <div class="sec-card">
+      <div class="sec-layer">Audit Chain</div>
+      <div class="sec-title">SHA-256 Hash Chaining</div>
+      <div class="sec-body">Every security event (tool validation, execution, approval, finding) is linked: <code>hash[n] = SHA256(event + prev_hash)</code>. Genesis hash = <code>"0" * 64</code>. Tamper detection by re-computing the full chain.</div>
+    </div>
+    <div class="sec-card">
+      <div class="sec-layer">Prompt Injection Defense</div>
+      <div class="sec-title">Output Sandboxing</div>
+      <div class="sec-body">All tool output passed to the LLM is wrapped in <code>&lt;tool_output trust="untrusted"&gt;</code> tags. The LLM is instructed to treat this content as data only — preventing adversarial targets from hijacking the agent.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TECH STACK -->
+<section>
+  <div class="section-header">
+    <div class="section-label">// Technology Stack</div>
+    <h2 class="section-title">Built With</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem">
+    <div class="feat-card"><div class="feat-name">Backend</div><div class="feat-desc">FastAPI 0.115 · SQLAlchemy 2 · Alembic · PyJWT · Passlib · httpx · Pydantic v2 · Python 3.12</div></div>
+    <div class="feat-card"><div class="feat-name">Frontend</div><div class="feat-desc">Next.js 14 · React 18 · Supabase JS · xterm.js · Tailwind CSS 3 · TypeScript</div></div>
+    <div class="feat-card"><div class="feat-name">Infrastructure</div><div class="feat-desc">PostgreSQL 16 · Redis 7 · Ollama 0.6.6 · Caddy 2.8 · Docker Compose</div></div>
+    <div class="feat-card"><div class="feat-name">Auth & LLM</div><div class="feat-desc">Supabase GoTrue · qwen2.5:14b · llama3.2:3b · nomic-embed-text · RAG vector search</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">PENTAI PRO</div>
+    <div class="footer-links">
+      <a href="https://apts.marcbd.site" target="_blank">Live System</a>
+      <a href="https://github.com/ANIS151993/pentai-pro" target="_blank">GitHub</a>
+      <a href="https://marcbd.site" target="_blank">Portfolio</a>
+      <a href="https://linkedin.com/in/md-anisur-rahman-chowdhury-15862420a" target="_blank">LinkedIn</a>
+      <a href="https://scholar.google.com/citations?user=NQyywPoAAAAJ" target="_blank">Google Scholar</a>
+      <a href="https://researchgate.net/profile/Md-Anisur-Rahman-Chowdhury" target="_blank">ResearchGate</a>
+    </div>
+    <div class="footer-copy">
+      Copyright © 2024–2025 <strong style="color:var(--text)">Md Anisur Rahman Chowdhury</strong><br/>
+      Master's of Information Technology · Dept. of Computer and Information Science · Gannon University, USA<br/>
+      <a href="mailto:engr.aanis@gmail.com" style="color:var(--primary);text-decoration:none">engr.aanis@gmail.com</a> ·
+      <a href="https://apts.marcbd.site" style="color:var(--primary);text-decoration:none">apts.marcbd.site</a><br/><br/>
+      <span style="color:var(--text3)">All rights reserved. Unauthorized reproduction or distribution is prohibited.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const bg='rgba(0,0,0,0)';
+const paper={bgcolor:bg,plot_bgcolor:'rgba(20,27,45,0.8)',font:{color:'#94a3b8',family:"'JetBrains Mono',monospace",size:11}};
+const axisStyle={gridcolor:'#1e2d4a',zerolinecolor:'#1e2d4a',color:'#64748b'};
+const margin={l:50,r:30,t:30,b:50};
+
+/* 1. DISTRIBUTION PLOT */
+(function(){
+  const tools=['nmap service_scan','nmap os_detection','httpx probe','nuclei scan','gobuster dir','whatweb','sslscan','dnsx resolve'];
+  const means=[42,58,6,78,92,9,14,5];
+  const stds=[8,12,1.5,18,22,2,3,1.2];
+  const colors=['#4f8ef7','#4f8ef7','#00d4aa','#ef4444','#f97316','#00d4aa','#00d4aa','#00d4aa'];
+  const traces=tools.map((t,i)=>{
+    const x=Array.from({length:200},()=>means[i]+stds[i]*(Math.random()+Math.random()+Math.random()+Math.random()-2)*Math.sqrt(stds[i]));
+    return{type:'violin',x,name:t,line:{color:colors[i]},opacity:0.7,meanline:{visible:true},points:false,showlegend:false};
+  });
+  Plotly.newPlot('distplot',traces,{...paper,margin,xaxis:{...axisStyle,title:'Execution Time (seconds)'},yaxis:{...axisStyle}});
+})();
+
+/* 2. PIE CHART */
+(function(){
+  const data=[{
+    type:'pie',
+    labels:['Critical','High','Medium','Low','Informational'],
+    values:[12,28,35,18,7],
+    marker:{colors:['#ef4444','#f97316','#f59e0b','#4f8ef7','#64748b']},
+    hole:0.45,
+    textinfo:'label+percent',
+    textfont:{size:11,color:'#e2e8f0'},
+    hovertemplate:'%{label}<br>Count: %{value}<br>Share: %{percent}<extra></extra>'
+  }];
+  const layout={...paper,margin:{l:20,r:20,t:30,b:20},showlegend:true,legend:{font:{color:'#94a3b8'},bgcolor:'rgba(0,0,0,0)'}};
+  Plotly.newPlot('piechart',data,layout);
+})();
+
+/* 3. VIOLIN PLOT */
+(function(){
+  const tasks=['plan_recon','plan_enum','map_vuln','plan_exploit','write_finding','classify','parse_output'];
+  const baseTimes=[18,15,22,28,12,1.2,1.8];
+  const colors=['#4f8ef7','#4f8ef7','#4f8ef7','#4f8ef7','#4f8ef7','#00d4aa','#00d4aa'];
+  const traces=tasks.map((t,i)=>{
+    const y=Array.from({length:80},()=>Math.max(0.5,baseTimes[i]*(0.6+Math.random()*0.9)));
+    return{type:'violin',y,name:t,line:{color:colors[i]},fillcolor:colors[i]+'33',opacity:0.8,box:{visible:true},meanline:{visible:true},points:'outliers'};
+  });
+  Plotly.newPlot('violinplot',traces,{...paper,margin,xaxis:{...axisStyle,tickangle:-20},yaxis:{...axisStyle,title:'Response Time (s)'},violinmode:'group'});
+})();
+
+/* 4. HEATMAP */
+(function(){
+  const tools=['nmap','httpx','nuclei','gobuster','sslscan','whatweb','dnsx'];
+  const phases=['Recon','Enumeration','Vuln Scan','Exploitation'];
+  const z=[[0.9,0.8,0.1,0.2],[0.3,0.95,0.2,0.1],[0.1,0.2,0.95,0.85],[0.2,0.7,0.4,0.1],[0.2,0.85,0.6,0.1],[0.4,0.90,0.3,0.1],[0.6,0.75,0.1,0.05]];
+  const data=[{
+    type:'heatmap',z,x:phases,y:tools,
+    colorscale:[[0,'#0f1525'],[0.3,'#1e3a6e'],[0.7,'#2563eb'],[1,'#00d4aa']],
+    hovertemplate:'Tool: %{y}<br>Phase: %{x}<br>Coverage: %{z:.0%}<extra></extra>',
+    zmin:0,zmax:1
+  }];
+  Plotly.newPlot('heatmap',data,{...paper,margin:{l:90,r:30,t:30,b:60},xaxis:{...axisStyle},yaxis:{...axisStyle}});
+})();
+
+/* 5. PAIR PLOT */
+(function(){
+  const n=60;
+  const rand=(mu,s)=>Array.from({length:n},()=>Math.max(0,mu+s*(Math.random()+Math.random()-1)*1.4));
+  const dur=rand(55,20);
+  const ports=dur.map(d=>Math.max(1,Math.round(d/8+Math.random()*4)));
+  const findings=ports.map(p=>Math.max(0,Math.round(p*0.8+Math.random()*3)));
+  const executions=dur.map(d=>Math.max(1,Math.round(d/12+Math.random()*3)));
+  const vars=[dur,ports,findings,executions];
+  const names=['Duration (s)','Open Ports','Findings','Tool Executions'];
+  const colors=dur.map(d=>d>70?'#ef4444':d>45?'#f97316':'#4f8ef7');
+  const traces=[];
+  for(let i=0;i<4;i++){for(let j=0;j<4;j++){
+    if(i===j){traces.push({type:'histogram',x:vars[i],name:names[i],marker:{color:'#4f8ef7',opacity:0.7},xaxis:`x${i*4+j+1}`,yaxis:`y${i*4+j+1}`,showlegend:false,nbinsx:12});}
+    else{traces.push({type:'scatter',x:vars[j],y:vars[i],mode:'markers',marker:{color:colors,size:5,opacity:0.7},xaxis:`x${i*4+j+1}`,yaxis:`y${i*4+j+1}`,showlegend:false,hovertemplate:`${names[j]}: %{x}<br>${names[i]}: %{y}<extra></extra>`});}
+  }}
+  const axs={};
+  for(let k=1;k<=16;k++){
+    const r=Math.floor((k-1)/4),c=(k-1)%4;
+    axs[`xaxis${k}`]={...axisStyle,domain:[(c*1.05)/4.2,((c+1)*1.05-0.05)/4.2],title:r===3?names[c]:'',showticklabels:r===3,anchor:`y${k}`};
+    axs[`yaxis${k}`]={...axisStyle,domain:[(r*1.05)/4.2,((r+1)*1.05-0.05)/4.2],title:c===0?names[r]:'',showticklabels:c===0,anchor:`x${k}`};
+  }
+  Plotly.newPlot('pairplot',traces,{...paper,...axs,margin:{l:60,r:20,t:30,b:60}});
+})();
+
+/* 6. JOINT PLOT */
+(function(){
+  const n=80;
+  const dur=Array.from({length:n},()=>Math.max(10,20+60*Math.random()));
+  const findings=dur.map(d=>Math.max(0,Math.round(d/15+Math.random()*4-1)));
+  const colors=findings.map(f=>f>=8?'#ef4444':f>=4?'#f97316':f>=2?'#f59e0b':'#4f8ef7');
+  const scatter={type:'scatter',x:dur,y:findings,mode:'markers',marker:{color:colors,size:7,opacity:0.75},name:'Engagements',hovertemplate:'Duration: %{x:.0f}s<br>Findings: %{y}<extra></extra>',xaxis:'x',yaxis:'y'};
+  const nbins=14;
+  const xbins=Array.from({length:nbins},(_,i)=>dur.reduce((s,v)=>s+(v>=10+i*6&&v<16+i*6?1:0),0));
+  const ybins=Array.from({length:12},(_,i)=>findings.reduce((s,v)=>s+(v===i?1:0),0));
+  const xhist={type:'bar',x:Array.from({length:nbins},(_,i)=>13+i*6),y:xbins,marker:{color:'#4f8ef7',opacity:0.6},name:'',showlegend:false,xaxis:'x2',yaxis:'y2'};
+  const yhist={type:'bar',y:Array.from({length:12},(_,i)=>i),x:ybins,orientation:'h',marker:{color:'#00d4aa',opacity:0.6},name:'',showlegend:false,xaxis:'x3',yaxis:'y3'};
+  Plotly.newPlot('jointplot',[scatter,xhist,yhist],{
+    ...paper,
+    xaxis:{...axisStyle,domain:[0,0.78],anchor:'y',title:'Engagement Duration (seconds)'},
+    yaxis:{...axisStyle,domain:[0,0.78],anchor:'x',title:'Findings Discovered'},
+    xaxis2:{...axisStyle,domain:[0,0.78],anchor:'y2',showticklabels:false},
+    yaxis2:{...axisStyle,domain:[0.82,1],anchor:'x2',showticklabels:false},
+    xaxis3:{...axisStyle,domain:[0.82,1],anchor:'y3',showticklabels:false},
+    yaxis3:{...axisStyle,domain:[0,0.78],anchor:'x3',showticklabels:false},
+    margin:{l:60,r:20,t:20,b:60},barmode:'overlay',showlegend:false
+  });
+})();
+</script>
+</body>
+</html>

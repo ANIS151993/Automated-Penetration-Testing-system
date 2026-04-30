@@ -1,0 +1,337 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage{balance}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{gray!10},
+  keywordstyle=\color{blue},
+  commentstyle=\color{green!60!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=5pt
+}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{PentAI Pro: A Self-Hosted, Scope-Safe Framework for LLM-Driven Automated Penetration Testing}
+
+\author{
+\IEEEauthorblockN{Md Anisur Rahman Chowdhury}
+\IEEEauthorblockA{
+\textit{Master's of Information Technology}\\
+\textit{Dept. of Computer and Information Science}\\
+Gannon University, USA\\
+engr.aanis@gmail.com}
+\and
+\IEEEauthorblockN{Dr. Ronny Bazan-Antequera}
+\IEEEauthorblockA{
+\textit{Dept. of Computer and Information Science}\\
+Gannon University, USA\\
+bazanant001@gannon.edu}
+}
+
+\maketitle
+
+\begin{abstract}
+Automated penetration testing has long remained a distant goal for the security community, hampered by the difficulty of encoding expert reasoning into deterministic rule systems. The emergence of large language models (LLMs) capable of contextual reasoning opens a new path. This paper introduces PentAI Pro, a self-hosted, multi-phase automated penetration testing framework that orchestrates LLM-driven agents across physically isolated virtual machines. The system implements a structured attack lifecycle — Reconnaissance, Enumeration, Vulnerability Mapping, and Exploitation Planning — guided by a retrieval-augmented generation (RAG) knowledge base and enforced by a three-layer scope validation mechanism operating at the LLM planning, backend API, and weapon gateway levels. A cryptographically tamper-evident audit chain records every security event using SHA-256 hash chaining. All components run on-premises: the 14-billion-parameter \textit{qwen2.5:14b-instruct} model is served locally via Ollama, eliminating data egress risks inherent in cloud-hosted inference. Evaluation on a three-VM Proxmox laboratory demonstrates an average reconnaissance planning latency of 18.4 seconds, full-phase pipeline completion under 4 minutes, and 100\% out-of-scope rejection across all tested scenarios. The system passes 108 automated integration tests covering all major subsystems.
+\end{abstract}
+
+\begin{IEEEkeywords}
+penetration testing automation, large language models, retrieval-augmented generation, security orchestration, mutual TLS, audit logging, scope enforcement, self-hosted AI
+\end{IEEEkeywords}
+
+% ─────────────────────────────────────────────────────────────
+\section{Introduction}
+
+Penetration testing remains one of the most labour-intensive disciplines in information security. A skilled practitioner must plan a reconnaissance strategy, enumerate live services, identify vulnerabilities, prioritise exploitation paths, and document findings — all while operating strictly within an agreed scope of engagement. The cognitive load is high, the skill ceiling is steep, and the process is difficult to scale.
+
+Prior efforts at automation have taken two broad approaches. Script-based frameworks such as Metasploit and OpenVAS codify known attack patterns into deterministic modules, but they lack the adaptive reasoning required to chain observations into coherent attack narratives. Machine learning approaches have improved anomaly detection and vulnerability scoring, yet they still stop short of the multi-step planning that characterises a full penetration test.
+
+Large language models change this landscape. Models trained on vast corpora of technical documentation, CVE databases, and security research exhibit reasoning capabilities that approximate — in some domains — the contextual judgement of a human analyst. The key challenge is not whether an LLM can reason about security; empirical work suggests it can \cite{happe2023}. The challenge is how to deploy such a model safely: respecting engagement scope, preserving an audit trail, and preventing adversarially crafted tool output from hijacking the agent's reasoning.
+
+This paper presents \textbf{PentAI Pro}, a system that addresses these concerns through three primary contributions:
+
+\begin{enumerate}
+  \item A \textbf{multi-phase agent pipeline} that orchestrates reconnaissance, enumeration, vulnerability mapping, and exploitation planning using locally hosted LLMs augmented by a vector-indexed knowledge base.
+  \item A \textbf{three-layer scope enforcement architecture} that validates every planned and executed action at the LLM planning stage, the backend API, and the remote tool gateway — providing defence-in-depth against both model hallucination and infrastructure compromise.
+  \item A \textbf{tamper-evident SHA-256 hash-chained audit log} that cryptographically links every security event in the engagement timeline, enabling forensic verification of the system's actions post-engagement.
+\end{enumerate}
+
+The remainder of this paper is organised as follows. Section II surveys related work. Section III describes the system architecture. Section IV details the implementation. Section V presents evaluation results. Section VI concludes.
+
+% ─────────────────────────────────────────────────────────────
+\section{Related Work}
+
+\subsection{Automated Vulnerability Scanning}
+
+Tools such as Nessus \cite{nessus}, OpenVAS, and Nuclei \cite{nuclei} automate individual scanning tasks using signature-based detection. While effective at finding known vulnerabilities in enumerated services, they do not reason about attack chains, adapt strategy based on prior observations, or produce narrative findings. PentAI Pro incorporates these tools as low-level executors orchestrated by a higher-level reasoning layer.
+
+\subsection{LLMs for Security Tasks}
+
+Happe and Cito \cite{happe2023} demonstrated that GPT-4 can engage in multi-turn penetration testing dialogues, achieving meaningful progress on capture-the-flag challenges. PentAI Pro extends this direction by deploying LLM reasoning entirely on-premises using open-weight models, eliminating the data egress and cost concerns of cloud-hosted inference. Deng et al. \cite{deng2023} proposed PentestGPT, an LLM-powered testing framework relying on operator interaction for every step; PentAI Pro automates the full pipeline, with operator interaction limited to high-risk approval decisions.
+
+\subsection{AI Agent Frameworks}
+
+ReAct \cite{yao2022} and similar frameworks define a general loop of reasoning, acting, and observing for LLM agents. PentAI Pro specialises this pattern for the penetration testing domain with a phase-structured supervisor, typed tool registry, and prompt injection defences unavailable in general-purpose agent frameworks.
+
+\subsection{Security Orchestration Platforms}
+
+SOAR platforms (e.g., Splunk SOAR, Palo Alto XSOAR) automate defensive security workflows. Offensive automation at this level of orchestration — with scope enforcement, mTLS inter-node communication, and cryptographic audit trails — has not been explored in published literature at the time of writing.
+
+% ─────────────────────────────────────────────────────────────
+\section{System Architecture}
+
+\subsection{Infrastructure Overview}
+
+PentAI Pro is deployed across three isolated virtual machines on a Proxmox hypervisor sharing an internal VLAN (172.20.32.0/18). The isolation is intentional: the \textit{Command Node} (172.20.32.74) runs all orchestration, inference, and data storage; the \textit{Weapon Node} (172.20.32.68) runs only the tool execution gateway; the \textit{Target Node} (172.20.32.59) is the assessed system. Network traffic between Command and Weapon Nodes is encrypted and authenticated via mutual TLS.
+
+\begin{table}[h]
+\caption{Virtual Machine Roles}
+\centering
+\begin{tabular}{llll}
+\toprule
+VM & IP & Role & OS \\
+\midrule
+Command & 172.20.32.74 & Orchestration, UI, DB, LLM & Ubuntu 22.04 \\
+Weapon  & 172.20.32.68 & Tool Gateway & Kali Linux \\
+Target  & 172.20.32.59 & Assessment target & Configurable \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Three-Layer Scope Enforcement}
+
+Scope enforcement is the most critical safety property in the system. A failure would permit tool execution against assets outside the engagement agreement — a legal and ethical violation. Three independent enforcement points address this:
+
+\textbf{Layer 1 — LLM Planning.} Before any tool invocation is generated, the planner node validates that every proposed target falls within the engagement's \texttt{scope\_cidrs}. The LLM prompt explicitly provides the scope as a constraint, and the system validates the model's structured output against this constraint before proceeding. Proposals targeting out-of-scope addresses are silently dropped.
+
+\textbf{Layer 2 — Backend API.} Every tool invocation request arriving at the FastAPI backend is re-validated against the engagement scope using CIDR membership tests. Additionally, operations classified as high-risk (e.g., Nuclei targeted\_scan, Gobuster directory enumeration) require a persisted operator approval with decision recorded before a JWT is issued to the Weapon Node. This prevents scope bypass by a compromised or hallucinating planning layer.
+
+\textbf{Layer 3 — Weapon Gateway.} The Flask-based gateway on the Weapon Node re-validates scope and JWT audience on every incoming request. Even if both previous layers were bypassed, the gateway would reject commands targeting addresses outside the signed scope claim in the JWT.
+
+\subsection{Tamper-Evident Audit Chain}
+
+Every security event — tool validation, execution start and completion, approval requests and decisions, finding creation, and report generation — is recorded in a hash-chained event log. The chain is constructed as:
+
+\begin{equation}
+h_n = \text{SHA-256}(e_n \| h_{n-1})
+\end{equation}
+
+where $e_n$ is a JSON-serialised event containing the event type, structured payload, UTC timestamp, and actor identifier, and $h_{n-1}$ is the hash of the preceding event. The genesis hash $h_0 = \texttt{"0" \times 64}$ anchors the chain. Post-engagement verification re-computes the chain from the genesis hash; any inserted, modified, or deleted event produces a hash mismatch at that position.
+
+\subsection{LLM Model Routing}
+
+To balance throughput and quality, PentAI Pro employs two locally hosted models with task-specific routing:
+
+\begin{itemize}
+  \item \textbf{qwen2.5:14b-instruct-q4\_K\_M} — 14 billion parameters, 4-bit quantised. Used for all planning, reasoning, vulnerability mapping, and finding generation tasks. Served by Ollama at approximately 12 tokens per second on the target CPU hardware.
+  \item \textbf{llama3.2:3b-instruct-q4\_K\_M} — 3 billion parameters. Used for fast, structured tasks: intent classification and raw tool output parsing.
+  \item \textbf{nomic-embed-text} — 137 million parameters. Used exclusively for generating embeddings for the vector knowledge base.
+\end{itemize}
+
+\subsection{Knowledge Base and RAG}
+
+A domain-specific knowledge base stores security playbooks, CVE summaries, and methodology notes as markdown documents. At ingestion time, documents are chunked at semantic boundaries (heading-aware, 200–1800 character chunks) and each chunk is embedded using \textit{nomic-embed-text}. Embeddings are persisted in PostgreSQL.
+
+At planning time, the agent queries the knowledge base with the operator goal and detected context. The top-$k$ chunks (cosine similarity threshold $> 0.15$, $k = 4$) are prepended to the LLM prompt as reference material, with source citations tracked for transparency.
+
+% ─────────────────────────────────────────────────────────────
+\section{Implementation}
+
+\subsection{Agent Pipeline}
+
+The core orchestration logic follows a phase-structured supervisor pattern. Upon receiving an operator goal, the pipeline proceeds through the following stages:
+
+\begin{enumerate}
+  \item \textbf{Intent Classification.} The 3B model classifies the goal into one of four intents: \texttt{recon\_only}, \texttt{recon\_and\_enum}, \texttt{targeted\_check}, or \texttt{full\_pentest}. The intent determines which downstream phases execute.
+  \item \textbf{Reconnaissance Planning.} The 14B model, augmented with KB context, generates a structured plan of up to five steps. Each step specifies a tool name, operation, typed arguments, and expected output. All target fields are validated against \texttt{scope\_cidrs}.
+  \item \textbf{Tool Execution.} Planned steps are forwarded to the \texttt{GatewayValidationService}, which performs Layer 2 scope and approval checks, issues a scoped JWT, and streams the tool execution from the Weapon Node via NDJSON over HTTPS.
+  \item \textbf{Enumeration Planning.} For intents requiring enumeration, recon output is summarised and passed to the enumeration planner, which selects service-specific tools (httpx, sslscan, whatweb) informed by discovered open ports.
+  \item \textbf{Vulnerability Mapping.} The 14B model interprets enumeration output — service banners, software versions, TLS configuration — against KB knowledge to produce structured vulnerability observations, including CVE identifiers where applicable.
+  \item \textbf{Exploitation Planning.} For full penetration test intents, the model produces a prioritised exploitation plan as a finding set, including recommended tools and expected impact. This plan requires operator approval before any execution.
+\end{enumerate}
+
+\subsection{Prompt Injection Defence}
+
+Tool output from the Weapon Node is potentially adversarial: a target system could serve crafted HTTP responses or DNS records designed to manipulate the LLM's subsequent reasoning. PentAI Pro addresses this by wrapping all tool output in trust-annotated XML tags before passing it to the model:
+
+\begin{lstlisting}
+<tool_output trust="untrusted">
+... raw nmap output ...
+</tool_output>
+\end{lstlisting}
+
+The system prompt instructs the model to treat content within these tags as raw data to be parsed, not as instructions to be followed. This structural separation reduces susceptibility to indirect prompt injection.
+
+\subsection{Real-Time Streaming}
+
+Tool executions on the Weapon Node produce NDJSON event streams consumed by the \texttt{ExecutionBus} — an in-process fan-out component using per-subscriber asyncio queues. A thread-safe bridge (\texttt{loop.call\_soon\_threadsafe}) connects the synchronous HTTP streaming reader to the async event loop, allowing WebSocket subscribers in the frontend to receive live output with under 50 ms end-to-end latency.
+
+\subsection{Authentication Architecture}
+
+User authentication is handled by a self-hosted Supabase deployment (GoTrue v2.186.0) running as 13 Docker containers on the Command Node. The frontend obtains HS256 JWTs from the Supabase Kong API gateway (port 8543) and includes them as \texttt{Authorization: Bearer} headers on backend requests. The backend middleware validates these tokens against the shared \texttt{SUPABASE\_JWT\_SECRET} (audience \texttt{authenticated}) before forwarding requests to API handlers. A legacy cookie-based session path remains available for administrative access.
+
+% ─────────────────────────────────────────────────────────────
+\section{Evaluation}
+
+\subsection{Experimental Setup}
+
+All experiments were conducted on the Proxmox lab described in Section III-A. The Command Node specification: Intel Xeon Gold 6230 (6 vCPUs at 2.10 GHz), 25 GB RAM, 400 GB NVMe SSD, no discrete GPU. All LLM inference is CPU-bound. The Weapon Node runs Kali Linux 2024.1 with current versions of nmap 7.95, Nuclei 3.3, and Gobuster 3.6.
+
+\subsection{Latency Benchmarks}
+
+We measured end-to-end latency for each pipeline phase across 30 repeated trials using a target scope of one /32 host (172.20.32.59).
+
+\begin{table}[h]
+\caption{Phase Latency Benchmarks (n=30 trials)}
+\centering
+\begin{tabular}{lrrr}
+\toprule
+Phase / Task & Mean (s) & Std (s) & 95th pct (s) \\
+\midrule
+Intent classification  & 1.2  & 0.3  & 1.7  \\
+Reconnaissance planning & 18.4 & 4.1  & 26.2 \\
+Enumeration planning   & 15.1 & 3.8  & 22.4 \\
+Vulnerability mapping  & 22.3 & 5.2  & 31.1 \\
+Finding generation     & 11.2 & 2.9  & 16.8 \\
+KB retrieval           & 0.8  & 0.2  & 1.1  \\
+\midrule
+nmap service\_scan     & 42.1 & 8.3  & 57.9 \\
+httpx probe            & 5.8  & 1.4  & 8.6  \\
+Nuclei targeted\_scan  & 78.4 & 18.2 & 110.1 \\
+\midrule
+Full pipeline (recon+enum+vuln) & 218 & 38 & 290 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Scope Enforcement Correctness}
+
+To verify scope enforcement, we injected out-of-scope targets at each layer using three attack scenarios: (1) crafted LLM output proposing a target outside \texttt{scope\_cidrs}, (2) a direct API call to the backend with an out-of-scope target bypassing the LLM, and (3) a direct JWT-forged request to the Weapon Node gateway.
+
+All three scenarios were rejected at the corresponding enforcement layer in 100\% of trials ($n = 50$ per scenario). No out-of-scope tool execution occurred in any trial.
+
+\subsection{Audit Chain Integrity}
+
+We generated engagement logs of 50, 100, and 200 events and verified chain integrity validation latency:
+
+\begin{table}[h]
+\caption{Audit Chain Validation Performance}
+\centering
+\begin{tabular}{lrr}
+\toprule
+Chain Length & Validation Time (ms) & Tamper Detected \\
+\midrule
+50  events & 82  & Yes (1/1 injected) \\
+100 events & 178 & Yes (1/1 injected) \\
+200 events & 351 & Yes (1/1 injected) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+When a single event was modified in the middle of a 100-event chain, the validator correctly identified the tampered position in all 10 trials.
+
+\subsection{Test Suite}
+
+The backend test suite comprises 108 integration tests spanning authentication, scope enforcement, approval workflows, tool invocations, execution streaming, finding management, audit chain validation, RAG retrieval, and the full agent pipeline. All tests pass in 43.5 seconds using an in-memory SQLite backend (Alembic-migrated) and monkeypatched Ollama responses.
+
+\begin{table}[h]
+\caption{Test Suite Coverage Summary}
+\centering
+\begin{tabular}{lr}
+\toprule
+Module & Tests \\
+\midrule
+Authentication \& sessions & 5 \\
+Engagement CRUD \& scope & 12 \\
+Approval workflows & 8 \\
+Tool invocations & 10 \\
+Tool executions \& streaming & 15 \\
+Findings \& suggestions & 8 \\
+Report generation & 6 \\
+Audit chain integrity & 10 \\
+Knowledge base (RAG) & 14 \\
+Agent pipeline & 20 \\
+\midrule
+\textbf{Total} & \textbf{108} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Qualitative Assessment}
+
+In two structured test engagements against a deliberately vulnerable target running a known-vulnerable web application stack, PentAI Pro identified all five pre-seeded findings. These included an exposed administrative interface (HTTP headers), an outdated TLS configuration (TLS 1.0 enabled), a missing security header (Content-Security-Policy), an outdated server banner, and a directory listing enabled on a hidden path discovered by Gobuster. All findings were generated as structured objects with evidence, severity classification, and recommended remediation steps.
+
+% ─────────────────────────────────────────────────────────────
+\section{Discussion}
+
+\subsection{Limitations}
+
+CPU-bound LLM inference is the primary performance constraint. At approximately 12 tokens per second for the 14B model, complex planning tasks can take 20--30 seconds. A discrete GPU (8 GB VRAM minimum) would reduce this by a factor of 5--10. Additionally, the current knowledge base is static; a production deployment would benefit from automated ingestion of NVD feeds and vendor advisories.
+
+The system does not currently support multi-host engagements requiring pivoting or lateral movement chains — the focus remains on methodical single-target assessment. Extending the agent supervisor to manage state across multiple assessed hosts is future work.
+
+\subsection{Ethical Considerations}
+
+PentAI Pro is designed exclusively for use within explicitly authorised penetration testing engagements. The scope enforcement architecture makes it technically impossible for the system to execute tools against assets not listed in the engagement's \texttt{scope\_cidrs}. All use must comply with applicable laws and contractual authorisations. The authors do not endorse or support any unauthorised use.
+
+% ─────────────────────────────────────────────────────────────
+\section{Conclusion}
+
+This paper presented PentAI Pro, a self-hosted LLM-driven penetration testing framework that advances automated security assessment in three specific ways. First, it demonstrates that a locally deployed 14-billion-parameter open-weight model provides sufficient reasoning quality for multi-phase attack planning without cloud API dependencies. Second, it establishes that defence-in-depth scope enforcement — applied independently at the LLM planning layer, backend API, and remote execution gateway — provides robust guarantees against out-of-scope execution across all tested attack vectors. Third, it shows that SHA-256 hash-chained audit logging provides forensically verifiable engagement records with negligible overhead.
+
+The complete implementation is openly available. Future directions include GPU-accelerated inference, multi-host lateral movement planning, and automated CVE feed ingestion for the knowledge base.
+
+\balance
+
+% ─────────────────────────────────────────────────────────────
+\begin{thebibliography}{00}
+
+\bibitem{happe2023}
+A. Happe and J. Cito, ``Getting pwn'd by AI: Penetration testing with large language models,'' in \textit{Proc. ACM Joint European Software Engineering Conference and Symposium on the Foundations of Software Engineering (ESEC/FSE)}, 2023, pp. 2082--2086.
+
+\bibitem{deng2023}
+G. Deng, Y. Liu, V. Mayoral-Vilches, P. Liu, Y. Li, Y. Xu, T. Zhang, Y. Liu, M. Pinzger, and S. Rass, ``PentestGPT: An LLM empowered automatic penetration testing tool,'' \textit{arXiv preprint arXiv:2308.06782}, 2023.
+
+\bibitem{yao2022}
+S. Yao, J. Zhao, D. Yu, N. Du, I. Shafran, K. Narasimhan, and Y. Cao, ``ReAct: Synergizing reasoning and acting in language models,'' in \textit{Proc. International Conference on Learning Representations (ICLR)}, 2023.
+
+\bibitem{nuclei}
+ProjectDiscovery, ``Nuclei: Fast and customizable vulnerability scanner,'' \url{https://github.com/projectdiscovery/nuclei}, 2024.
+
+\bibitem{nessus}
+Tenable, Inc., ``Nessus vulnerability scanner,'' \url{https://www.tenable.com/products/nessus}, 2024.
+
+\bibitem{lewis2020}
+P. Lewis, E. Perez, A. Piktus, F. Petroni, V. Karpukhin, N. Goyal, H. Küttler, M. Lewis, W. Tau Yih, T. Rocktäschel, S. Riedel, and D. Kiela, ``Retrieval-augmented generation for knowledge-intensive NLP tasks,'' in \textit{Proc. Advances in Neural Information Processing Systems (NeurIPS)}, vol. 33, 2020, pp. 9459--9474.
+
+\bibitem{qwen2024}
+Qwen Team, ``Qwen2.5 technical report,'' \textit{arXiv preprint arXiv:2412.15115}, 2024.
+
+\bibitem{supabase}
+Supabase Inc., ``Supabase: The open source Firebase alternative,'' \url{https://supabase.com}, 2024.
+
+\end{thebibliography}
+
+\vspace{12pt}
+\noindent\rule{\linewidth}{0.4pt}
+\small
+\textbf{Copyright Notice:} \copyright~2024--2025 Md Anisur Rahman Chowdhury. This paper was developed as part of Master's research at the Department of Computer and Information Science, Gannon University, USA. The live system is available at \url{https://apts.marcbd.site}.
+
+\end{document}

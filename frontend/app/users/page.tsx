@@ -17,13 +17,11 @@ export default function UsersPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // create form
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("operator");
 
-  // password reset
   const [resetTarget, setResetTarget] = useState<string | null>(null);
   const [resetPw, setResetPw] = useState("");
 
@@ -98,8 +96,10 @@ export default function UsersPage() {
   if (me && me.role !== "admin") {
     return (
       <AppShell>
-        <div className="mx-auto max-w-2xl p-6">
-          <p className="text-rose-400 text-sm">Admin access required.</p>
+        <div className="space-y-gutter">
+          <div className="border border-severity-critical/50 bg-severity-critical/10 p-3 font-mono text-[11px] text-severity-critical">
+            Admin access required.
+          </div>
         </div>
       </AppShell>
     );
@@ -107,155 +107,187 @@ export default function UsersPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-4xl space-y-6 p-6">
-        <header>
-          <h1 className="text-2xl font-semibold text-white">User Management</h1>
-          <p className="mt-1 text-sm text-white/60">Admin-only. Create operators and manage access.</p>
-        </header>
+      <div className="space-y-gutter">
+        <div>
+          <div className="font-mono text-[10px] text-text-tertiary uppercase tracking-widest">
+            Access Control
+          </div>
+          <h1 className="font-display text-[24px] font-semibold text-text-primary uppercase tracking-tight">
+            User Management · v1
+          </h1>
+          <p className="mt-2 font-mono text-[11px] text-text-tertiary max-w-2xl leading-relaxed">
+            Admin-only. Create operators and manage access credentials.
+          </p>
+        </div>
 
-        {error ? <p className="text-sm text-rose-400">{error}</p> : null}
+        {error && (
+          <div className="border border-severity-critical/50 bg-severity-critical/10 p-2 font-mono text-[11px] text-severity-critical">
+            {error}
+          </div>
+        )}
 
         {/* Create user */}
-        <section className="rounded-[24px] border border-white/10 bg-white/5 p-5 shadow-panel">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/72 mb-4">
-            Create user
-          </h2>
-          <form onSubmit={onCreateSubmit} className="grid grid-cols-2 gap-4">
+        <section className="border border-border-subtle bg-surface-secondary p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="font-display text-[11px] uppercase tracking-widest text-text-primary font-semibold">
+              Create Operator
+            </span>
+            <span className="material-symbols-outlined text-[18px] text-text-tertiary">person_add</span>
+          </div>
+          <form onSubmit={onCreateSubmit} className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs uppercase tracking-[0.3em] text-white/48 mb-1">Email</label>
+              <label className="font-mono text-[10px] uppercase tracking-widest text-text-tertiary block mb-1.5">
+                Email
+              </label>
               <input
-                type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-md border border-white/10 bg-black/30 p-2 text-sm text-white"
+                type="email" required value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-surface-tertiary border border-border-subtle px-3 py-2 font-mono text-[12px] text-text-primary focus:outline-none focus:border-primary"
               />
             </div>
             <div>
-              <label className="block text-xs uppercase tracking-[0.3em] text-white/48 mb-1">Display name</label>
+              <label className="font-mono text-[10px] uppercase tracking-widest text-text-tertiary block mb-1.5">
+                Display Name
+              </label>
               <input
-                type="text" required value={displayName} onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full rounded-md border border-white/10 bg-black/30 p-2 text-sm text-white"
+                type="text" required value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                className="w-full bg-surface-tertiary border border-border-subtle px-3 py-2 font-mono text-[12px] text-text-primary focus:outline-none focus:border-primary"
               />
             </div>
             <div>
-              <label className="block text-xs uppercase tracking-[0.3em] text-white/48 mb-1">Password</label>
+              <label className="font-mono text-[10px] uppercase tracking-widest text-text-tertiary block mb-1.5">
+                Password
+              </label>
               <input
-                type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-md border border-white/10 bg-black/30 p-2 text-sm text-white"
+                type="password" required minLength={8} value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-surface-tertiary border border-border-subtle px-3 py-2 font-mono text-[12px] text-text-primary focus:outline-none focus:border-primary"
               />
             </div>
             <div>
-              <label className="block text-xs uppercase tracking-[0.3em] text-white/48 mb-1">Role</label>
+              <label className="font-mono text-[10px] uppercase tracking-widest text-text-tertiary block mb-1.5">
+                Role
+              </label>
               <select
                 value={role} onChange={(e) => setRole(e.target.value)}
-                className="w-full rounded-md border border-white/10 bg-black/30 p-2 text-sm text-white"
+                className="w-full bg-surface-tertiary border border-border-subtle px-3 py-2 font-mono text-[12px] text-text-primary focus:outline-none focus:border-primary"
               >
-                <option value="operator">Operator</option>
-                <option value="admin">Admin</option>
+                <option value="operator">OPERATOR</option>
+                <option value="admin">ADMIN</option>
               </select>
             </div>
-            <div className="col-span-2">
+            <div className="col-span-2 pt-1">
               <button
                 type="submit" disabled={busy}
-                className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-black disabled:opacity-50"
+                className="bg-primary px-4 py-2 font-display text-[11px] uppercase tracking-widest text-white hover:opacity-80 disabled:opacity-30"
               >
-                {busy ? "Creating…" : "Create user"}
+                {busy ? "Creating…" : "Create User"}
               </button>
             </div>
           </form>
         </section>
 
         {/* User list */}
-        <section className="rounded-[24px] border border-white/10 bg-white/5 p-5 shadow-panel">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-white/72 mb-4">
-            Users ({users.length})
-          </h2>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/10 text-left text-xs uppercase tracking-wider text-white/48">
-                <th className="pb-2 pr-4">Email</th>
-                <th className="pb-2 pr-4">Name</th>
-                <th className="pb-2 pr-4">Role</th>
-                <th className="pb-2 pr-4">Status</th>
-                <th className="pb-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {users.map((u) => (
-                <tr key={u.id} className="text-white/80">
-                  <td className="py-2 pr-4 font-mono text-xs">{u.email}</td>
-                  <td className="py-2 pr-4">{u.display_name}</td>
-                  <td className="py-2 pr-4">
-                    <span className={`font-mono text-xs uppercase ${u.role === "admin" ? "text-accent" : "text-white/48"}`}>
-                      {u.role}
-                    </span>
-                  </td>
-                  <td className="py-2 pr-4">
-                    <span className={u.is_active ? "text-emerald-400 text-xs" : "text-rose-400 text-xs"}>
-                      {u.is_active ? "active" : "inactive"}
-                    </span>
-                  </td>
-                  <td className="py-2 flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => { setResetTarget(u.id); setResetPw(""); }}
-                      className="text-xs border border-white/10 px-2 py-1 hover:border-accent/60 hover:text-accent rounded"
-                    >
-                      Reset PW
-                    </button>
-                    {u.id !== me?.id ? (
-                      <button
-                        type="button"
-                        disabled={busy}
-                        onClick={() => onToggleActive(u)}
-                        className={`text-xs border px-2 py-1 rounded disabled:opacity-50 ${
-                          u.is_active
-                            ? "border-rose-400/40 text-rose-300 hover:bg-rose-400/10"
-                            : "border-emerald-400/40 text-emerald-300 hover:bg-emerald-400/10"
-                        }`}
-                      >
-                        {u.is_active ? "Deactivate" : "Activate"}
-                      </button>
-                    ) : null}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-
-        {/* Password reset modal */}
-        {resetTarget ? (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="w-full max-w-sm rounded-[24px] border border-white/10 bg-[#0d0f1a] p-6 shadow-xl">
-              <h3 className="text-sm font-semibold text-white mb-4">Reset password</h3>
-              <form onSubmit={onResetPassword} className="space-y-4">
-                <div>
-                  <label className="block text-xs uppercase tracking-[0.3em] text-white/48 mb-1">New password</label>
-                  <input
-                    type="password" required minLength={8} autoFocus
-                    value={resetPw} onChange={(e) => setResetPw(e.target.value)}
-                    className="w-full rounded-md border border-white/10 bg-black/30 p-2 text-sm text-white"
-                  />
+        <section className="border border-border-subtle bg-surface-secondary">
+          <div className="px-4 h-10 grid grid-cols-[1fr_80px_80px_auto] gap-4 border-b border-border-subtle bg-surface-tertiary font-mono text-[10px] uppercase tracking-widest text-text-tertiary items-center">
+            <span>Email / Name</span>
+            <span>Role</span>
+            <span>Status</span>
+            <span>Actions</span>
+          </div>
+          <div className="divide-y divide-border-subtle/50">
+            {users.length === 0 && (
+              <div className="px-4 py-8 font-mono text-[11px] text-text-tertiary text-center">
+                No users found.
+              </div>
+            )}
+            {users.map((u) => (
+              <div
+                key={u.id}
+                className="px-4 py-3 grid grid-cols-[1fr_80px_80px_auto] gap-4 items-center"
+              >
+                <div className="flex flex-col gap-0.5 min-w-0">
+                  <span className="font-mono text-[11px] text-text-primary truncate">{u.email}</span>
+                  <span className="font-mono text-[10px] text-text-tertiary truncate">{u.display_name}</span>
                 </div>
-                <div className="flex gap-3">
-                  <button
-                    type="submit" disabled={busy}
-                    className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-black disabled:opacity-50"
-                  >
-                    {busy ? "Saving…" : "Set password"}
-                  </button>
+                <span className={`font-mono text-[10px] uppercase font-bold ${u.role === "admin" ? "text-primary" : "text-text-secondary"}`}>
+                  {u.role}
+                </span>
+                <span className={`font-mono text-[10px] uppercase font-bold ${u.is_active ? "text-secondary" : "text-severity-critical"}`}>
+                  {u.is_active ? "active" : "inactive"}
+                </span>
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => { setResetTarget(null); setResetPw(""); }}
-                    className="rounded-md border border-white/10 px-4 py-2 text-sm text-white/60 hover:text-white"
+                    onClick={() => { setResetTarget(u.id); setResetPw(""); }}
+                    className="px-2 py-1 border border-border-subtle font-display text-[10px] uppercase tracking-widest text-text-secondary hover:border-primary hover:text-primary"
                   >
-                    Cancel
+                    Reset PW
                   </button>
+                  {u.id !== me?.id && (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => onToggleActive(u)}
+                      className={`px-2 py-1 border font-display text-[10px] uppercase tracking-widest disabled:opacity-30 ${
+                        u.is_active
+                          ? "border-severity-critical/40 text-severity-critical hover:bg-severity-critical/10"
+                          : "border-secondary/40 text-secondary hover:bg-secondary/10"
+                      }`}
+                    >
+                      {u.is_active ? "Deactivate" : "Activate"}
+                    </button>
+                  )}
                 </div>
-              </form>
-            </div>
+              </div>
+            ))}
           </div>
-        ) : null}
+        </section>
       </div>
+
+      {/* Password reset modal */}
+      {resetTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-bg-primary/80">
+          <div className="w-full max-w-sm border border-border-subtle bg-surface-secondary">
+            <div className="px-5 py-4 border-b border-border-subtle">
+              <div className="font-mono text-[10px] text-text-tertiary uppercase tracking-widest">
+                Security Operation
+              </div>
+              <h3 className="font-display text-[16px] font-semibold text-text-primary mt-1">
+                Reset Password
+              </h3>
+            </div>
+            <form onSubmit={onResetPassword} className="p-5 space-y-4">
+              <div>
+                <label className="font-mono text-[10px] uppercase tracking-widest text-text-tertiary block mb-1.5">
+                  New Password
+                </label>
+                <input
+                  type="password" required minLength={8} autoFocus
+                  value={resetPw} onChange={(e) => setResetPw(e.target.value)}
+                  className="w-full bg-surface-tertiary border border-border-subtle px-3 py-2 font-mono text-[12px] text-text-primary focus:outline-none focus:border-primary"
+                />
+              </div>
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="submit" disabled={busy}
+                  className="bg-primary px-4 py-2 font-display text-[11px] uppercase tracking-widest text-white hover:opacity-80 disabled:opacity-30"
+                >
+                  {busy ? "Saving…" : "Set Password"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setResetTarget(null); setResetPw(""); }}
+                  className="px-4 py-2 border border-border-subtle font-display text-[11px] uppercase tracking-widest text-text-secondary hover:text-text-primary"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </AppShell>
   );
 }

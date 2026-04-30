@@ -176,15 +176,15 @@ function getParsedDiagnostics(
 
 function pillClassName(tone: "accent" | "caution" | "danger" | "neutral") {
   if (tone === "accent") {
-    return "border border-accent/30 bg-accent/10 text-accent";
+    return "border border-primary/30 bg-primary/10 text-primary";
   }
   if (tone === "caution") {
-    return "border border-caution/30 bg-caution/10 text-caution";
+    return "border border-severity-medium/30 bg-severity-medium/10 text-severity-medium";
   }
   if (tone === "danger") {
-    return "border border-danger/30 bg-danger/10 text-danger";
+    return "border border-severity-critical/30 bg-severity-critical/10 text-severity-critical";
   }
-  return "border border-white/10 bg-white/5 text-white/72";
+  return "border border-border-subtle bg-surface-secondary text-text-secondary";
 }
 
 function severityTone(severity: FindingSeverity) {
@@ -728,117 +728,113 @@ export function OperatorConsole() {
   return (
     <div className="text-text-primary">
       <section className="flex flex-col gap-8">
-        <header className="grid gap-6 rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-panel backdrop-blur md:grid-cols-[1.3fr_0.7fr]">
-          <div className="space-y-5">
-            <p className="text-sm uppercase tracking-[0.35em] text-accent/90">
-              Command Node 172.20.32.74
-            </p>
-            <div className="space-y-3">
-              <h1 className="max-w-3xl text-4xl font-semibold leading-tight md:text-6xl">
-                Operator workflows are now live against the real gateway path.
+        <header className="grid gap-6 border border-border-subtle bg-surface-secondary p-6 md:grid-cols-[1.3fr_0.7fr]">
+          <div className="space-y-4">
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-widest text-text-tertiary">
+                Command Node 172.20.32.74
+              </div>
+              <h1 className="font-display text-[26px] font-semibold text-text-primary mt-1 leading-tight">
+                Op Console · Live Gateway Path
               </h1>
-              <p className="max-w-2xl text-sm leading-7 text-white/72 md:text-base">
+              <p className="mt-2 font-mono text-[11px] text-text-secondary leading-relaxed max-w-2xl">
                 Create scoped engagements, approve high-risk actions, validate tool
                 invocations, and capture findings with a matching audit timeline in one console.
               </p>
             </div>
-            <div className="flex flex-wrap gap-3 text-xs uppercase tracking-[0.28em] text-white/62">
-              <span className={`rounded-full px-4 py-2 font-mono ${pillClassName("accent")}`}>
+            <div className="flex flex-wrap gap-2">
+              <span className={`px-3 py-1 font-mono text-[10px] uppercase tracking-widest ${pillClassName("accent")}`}>
                 Three-layer scope enforcement
               </span>
-              <span className={`rounded-full px-4 py-2 font-mono ${pillClassName("caution")}`}>
-                Human approval for high-risk actions
+              <span className={`px-3 py-1 font-mono text-[10px] uppercase tracking-widest ${pillClassName("caution")}`}>
+                Human approval for high-risk
               </span>
-              <span className={`rounded-full px-4 py-2 font-mono ${pillClassName("neutral")}`}>
-                Findings and audit evidence aligned
+              <span className={`px-3 py-1 font-mono text-[10px] uppercase tracking-widest ${pillClassName("neutral")}`}>
+                Tamper-evident audit log
               </span>
             </div>
           </div>
 
-          <div className="rounded-[24px] border border-accent/30 bg-accent/10 p-5">
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-accent">
+          <div className="border border-primary/30 bg-primary/10 p-4">
+            <div className="font-mono text-[10px] uppercase tracking-widest text-primary mb-3">
               Platform State
-            </p>
-            <div className="mt-5 grid gap-3 text-sm">
-              <div className="rounded-xl border border-white/10 bg-black/20 p-3">
-                <div className="text-white/54">API Status</div>
-                <div className="mt-1 font-mono text-accent">{health?.status ?? "loading"}</div>
+            </div>
+            <div className="grid gap-2">
+              <div className="border border-border-subtle bg-surface-tertiary px-3 py-2">
+                <div className="font-mono text-[10px] text-text-tertiary uppercase tracking-widest">API Status</div>
+                <div className="font-mono text-[12px] text-primary mt-0.5">{health?.status ?? "loading"}</div>
               </div>
-              <div className="rounded-xl border border-white/10 bg-black/20 p-3">
-                <div className="text-white/54">Allowed Network</div>
-                <div className="mt-1 font-mono">{health?.allowed_network ?? "..."}</div>
+              <div className="border border-border-subtle bg-surface-tertiary px-3 py-2">
+                <div className="font-mono text-[10px] text-text-tertiary uppercase tracking-widest">Allowed Network</div>
+                <div className="font-mono text-[12px] text-text-primary mt-0.5">{health?.allowed_network ?? "—"}</div>
               </div>
-              <div className="rounded-xl border border-white/10 bg-black/20 p-3">
-                <div className="text-white/54">Weapon Node</div>
-                <div className="mt-1 font-mono break-all">
-                  {health?.weapon_node_url ?? "loading"}
-                </div>
+              <div className="border border-border-subtle bg-surface-tertiary px-3 py-2">
+                <div className="font-mono text-[10px] text-text-tertiary uppercase tracking-widest">Weapon Node</div>
+                <div className="font-mono text-[11px] text-text-primary mt-0.5 break-all">{health?.weapon_node_url ?? "loading"}</div>
               </div>
-              <div className="rounded-xl border border-white/10 bg-black/20 p-3">
-                <div className="text-white/54">Database</div>
-                <div className="mt-1 font-mono text-caution">
-                  {health?.database_status ?? "checking"}
-                </div>
+              <div className="border border-border-subtle bg-surface-tertiary px-3 py-2">
+                <div className="font-mono text-[10px] text-text-tertiary uppercase tracking-widest">Database</div>
+                <div className="font-mono text-[12px] text-severity-medium mt-0.5">{health?.database_status ?? "checking"}</div>
               </div>
             </div>
           </div>
         </header>
 
         <section className="grid gap-4 xl:grid-cols-6">
-          <article className="rounded-[24px] border border-white/10 bg-white/5 p-5 shadow-panel">
-            <p className="text-xs uppercase tracking-[0.3em] text-white/48">Engagements</p>
-            <div className="mt-4 text-3xl font-semibold text-accent">{engagements.length}</div>
-            <p className="mt-3 text-sm leading-7 text-white/72">Current records in scope.</p>
+          <article className="border border-border-subtle bg-surface-secondary p-5 ">
+            <p className="text-xs uppercase tracking-[0.3em] text-text-tertiary">Engagements</p>
+            <div className="mt-4 font-display text-[28px] font-bold text-primary">{engagements.length}</div>
+            <p className="mt-3 text-sm leading-7 text-text-secondary">Current records in scope.</p>
           </article>
-          <article className="rounded-[24px] border border-white/10 bg-white/5 p-5 shadow-panel">
-            <p className="text-xs uppercase tracking-[0.3em] text-white/48">Pending Approvals</p>
-            <div className="mt-4 text-3xl font-semibold text-caution">
+          <article className="border border-border-subtle bg-surface-secondary p-5 ">
+            <p className="text-xs uppercase tracking-[0.3em] text-text-tertiary">Pending Approvals</p>
+            <div className="mt-4 font-display text-[28px] font-bold text-severity-medium">
               {approvals.filter((approval) => !approval.approved).length}
             </div>
-            <p className="mt-3 text-sm leading-7 text-white/72">Requests awaiting a decision.</p>
+            <p className="mt-3 text-sm leading-7 text-text-secondary">Requests awaiting a decision.</p>
           </article>
-          <article className="rounded-[24px] border border-white/10 bg-white/5 p-5 shadow-panel">
-            <p className="text-xs uppercase tracking-[0.3em] text-white/48">Approved</p>
-            <div className="mt-4 text-3xl font-semibold text-accent">
+          <article className="border border-border-subtle bg-surface-secondary p-5 ">
+            <p className="text-xs uppercase tracking-[0.3em] text-text-tertiary">Approved</p>
+            <div className="mt-4 font-display text-[28px] font-bold text-primary">
               {approvals.filter((approval) => approval.approved).length}
             </div>
-            <p className="mt-3 text-sm leading-7 text-white/72">High-risk approvals on file.</p>
+            <p className="mt-3 text-sm leading-7 text-text-secondary">High-risk approvals on file.</p>
           </article>
-          <article className="rounded-[24px] border border-white/10 bg-white/5 p-5 shadow-panel">
-            <p className="text-xs uppercase tracking-[0.3em] text-white/48">Findings</p>
-            <div className="mt-4 text-3xl font-semibold text-caution">{findings.length}</div>
-            <p className="mt-3 text-sm leading-7 text-white/72">Captured evidence records.</p>
+          <article className="border border-border-subtle bg-surface-secondary p-5 ">
+            <p className="text-xs uppercase tracking-[0.3em] text-text-tertiary">Findings</p>
+            <div className="mt-4 font-display text-[28px] font-bold text-severity-medium">{findings.length}</div>
+            <p className="mt-3 text-sm leading-7 text-text-secondary">Captured evidence records.</p>
           </article>
-          <article className="rounded-[24px] border border-white/10 bg-white/5 p-5 shadow-panel">
-            <p className="text-xs uppercase tracking-[0.3em] text-white/48">Audit Events</p>
-            <div className="mt-4 text-3xl font-semibold text-accent">{auditEvents.length}</div>
-            <p className="mt-3 text-sm leading-7 text-white/72">Tamper-evident timeline entries.</p>
+          <article className="border border-border-subtle bg-surface-secondary p-5 ">
+            <p className="text-xs uppercase tracking-[0.3em] text-text-tertiary">Audit Events</p>
+            <div className="mt-4 font-display text-[28px] font-bold text-primary">{auditEvents.length}</div>
+            <p className="mt-3 text-sm leading-7 text-text-secondary">Tamper-evident timeline entries.</p>
           </article>
-          <article className="rounded-[24px] border border-white/10 bg-white/5 p-5 shadow-panel">
-            <p className="text-xs uppercase tracking-[0.3em] text-white/48">Reports</p>
-            <div className="mt-4 text-3xl font-semibold text-caution">{reports.length}</div>
-            <p className="mt-3 text-sm leading-7 text-white/72">Generated engagement artifacts.</p>
+          <article className="border border-border-subtle bg-surface-secondary p-5 ">
+            <p className="text-xs uppercase tracking-[0.3em] text-text-tertiary">Reports</p>
+            <div className="mt-4 font-display text-[28px] font-bold text-severity-medium">{reports.length}</div>
+            <p className="mt-3 text-sm leading-7 text-text-secondary">Generated engagement artifacts.</p>
           </article>
-          <article className="rounded-[24px] border border-white/10 bg-white/5 p-5 shadow-panel">
-            <p className="text-xs uppercase tracking-[0.3em] text-white/48">Last Validation</p>
-            <div className="mt-4 text-2xl font-semibold text-accent">
+          <article className="border border-border-subtle bg-surface-secondary p-5 ">
+            <p className="text-xs uppercase tracking-[0.3em] text-text-tertiary">Last Validation</p>
+            <div className="mt-4 font-display text-[22px] font-bold text-primary">
               {validationResult ? validationResult.operation : "none"}
             </div>
-            <p className="mt-3 text-sm leading-7 text-white/72">Latest gateway-confirmed request.</p>
+            <p className="mt-3 text-sm leading-7 text-text-secondary">Latest gateway-confirmed request.</p>
           </article>
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-          <article className="rounded-[28px] border border-white/10 bg-panel/90 p-6">
+          <article className="border border-border-subtle bg-panel/90 p-6">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-accent">Engagement Control</p>
-                <p className="mt-2 text-sm leading-7 text-white/72">
+                <p className="text-sm uppercase tracking-[0.3em] text-primary">Engagement Control</p>
+                <p className="mt-2 text-sm leading-7 text-text-secondary">
                   Define explicit scope before the operator can ask the backend to validate or record anything.
                 </p>
               </div>
               <button
-                className="rounded-full border border-white/10 px-4 py-2 text-xs uppercase tracking-[0.28em] text-white/72 transition hover:border-accent/40 hover:text-accent"
+                className="border border-border-subtle px-4 py-2 text-xs uppercase tracking-[0.28em] text-text-secondary transition hover:border-primary/40 hover:text-primary"
                 onClick={() => void refreshDashboard(selectedEngagementId)}
                 type="button"
               >
@@ -847,18 +843,18 @@ export function OperatorConsole() {
             </div>
 
             <form className="mt-6 grid gap-4" onSubmit={handleCreateEngagement}>
-              <label className="grid gap-2 text-sm text-white/76">
+              <label className="grid gap-2 text-sm text-text-secondary">
                 Engagement Name
                 <input
-                  className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-accent/40"
+                  className="border border-border-subtle bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none transition focus:border-primary/40"
                   onChange={(event) => setEngagementForm((current) => ({ ...current, name: event.target.value }))}
                   value={engagementForm.name}
                 />
               </label>
-              <label className="grid gap-2 text-sm text-white/76">
+              <label className="grid gap-2 text-sm text-text-secondary">
                 Description
                 <textarea
-                  className="min-h-24 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-accent/40"
+                  className="min-h-24 border border-border-subtle bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none transition focus:border-primary/40"
                   onChange={(event) =>
                     setEngagementForm((current) => ({ ...current, description: event.target.value }))
                   }
@@ -866,32 +862,32 @@ export function OperatorConsole() {
                 />
               </label>
               <div className="grid gap-4 md:grid-cols-3">
-                <label className="grid gap-2 text-sm text-white/76">
+                <label className="grid gap-2 text-sm text-text-secondary">
                   Scope CIDR
                   <input
-                    className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-accent/40"
+                    className="border border-border-subtle bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none transition focus:border-primary/40"
                     onChange={(event) => setEngagementForm((current) => ({ ...current, scopeCidr: event.target.value }))}
                     value={engagementForm.scopeCidr}
                   />
                 </label>
-                <label className="grid gap-2 text-sm text-white/76">
+                <label className="grid gap-2 text-sm text-text-secondary">
                   Authorizer
                   <input
-                    className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-accent/40"
+                    className="border border-border-subtle bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none transition focus:border-primary/40"
                     onChange={(event) => setEngagementForm((current) => ({ ...current, authorizerName: event.target.value }))}
                     value={engagementForm.authorizerName}
                   />
                 </label>
-                <label className="grid gap-2 text-sm text-white/76">
+                <label className="grid gap-2 text-sm text-text-secondary">
                   Operator
                   <input
-                    className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-accent/40"
+                    className="border border-border-subtle bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none transition focus:border-primary/40"
                     onChange={(event) => setEngagementForm((current) => ({ ...current, operatorName: event.target.value }))}
                     value={engagementForm.operatorName}
                   />
                 </label>
               </div>
-              <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/15 px-4 py-3 text-sm text-white/76">
+              <label className="flex items-center gap-3 border border-border-subtle bg-black/15 px-4 py-3 text-sm text-text-secondary">
                 <input
                   checked={engagementForm.authorizationConfirmed}
                   className="h-4 w-4 accent-accent"
@@ -906,7 +902,7 @@ export function OperatorConsole() {
                 Authorization confirmed for the explicit scope above.
               </label>
               <button
-                className="rounded-2xl bg-accent px-5 py-3 text-sm font-semibold text-canvas transition hover:bg-[#e1ff7f] disabled:cursor-not-allowed disabled:opacity-60"
+                className="bg-primary px-5 py-3 text-sm font-semibold text-canvas transition hover:bg-[#e1ff7f] disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={interactionsDisabled}
                 type="submit"
               >
@@ -916,16 +912,16 @@ export function OperatorConsole() {
 
             <div className="mt-6 grid gap-3">
               {engagements.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-white/10 bg-black/15 px-4 py-6 text-sm text-white/58">
+                <div className="border border-dashed border-border-subtle bg-black/15 px-4 py-6 text-sm text-text-primary/58">
                   No engagement records yet.
                 </div>
               ) : (
                 engagements.map((engagement) => (
                   <button
-                    className={`rounded-2xl border px-4 py-4 text-left transition ${
+                    className={`border px-4 py-4 text-left transition ${
                       engagement.id === selectedEngagementId
-                        ? "border-accent/40 bg-accent/10"
-                        : "border-white/10 bg-black/15 hover:border-white/20"
+                        ? "border-primary/40 bg-primary/10"
+                        : "border-border-subtle bg-black/15 hover:border-border-subtle"
                     }`}
                     key={engagement.id}
                     onClick={() => setSelectedEngagementId(engagement.id)}
@@ -933,13 +929,13 @@ export function OperatorConsole() {
                   >
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <div className="text-base font-semibold text-white">{engagement.name}</div>
-                        <div className="mt-1 text-xs uppercase tracking-[0.24em] text-white/48">
+                        <div className="text-base font-semibold text-text-primary">{engagement.name}</div>
+                        <div className="mt-1 text-xs uppercase tracking-[0.24em] text-text-tertiary">
                           {engagement.scope_cidrs.join(", ")}
                         </div>
                       </div>
                       <span
-                        className={`rounded-full px-3 py-1 text-xs uppercase tracking-[0.22em] ${
+                        className={`px-3 py-1 text-xs uppercase tracking-[0.22em] ${
                           engagement.status === "active"
                             ? pillClassName("accent")
                             : engagement.status === "archived" || engagement.status === "aborted"
@@ -950,7 +946,7 @@ export function OperatorConsole() {
                         {engagement.status}
                       </span>
                     </div>
-                    <p className="mt-3 text-sm leading-7 text-white/72">
+                    <p className="mt-3 text-sm leading-7 text-text-secondary">
                       {engagement.description ?? "No description provided."}
                     </p>
                   </button>
@@ -960,16 +956,16 @@ export function OperatorConsole() {
           </article>
 
           <div className="grid gap-6">
-            <article className="rounded-[28px] border border-white/10 bg-white/5 p-6">
+            <article className="border border-border-subtle bg-surface-secondary p-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.3em] text-caution">Selected Engagement</p>
-                  <h2 className="mt-2 text-2xl font-semibold">
+                  <p className="text-sm uppercase tracking-[0.3em] text-severity-medium">Selected Engagement</p>
+                  <h2 className="mt-2 font-display text-[22px] font-bold">
                     {selectedEngagement?.name ?? "Choose an engagement"}
                   </h2>
                 </div>
                 {selectedEngagement ? (
-                  <span className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("neutral")}`}>
+                  <span className={`px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("neutral")}`}>
                     {selectedEngagement.id}
                   </span>
                 ) : null}
@@ -977,16 +973,16 @@ export function OperatorConsole() {
 
               {selectedEngagement ? (
                 <>
-                  <p className="mt-3 max-w-3xl text-sm leading-7 text-white/72">
+                  <p className="mt-3 max-w-3xl text-sm leading-7 text-text-secondary">
                     {selectedEngagement.description ?? "No description provided for this engagement."}
                   </p>
                   <div className="mt-5 flex flex-wrap gap-3">
                     {engagementStatuses.map((status) => (
                       <button
-                        className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.22em] transition ${
+                        className={`px-4 py-2 text-xs uppercase tracking-[0.22em] transition ${
                           selectedEngagement.status === status
                             ? `${pillClassName("accent")} cursor-default`
-                            : "border border-white/10 bg-black/15 text-white/70 hover:border-accent/30 hover:text-accent"
+                            : "border border-border-subtle bg-black/15 text-text-secondary hover:border-primary/30 hover:text-primary"
                         }`}
                         disabled={interactionsDisabled || selectedEngagement.status === status}
                         key={status}
@@ -999,30 +995,30 @@ export function OperatorConsole() {
                   </div>
                 </>
               ) : (
-                <p className="mt-3 text-sm leading-7 text-white/60">
+                <p className="mt-3 text-sm leading-7 text-text-tertiary">
                   Select an engagement to open approvals, findings, and live validation controls.
                 </p>
               )}
             </article>
 
-            <article className="rounded-[28px] border border-white/10 bg-panel/90 p-6">
+            <article className="border border-border-subtle bg-panel/90 p-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.3em] text-danger">Tool Validation</p>
-                  <p className="mt-2 text-sm leading-7 text-white/72">
+                  <p className="text-sm uppercase tracking-[0.3em] text-severity-critical">Tool Validation</p>
+                  <p className="mt-2 text-sm leading-7 text-text-secondary">
                     Build a typed invocation and send it through backend scope checks and the remote gateway.
                   </p>
                 </div>
-                <span className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.24em] ${selectedOperation.requiresApproval ? pillClassName("danger") : pillClassName("accent")}`}>
+                <span className={`px-4 py-2 text-xs uppercase tracking-[0.24em] ${selectedOperation.requiresApproval ? pillClassName("danger") : pillClassName("accent")}`}>
                   {selectedOperation.riskLevel} risk
                 </span>
               </div>
 
               <div className="mt-6 grid gap-4">
-                <label className="grid gap-2 text-sm text-white/76">
+                <label className="grid gap-2 text-sm text-text-secondary">
                   Operation
                   <select
-                    className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-accent/40"
+                    className="border border-border-subtle bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none transition focus:border-primary/40"
                     onChange={(event) => setToolForm((current) => ({ ...current, operationKey: event.target.value }))}
                     value={toolForm.operationKey}
                   >
@@ -1034,40 +1030,40 @@ export function OperatorConsole() {
                   </select>
                 </label>
                 {selectedOperation.argumentKind === "url" ? (
-                  <label className="grid gap-2 text-sm text-white/76">
+                  <label className="grid gap-2 text-sm text-text-secondary">
                     Target URL
                     <input
-                      className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-accent/40"
+                      className="border border-border-subtle bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none transition focus:border-primary/40"
                       onChange={(event) => setToolForm((current) => ({ ...current, url: event.target.value }))}
                       value={toolForm.url}
                     />
                   </label>
                 ) : (
                   <div className="grid gap-4 md:grid-cols-2">
-                    <label className="grid gap-2 text-sm text-white/76">
+                    <label className="grid gap-2 text-sm text-text-secondary">
                       Target IP
                       <input
-                        className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-accent/40"
+                        className="border border-border-subtle bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none transition focus:border-primary/40"
                         onChange={(event) => setToolForm((current) => ({ ...current, target: event.target.value }))}
                         value={toolForm.target}
                       />
                     </label>
-                    <label className="grid gap-2 text-sm text-white/76">
+                    <label className="grid gap-2 text-sm text-text-secondary">
                       Ports
                       <input
-                        className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-accent/40"
+                        className="border border-border-subtle bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none transition focus:border-primary/40"
                         onChange={(event) => setToolForm((current) => ({ ...current, ports: event.target.value }))}
                         value={toolForm.ports}
                       />
                     </label>
                   </div>
                 )}
-                <div className="rounded-2xl border border-white/8 bg-black/15 px-4 py-3 text-sm leading-7 text-white/68">
+                <div className="border border-border-subtle bg-black/15 px-4 py-3 text-sm leading-7 text-text-primary/68">
                   {selectedOperation.help}
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <button
-                    className="rounded-2xl bg-accent px-5 py-3 text-sm font-semibold text-canvas transition hover:bg-[#e1ff7f] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="bg-primary px-5 py-3 text-sm font-semibold text-canvas transition hover:bg-[#e1ff7f] disabled:cursor-not-allowed disabled:opacity-60"
                     disabled={interactionsDisabled || !selectedEngagement}
                     onClick={() => void handleValidate()}
                     type="button"
@@ -1075,7 +1071,7 @@ export function OperatorConsole() {
                     {busyAction === "validate-tool" ? "Validating..." : "Validate Tool Request"}
                   </button>
                   <button
-                    className="rounded-2xl border border-caution/35 bg-caution/10 px-5 py-3 text-sm font-semibold text-caution transition hover:border-caution/60 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="border border-caution/35 bg-caution/10 px-5 py-3 text-sm font-semibold text-severity-medium transition hover:border-caution/60 disabled:cursor-not-allowed disabled:opacity-60"
                     disabled={interactionsDisabled || !selectedEngagement || !selectedOperation.requiresApproval}
                     onClick={() => void handleCreateApproval()}
                     type="button"
@@ -1085,10 +1081,10 @@ export function OperatorConsole() {
                 </div>
               </div>
 
-              <div className="mt-6 rounded-[24px] border border-white/10 bg-black/20 p-5">
+              <div className="mt-6 border border-border-subtle bg-surface-tertiary p-5">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.28em] text-white/48">Last Validation Result</p>
+                    <p className="text-xs uppercase tracking-[0.28em] text-text-tertiary">Last Validation Result</p>
                     <h3 className="mt-2 text-lg font-semibold">
                       {validationResult
                         ? formatOperationLabel(validationResult.tool, validationResult.operation)
@@ -1096,81 +1092,81 @@ export function OperatorConsole() {
                     </h3>
                   </div>
                   {validationResult ? (
-                    <span className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.22em] ${pillClassName("accent")}`}>
+                    <span className={`px-4 py-2 text-xs uppercase tracking-[0.22em] ${pillClassName("accent")}`}>
                       {validationResult.status}
                     </span>
                   ) : null}
                 </div>
               {validationResult ? (
-                <div className="mt-4 grid gap-3 text-sm text-white/74 md:grid-cols-2">
-                  <div className="rounded-2xl border border-white/8 bg-white/3 px-4 py-3">
-                    <div className="text-white/48">Targets</div>
+                <div className="mt-4 grid gap-3 text-sm text-text-primary/74 md:grid-cols-2">
+                  <div className="border border-border-subtle bg-surface-tertiary px-4 py-3">
+                    <div className="text-text-tertiary">Targets</div>
                     <div className="mt-2 font-mono">{validationResult.targets.join(", ")}</div>
                     </div>
-                    <div className="rounded-2xl border border-white/8 bg-white/3 px-4 py-3">
-                      <div className="text-white/48">Command Preview</div>
+                    <div className="border border-border-subtle bg-surface-tertiary px-4 py-3">
+                      <div className="text-text-tertiary">Command Preview</div>
                       <div className="mt-2 font-mono break-all">
                         {validationResult.command_preview.join(" ")}
                       </div>
                     </div>
-                    <div className="rounded-2xl border border-white/8 bg-white/3 px-4 py-3 md:col-span-2">
-                      <div className="text-white/48">Evidence Reference</div>
+                    <div className="border border-border-subtle bg-surface-tertiary px-4 py-3 md:col-span-2">
+                      <div className="text-text-tertiary">Evidence Reference</div>
                       <div className="mt-2 font-mono break-all">
                         {validationResult.invocation_id ?? "Not persisted"}
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <p className="mt-4 text-sm leading-7 text-white/58">
+                  <p className="mt-4 text-sm leading-7 text-text-primary/58">
                     Successful validations will show the gateway-confirmed command preview here.
                   </p>
                 )}
               </div>
             </article>
 
-            <article className="rounded-[28px] border border-white/10 bg-white/5 p-6">
+            <article className="border border-border-subtle bg-surface-secondary p-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.3em] text-caution">Approvals</p>
-                  <p className="mt-2 text-sm leading-7 text-white/72">
+                  <p className="text-sm uppercase tracking-[0.3em] text-severity-medium">Approvals</p>
+                  <p className="mt-2 text-sm leading-7 text-text-secondary">
                     High-risk requests need an exact approval match before the backend will forward them.
                   </p>
                 </div>
-                <span className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("neutral")}`}>
+                <span className={`px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("neutral")}`}>
                   {approvals.length} records
                 </span>
               </div>
 
               <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <label className="grid gap-2 text-sm text-white/76">
+                <label className="grid gap-2 text-sm text-text-secondary">
                   Requested By
                   <input
-                    className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-accent/40"
+                    className="border border-border-subtle bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none transition focus:border-primary/40"
                     onChange={(event) => setApprovalForm((current) => ({ ...current, requestedBy: event.target.value }))}
                     value={approvalForm.requestedBy}
                   />
                 </label>
-                <label className="grid gap-2 text-sm text-white/76">
+                <label className="grid gap-2 text-sm text-text-secondary">
                   Approved By
                   <input
-                    className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-accent/40"
+                    className="border border-border-subtle bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none transition focus:border-primary/40"
                     onChange={(event) => setApprovalForm((current) => ({ ...current, approvedBy: event.target.value }))}
                     value={approvalForm.approvedBy}
                   />
                 </label>
               </div>
-              <label className="mt-4 grid gap-2 text-sm text-white/76">
+              <label className="mt-4 grid gap-2 text-sm text-text-secondary">
                 Requested Action
                 <input
-                  className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-accent/40"
+                  className="border border-border-subtle bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none transition focus:border-primary/40"
                   onChange={(event) => setApprovalForm((current) => ({ ...current, requestedAction: event.target.value }))}
                   value={approvalForm.requestedAction}
                 />
               </label>
-              <label className="mt-4 grid gap-2 text-sm text-white/76">
+              <label className="mt-4 grid gap-2 text-sm text-text-secondary">
                 Decision Reason
                 <textarea
-                  className="min-h-24 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-accent/40"
+                  className="min-h-24 border border-border-subtle bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none transition focus:border-primary/40"
                   onChange={(event) => setApprovalForm((current) => ({ ...current, decisionReason: event.target.value }))}
                   value={approvalForm.decisionReason}
                 />
@@ -1178,49 +1174,49 @@ export function OperatorConsole() {
 
               <div className="mt-6 grid gap-3">
                 {approvals.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-white/10 bg-black/15 px-4 py-6 text-sm text-white/58">
+                  <div className="border border-dashed border-border-subtle bg-black/15 px-4 py-6 text-sm text-text-primary/58">
                     No approval records yet for the selected engagement.
                   </div>
                 ) : (
                   approvals.map((approval) => (
-                    <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4" key={approval.id}>
+                    <div className="border border-border-subtle bg-black/15 px-4 py-4" key={approval.id}>
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                          <div className="text-base font-semibold text-white">{approval.requested_action}</div>
-                          <div className="mt-1 text-xs uppercase tracking-[0.24em] text-white/46">
+                          <div className="text-base font-semibold text-text-primary">{approval.requested_action}</div>
+                          <div className="mt-1 text-xs uppercase tracking-[0.24em] text-text-primary/46">
                             {formatOperationLabel(approval.tool_name, approval.operation_name)}
                           </div>
                         </div>
-                        <span className={`rounded-full px-3 py-1 text-xs uppercase tracking-[0.22em] ${approval.approved ? pillClassName("accent") : pillClassName("caution")}`}>
+                        <span className={`px-3 py-1 text-xs uppercase tracking-[0.22em] ${approval.approved ? pillClassName("accent") : pillClassName("caution")}`}>
                           {approval.approved ? "approved" : "pending"}
                         </span>
                       </div>
-                      <div className="mt-3 grid gap-3 text-sm text-white/72 md:grid-cols-2">
+                      <div className="mt-3 grid gap-3 text-sm text-text-secondary md:grid-cols-2">
                         <div>
-                          <div className="text-white/46">Requested By</div>
+                          <div className="text-text-primary/46">Requested By</div>
                           <div className="mt-1">{approval.requested_by}</div>
                         </div>
                         <div>
-                          <div className="text-white/46">Created</div>
+                          <div className="text-text-primary/46">Created</div>
                           <div className="mt-1">{formatTimestamp(approval.created_at)}</div>
                         </div>
                         <div>
-                          <div className="text-white/46">Risk</div>
+                          <div className="text-text-primary/46">Risk</div>
                           <div className="mt-1 uppercase">{approval.risk_level}</div>
                         </div>
                         <div>
-                          <div className="text-white/46">Args</div>
+                          <div className="text-text-primary/46">Args</div>
                           <div className="mt-1 font-mono break-all">{JSON.stringify(approval.args)}</div>
                         </div>
                       </div>
                       {approval.approved ? (
-                        <div className="mt-4 rounded-2xl border border-accent/20 bg-accent/10 px-4 py-3 text-sm text-white/74">
+                        <div className="mt-4 border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-text-primary/74">
                           Approved by {approval.approved_by ?? "unknown"} at {formatTimestamp(approval.decided_at)}.
                         </div>
                       ) : (
                         <div className="mt-4 flex flex-wrap gap-3">
                           <button
-                            className="rounded-full bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-canvas transition hover:bg-[#e1ff7f] disabled:cursor-not-allowed disabled:opacity-60"
+                            className="bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-canvas transition hover:bg-[#e1ff7f] disabled:cursor-not-allowed disabled:opacity-60"
                             disabled={interactionsDisabled}
                             onClick={() => void handleApprovalDecision(approval.id, true)}
                             type="button"
@@ -1228,7 +1224,7 @@ export function OperatorConsole() {
                             {busyAction === `approval-${approval.id}` ? "Applying..." : "Approve"}
                           </button>
                           <button
-                            className="rounded-full border border-danger/35 bg-danger/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-danger transition hover:border-danger/60 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="border border-danger/35 bg-danger/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-severity-critical transition hover:border-danger/60 disabled:cursor-not-allowed disabled:opacity-60"
                             disabled={interactionsDisabled}
                             onClick={() => void handleApprovalDecision(approval.id, false)}
                             type="button"
@@ -1246,42 +1242,42 @@ export function OperatorConsole() {
         </section>
 
         <section className="grid gap-6 xl:grid-cols-2">
-          <article className="rounded-[28px] border border-white/10 bg-white/5 p-6">
+          <article className="border border-border-subtle bg-surface-secondary p-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-accent">Derived Inventory</p>
-                <p className="mt-2 text-sm leading-7 text-white/72">
+                <p className="text-sm uppercase tracking-[0.3em] text-primary">Derived Inventory</p>
+                <p className="mt-2 text-sm leading-7 text-text-secondary">
                   Hosts, services, and banners are derived from executed evidence first, with validated requests used as fallback coverage.
                 </p>
               </div>
-              <span className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("neutral")}`}>
+              <span className={`px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("neutral")}`}>
                 {inventory.hosts.length} hosts / {inventory.services.length} services
               </span>
             </div>
 
             <div className="mt-6 grid gap-6 xl:grid-cols-2">
               <div className="grid gap-3">
-                <div className="text-xs uppercase tracking-[0.24em] text-white/46">Hosts</div>
+                <div className="text-xs uppercase tracking-[0.24em] text-text-primary/46">Hosts</div>
                 {inventory.hosts.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-white/10 bg-black/15 px-4 py-6 text-sm text-white/58">
+                  <div className="border border-dashed border-border-subtle bg-black/15 px-4 py-6 text-sm text-text-primary/58">
                     No hosts derived yet for this engagement.
                   </div>
                 ) : (
                   inventory.hosts.map((host) => (
-                    <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4" key={host.target}>
-                      <div className="font-mono text-sm text-white">{host.target}</div>
-                      <div className="mt-2 text-xs uppercase tracking-[0.22em] text-white/44">
+                    <div className="border border-border-subtle bg-black/15 px-4 py-4" key={host.target}>
+                      <div className="font-mono text-sm text-text-primary">{host.target}</div>
+                      <div className="mt-2 text-xs uppercase tracking-[0.22em] text-text-primary/44">
                         {formatTimestamp(host.last_validated_at)}
                       </div>
                       {host.os_guess ? (
-                        <div className="mt-3 rounded-2xl border border-white/8 bg-white/3 px-3 py-2 text-xs text-white/70">
+                        <div className="mt-3 border border-border-subtle bg-surface-tertiary px-3 py-2 text-xs text-text-secondary">
                           OS fingerprint: {host.os_guess}
                         </div>
                       ) : null}
                       <div className="mt-3 flex flex-wrap gap-2">
                         {host.operations.map((operation) => (
                           <span
-                            className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/68"
+                            className="border border-border-subtle bg-surface-secondary px-3 py-1 text-xs text-text-primary/68"
                             key={`${host.target}-${operation}`}
                           >
                             {operation}
@@ -1294,37 +1290,37 @@ export function OperatorConsole() {
               </div>
 
               <div className="grid gap-3">
-                <div className="text-xs uppercase tracking-[0.24em] text-white/46">Services</div>
+                <div className="text-xs uppercase tracking-[0.24em] text-text-primary/46">Services</div>
                 {inventory.services.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-white/10 bg-black/15 px-4 py-6 text-sm text-white/58">
+                  <div className="border border-dashed border-border-subtle bg-black/15 px-4 py-6 text-sm text-text-primary/58">
                     No service candidates derived yet.
                   </div>
                 ) : (
                   inventory.services.map((service) => (
                     <div
-                      className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4"
+                      className="border border-border-subtle bg-black/15 px-4 py-4"
                       key={`${service.target}-${service.port}-${service.protocol}`}
                     >
                       <div className="flex items-center justify-between gap-3">
-                        <div className="font-mono text-sm text-white">
+                        <div className="font-mono text-sm text-text-primary">
                           {service.target}:{service.port}/{service.protocol}
                         </div>
-                        <span className={`rounded-full px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName("accent")}`}>
+                        <span className={`px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName("accent")}`}>
                           evidence-backed
                         </span>
                       </div>
-                      <div className="mt-2 text-xs uppercase tracking-[0.22em] text-white/44">
+                      <div className="mt-2 text-xs uppercase tracking-[0.22em] text-text-primary/44">
                         {formatTimestamp(service.last_validated_at)}
                       </div>
                       {service.service_name || service.details ? (
-                        <div className="mt-3 rounded-2xl border border-white/8 bg-white/3 px-3 py-2 text-xs text-white/70">
+                        <div className="mt-3 border border-border-subtle bg-surface-tertiary px-3 py-2 text-xs text-text-secondary">
                           {[service.service_name, service.details].filter(Boolean).join(" • ")}
                         </div>
                       ) : null}
                       <div className="mt-3 flex flex-wrap gap-2">
                         {service.operations.map((operation) => (
                           <span
-                            className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/68"
+                            className="border border-border-subtle bg-surface-secondary px-3 py-1 text-xs text-text-primary/68"
                             key={`${service.target}-${service.port}-${operation}`}
                           >
                             {operation}
@@ -1338,22 +1334,22 @@ export function OperatorConsole() {
             </div>
           </article>
 
-          <article className="rounded-[28px] border border-white/10 bg-panel/90 p-6">
+          <article className="border border-border-subtle bg-panel/90 p-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-caution">Validated Evidence</p>
-                <p className="mt-2 text-sm leading-7 text-white/72">
+                <p className="text-sm uppercase tracking-[0.3em] text-severity-medium">Validated Evidence</p>
+                <p className="mt-2 text-sm leading-7 text-text-secondary">
                   These persisted validation records can be linked directly into findings as evidence references.
                 </p>
               </div>
-              <span className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("neutral")}`}>
+              <span className={`px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("neutral")}`}>
                 {toolInvocations.length} records
               </span>
             </div>
 
             <div className="mt-6 grid gap-3">
               {toolInvocations.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-white/10 bg-black/15 px-4 py-6 text-sm text-white/58">
+                <div className="border border-dashed border-border-subtle bg-black/15 px-4 py-6 text-sm text-text-primary/58">
                   No validated evidence records yet for the selected engagement.
                 </div>
               ) : (
@@ -1361,10 +1357,10 @@ export function OperatorConsole() {
                   const selected = findingForm.evidenceRefs.includes(invocation.id);
                   return (
                     <button
-                      className={`rounded-2xl border px-4 py-4 text-left transition ${
+                      className={`border px-4 py-4 text-left transition ${
                         selected
-                          ? "border-accent/40 bg-accent/10"
-                          : "border-white/10 bg-black/15 hover:border-white/20"
+                          ? "border-primary/40 bg-primary/10"
+                          : "border-border-subtle bg-black/15 hover:border-border-subtle"
                       }`}
                       key={invocation.id}
                       onClick={() => toggleEvidenceRef(invocation.id)}
@@ -1372,21 +1368,21 @@ export function OperatorConsole() {
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                          <div className="text-base font-semibold text-white">
+                          <div className="text-base font-semibold text-text-primary">
                             {formatOperationLabel(invocation.tool_name, invocation.operation_name)}
                           </div>
-                          <div className="mt-1 font-mono text-xs text-white/46">
+                          <div className="mt-1 font-mono text-xs text-text-primary/46">
                             {invocation.targets.join(", ")}
                           </div>
                         </div>
-                        <span className={`rounded-full px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName(selected ? "accent" : "neutral")}`}>
+                        <span className={`px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName(selected ? "accent" : "neutral")}`}>
                           {selected ? "linked" : invocation.risk_level}
                         </span>
                       </div>
-                      <div className="mt-3 rounded-2xl border border-white/8 bg-white/3 px-4 py-3 font-mono text-xs leading-6 text-white/70">
+                      <div className="mt-3 border border-border-subtle bg-surface-tertiary px-4 py-3 font-mono text-xs leading-6 text-text-secondary">
                         {invocation.command_preview.join(" ")}
                       </div>
-                      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs uppercase tracking-[0.22em] text-white/44">
+                      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs uppercase tracking-[0.22em] text-text-primary/44">
                         <span>{formatTimestamp(invocation.created_at)}</span>
                         <span>{invocation.id}</span>
                       </div>
@@ -1399,38 +1395,38 @@ export function OperatorConsole() {
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-          <article className="rounded-[28px] border border-white/10 bg-panel/90 p-6">
+          <article className="border border-border-subtle bg-panel/90 p-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-danger">Live Execution</p>
-                <p className="mt-2 text-sm leading-7 text-white/72">
+                <p className="text-sm uppercase tracking-[0.3em] text-severity-critical">Live Execution</p>
+                <p className="mt-2 text-sm leading-7 text-text-secondary">
                   Execute a previously validated request and stream the gateway output back into the console.
                 </p>
               </div>
-              <span className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("neutral")}`}>
+              <span className={`px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("neutral")}`}>
                 {executionEvents.length} events
               </span>
             </div>
 
             <div className="mt-6 grid gap-3">
               {toolInvocations.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-white/10 bg-black/15 px-4 py-6 text-sm text-white/58">
+                <div className="border border-dashed border-border-subtle bg-black/15 px-4 py-6 text-sm text-text-primary/58">
                   Validate a request first. Execution only runs from an existing validated invocation.
                 </div>
               ) : (
                 toolInvocations.map((invocation) => (
-                  <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4" key={`exec-${invocation.id}`}>
+                  <div className="border border-border-subtle bg-black/15 px-4 py-4" key={`exec-${invocation.id}`}>
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <div className="text-base font-semibold text-white">
+                        <div className="text-base font-semibold text-text-primary">
                           {formatOperationLabel(invocation.tool_name, invocation.operation_name)}
                         </div>
-                        <div className="mt-1 font-mono text-xs text-white/46">
+                        <div className="mt-1 font-mono text-xs text-text-primary/46">
                           {invocation.targets.join(", ")}
                         </div>
                       </div>
                       <button
-                        className="rounded-full bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-canvas transition hover:bg-[#e1ff7f] disabled:cursor-not-allowed disabled:opacity-60"
+                        className="bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-canvas transition hover:bg-[#e1ff7f] disabled:cursor-not-allowed disabled:opacity-60"
                         disabled={interactionsDisabled}
                         onClick={() => void handleExecuteInvocation(invocation.id)}
                         type="button"
@@ -1438,10 +1434,10 @@ export function OperatorConsole() {
                         {busyAction === `execute-${invocation.id}` ? "Streaming..." : "Execute"}
                       </button>
                     </div>
-                    <div className="mt-3 rounded-2xl border border-white/8 bg-white/3 px-4 py-3 font-mono text-xs leading-6 text-white/70">
+                    <div className="mt-3 border border-border-subtle bg-surface-tertiary px-4 py-3 font-mono text-xs leading-6 text-text-secondary">
                       {invocation.command_preview.join(" ")}
                     </div>
-                    <div className="mt-3 text-xs uppercase tracking-[0.22em] text-white/44">
+                    <div className="mt-3 text-xs uppercase tracking-[0.22em] text-text-primary/44">
                       {formatTimestamp(invocation.created_at)} • {invocation.id}
                     </div>
                   </div>
@@ -1450,23 +1446,23 @@ export function OperatorConsole() {
             </div>
           </article>
 
-          <article className="rounded-[28px] border border-white/10 bg-white/5 p-6">
+          <article className="border border-border-subtle bg-surface-secondary p-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-caution">Execution Stream</p>
-                <p className="mt-2 text-sm leading-7 text-white/72">
+                <p className="text-sm uppercase tracking-[0.3em] text-severity-medium">Execution Stream</p>
+                <p className="mt-2 text-sm leading-7 text-text-secondary">
                   Streaming events from the weapon node are shown here as the command runs.
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 {executionInvocationId ? (
-                  <span className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("neutral")}`}>
+                  <span className={`px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("neutral")}`}>
                     {executionInvocationId}
                   </span>
                 ) : null}
                 {activeExecutionId ? (
                   <button
-                    className="rounded-full border border-danger/30 bg-danger/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-danger transition hover:bg-danger/20 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="border border-danger/30 bg-danger/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-severity-critical transition hover:bg-danger/20 disabled:cursor-not-allowed disabled:opacity-60"
                     disabled={cancellingExecutionId === activeExecutionId}
                     onClick={() => void handleCancelExecution(activeExecutionId)}
                     type="button"
@@ -1483,38 +1479,38 @@ export function OperatorConsole() {
 
             <div className="mt-6 grid gap-3">
               {executionEvents.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-white/10 bg-black/15 px-4 py-6 text-sm text-white/58">
+                <div className="border border-dashed border-border-subtle bg-black/15 px-4 py-6 text-sm text-text-primary/58">
                   No live execution stream yet for this engagement.
                 </div>
               ) : (
                 executionEvents.map((event, index) => (
-                  <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4" key={`${event.timestamp}-${index}`}>
+                  <div className="border border-border-subtle bg-black/15 px-4 py-4" key={`${event.timestamp}-${index}`}>
                     <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div className="text-sm font-semibold capitalize text-white">{event.type}</div>
-                      <span className={`rounded-full px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName(event.type === "stderr" || event.type === "failed" ? "danger" : event.type === "completed" ? "accent" : "neutral")}`}>
+                      <div className="text-sm font-semibold capitalize text-text-primary">{event.type}</div>
+                      <span className={`px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName(event.type === "stderr" || event.type === "failed" ? "danger" : event.type === "completed" ? "accent" : "neutral")}`}>
                         {event.status ?? "event"}
                       </span>
                     </div>
-                    <div className="mt-2 text-xs uppercase tracking-[0.22em] text-white/44">
+                    <div className="mt-2 text-xs uppercase tracking-[0.22em] text-text-primary/44">
                       {formatTimestamp(event.timestamp)}
                     </div>
                     {typeof event.timeout_seconds === "number" ? (
-                      <div className="mt-3 text-xs uppercase tracking-[0.22em] text-white/44">
+                      <div className="mt-3 text-xs uppercase tracking-[0.22em] text-text-primary/44">
                         timeout budget {event.timeout_seconds}s
                       </div>
                     ) : null}
                     {event.line ? (
-                      <div className="mt-3 rounded-2xl border border-white/8 bg-white/3 px-4 py-3 font-mono text-xs leading-6 text-white/70">
+                      <div className="mt-3 border border-border-subtle bg-surface-tertiary px-4 py-3 font-mono text-xs leading-6 text-text-secondary">
                         {event.line}
                       </div>
                     ) : null}
                     {event.error ? (
-                      <div className="mt-3 rounded-2xl border border-danger/30 bg-danger/10 px-4 py-3 font-mono text-xs leading-6 text-danger">
+                      <div className="mt-3 border border-danger/30 bg-danger/10 px-4 py-3 font-mono text-xs leading-6 text-severity-critical">
                         {event.error}
                       </div>
                     ) : null}
                     {typeof event.exit_code === "number" ? (
-                      <div className="mt-3 text-xs uppercase tracking-[0.22em] text-white/44">
+                      <div className="mt-3 text-xs uppercase tracking-[0.22em] text-text-primary/44">
                         exit {event.exit_code} • stdout {event.stdout_lines ?? 0} • stderr {event.stderr_lines ?? 0}
                       </div>
                     ) : null}
@@ -1526,31 +1522,31 @@ export function OperatorConsole() {
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-          <article className="rounded-[28px] border border-white/10 bg-panel/90 p-6">
+          <article className="border border-border-subtle bg-panel/90 p-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-accent">Execution History</p>
-                <p className="mt-2 text-sm leading-7 text-white/72">
+                <p className="text-sm uppercase tracking-[0.3em] text-primary">Execution History</p>
+                <p className="mt-2 text-sm leading-7 text-text-secondary">
                   Persisted execution runs are stored as evidence artifacts and can be reviewed after the live stream ends.
                 </p>
               </div>
-              <span className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("neutral")}`}>
+              <span className={`px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("neutral")}`}>
                 {toolExecutions.length} stored
               </span>
             </div>
 
             <div className="mt-6 grid gap-3">
               {toolExecutions.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-white/10 bg-black/15 px-4 py-6 text-sm text-white/58">
+                <div className="border border-dashed border-border-subtle bg-black/15 px-4 py-6 text-sm text-text-primary/58">
                   No persisted execution evidence yet for the selected engagement.
                 </div>
               ) : (
                 toolExecutions.map((execution) => (
                   <button
-                    className={`rounded-2xl border px-4 py-4 text-left transition ${
+                    className={`border px-4 py-4 text-left transition ${
                       selectedExecutionArtifact?.execution.id === execution.id
-                        ? "border-accent/40 bg-accent/10"
-                        : "border-white/10 bg-black/15 hover:border-white/20"
+                        ? "border-primary/40 bg-primary/10"
+                        : "border-border-subtle bg-black/15 hover:border-border-subtle"
                     }`}
                     key={execution.id}
                     onClick={() => void handleSelectExecution(execution.id)}
@@ -1558,24 +1554,24 @@ export function OperatorConsole() {
                   >
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <div className="text-base font-semibold text-white">
+                        <div className="text-base font-semibold text-text-primary">
                           {formatOperationLabel(execution.tool_name, execution.operation_name)}
                         </div>
-                        <div className="mt-1 font-mono text-xs text-white/46">
+                        <div className="mt-1 font-mono text-xs text-text-primary/46">
                           invocation {execution.invocation_id}
                         </div>
                       </div>
-                      <span className={`rounded-full px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName(executionTone(execution.status))}`}>
+                      <span className={`px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName(executionTone(execution.status))}`}>
                         {execution.status}
                       </span>
                     </div>
-                    <div className="mt-3 grid gap-2 text-xs uppercase tracking-[0.22em] text-white/44 md:grid-cols-2">
+                    <div className="mt-3 grid gap-2 text-xs uppercase tracking-[0.22em] text-text-primary/44 md:grid-cols-2">
                       <span>{formatTimestamp(execution.started_at)}</span>
                       <span>
                         exit {execution.exit_code ?? "pending"} • stdout {execution.stdout_lines} • stderr {execution.stderr_lines}
                       </span>
                     </div>
-                    <div className="mt-3 rounded-2xl border border-white/8 bg-white/3 px-4 py-3 font-mono text-xs leading-6 text-white/70">
+                    <div className="mt-3 border border-border-subtle bg-surface-tertiary px-4 py-3 font-mono text-xs leading-6 text-text-secondary">
                       {execution.artifact_path ?? "Artifact will be written when execution completes."}
                     </div>
                   </button>
@@ -1584,16 +1580,16 @@ export function OperatorConsole() {
             </div>
           </article>
 
-          <article className="rounded-[28px] border border-white/10 bg-white/5 p-6">
+          <article className="border border-border-subtle bg-surface-secondary p-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-caution">Execution Artifact</p>
-                <p className="mt-2 text-sm leading-7 text-white/72">
+                <p className="text-sm uppercase tracking-[0.3em] text-severity-medium">Execution Artifact</p>
+                <p className="mt-2 text-sm leading-7 text-text-secondary">
                   Stored execution metadata, raw output, and parser-derived observations are loaded from the backend artifact store.
                 </p>
               </div>
               {selectedExecutionArtifact ? (
-                <span className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName(executionTone(selectedExecutionArtifact.execution.status))}`}>
+                <span className={`px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName(executionTone(selectedExecutionArtifact.execution.status))}`}>
                   {selectedExecutionArtifact.execution.status}
                 </span>
               ) : null}
@@ -1602,24 +1598,24 @@ export function OperatorConsole() {
             {selectedExecutionArtifact ? (
               <div className="mt-6 grid gap-4">
                 {getParsedWebObservations(selectedExecutionArtifact).length > 0 ? (
-                  <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4">
-                    <div className="text-xs uppercase tracking-[0.24em] text-white/46">Web Observations</div>
+                  <div className="border border-border-subtle bg-black/15 px-4 py-4">
+                    <div className="text-xs uppercase tracking-[0.24em] text-text-primary/46">Web Observations</div>
                     <div className="mt-4 grid gap-3">
                       {getParsedWebObservations(selectedExecutionArtifact).map((item, index) => (
-                        <div className="rounded-2xl border border-white/8 bg-white/3 px-4 py-4" key={`${item.url}-${index}`}>
+                        <div className="border border-border-subtle bg-surface-tertiary px-4 py-4" key={`${item.url}-${index}`}>
                           <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div className="font-mono text-sm text-white">{item.url}</div>
-                            <span className={`rounded-full px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName("accent")}`}>
+                            <div className="font-mono text-sm text-text-primary">{item.url}</div>
+                            <span className={`px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName("accent")}`}>
                               {item.status_code ?? item.status_line ?? "observed"}
                             </span>
                           </div>
                           <div className="mt-3 grid gap-3 md:grid-cols-2">
-                            <div className="rounded-2xl border border-white/8 bg-black/20 px-3 py-3 text-xs text-white/70">
-                              <div className="text-[11px] uppercase tracking-[0.22em] text-white/44">Banner</div>
+                            <div className="border border-border-subtle bg-surface-tertiary px-3 py-3 text-xs text-text-secondary">
+                              <div className="text-[11px] uppercase tracking-[0.22em] text-text-primary/44">Banner</div>
                               <div className="mt-2 font-mono">{[item.server, item.x_powered_by].filter(Boolean).join(" • ") || "none"}</div>
                             </div>
-                            <div className="rounded-2xl border border-white/8 bg-black/20 px-3 py-3 text-xs text-white/70">
-                              <div className="text-[11px] uppercase tracking-[0.22em] text-white/44">Missing Security Headers</div>
+                            <div className="border border-border-subtle bg-surface-tertiary px-3 py-3 text-xs text-text-secondary">
+                              <div className="text-[11px] uppercase tracking-[0.22em] text-text-primary/44">Missing Security Headers</div>
                               <div className="mt-2 font-mono">
                                 {(item.missing_security_headers ?? []).length
                                   ? item.missing_security_headers?.join(", ")
@@ -1634,30 +1630,30 @@ export function OperatorConsole() {
                 ) : null}
 
                 {getParsedFingerprints(selectedExecutionArtifact).length > 0 ? (
-                  <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4">
-                    <div className="text-xs uppercase tracking-[0.24em] text-white/46">OS Fingerprints</div>
+                  <div className="border border-border-subtle bg-black/15 px-4 py-4">
+                    <div className="text-xs uppercase tracking-[0.24em] text-text-primary/46">OS Fingerprints</div>
                     <div className="mt-4 grid gap-3">
                       {getParsedFingerprints(selectedExecutionArtifact).map((item, index) => (
-                        <div className="rounded-2xl border border-white/8 bg-white/3 px-4 py-4" key={`${item.target}-${index}`}>
+                        <div className="border border-border-subtle bg-surface-tertiary px-4 py-4" key={`${item.target}-${index}`}>
                           <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div className="font-mono text-sm text-white">{item.target}</div>
-                            <span className={`rounded-full px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName("caution")}`}>
+                            <div className="font-mono text-sm text-text-primary">{item.target}</div>
+                            <span className={`px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName("caution")}`}>
                               fingerprint
                             </span>
                           </div>
                           <div className="mt-3 grid gap-3 md:grid-cols-2">
-                            <div className="rounded-2xl border border-white/8 bg-black/20 px-3 py-3 text-xs text-white/70">
-                              <div className="text-[11px] uppercase tracking-[0.22em] text-white/44">Running</div>
+                            <div className="border border-border-subtle bg-surface-tertiary px-3 py-3 text-xs text-text-secondary">
+                              <div className="text-[11px] uppercase tracking-[0.22em] text-text-primary/44">Running</div>
                               <div className="mt-2 font-mono">{item.running ?? item.os_details ?? "unknown"}</div>
                             </div>
-                            <div className="rounded-2xl border border-white/8 bg-black/20 px-3 py-3 text-xs text-white/70">
-                              <div className="text-[11px] uppercase tracking-[0.22em] text-white/44">Device Type</div>
+                            <div className="border border-border-subtle bg-surface-tertiary px-3 py-3 text-xs text-text-secondary">
+                              <div className="text-[11px] uppercase tracking-[0.22em] text-text-primary/44">Device Type</div>
                               <div className="mt-2 font-mono">{item.device_type ?? "unknown"}</div>
                             </div>
                           </div>
                           {item.cpe && item.cpe.length > 0 ? (
-                            <div className="mt-3 rounded-2xl border border-white/8 bg-black/20 px-3 py-3 text-xs text-white/70">
-                              <div className="text-[11px] uppercase tracking-[0.22em] text-white/44">CPE</div>
+                            <div className="mt-3 border border-border-subtle bg-surface-tertiary px-3 py-3 text-xs text-text-secondary">
+                              <div className="text-[11px] uppercase tracking-[0.22em] text-text-primary/44">CPE</div>
                               <div className="mt-2 font-mono">{item.cpe.join(", ")}</div>
                             </div>
                           ) : null}
@@ -1668,24 +1664,24 @@ export function OperatorConsole() {
                 ) : null}
 
                 {getParsedDiagnostics(selectedExecutionArtifact).length > 0 ? (
-                  <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4">
-                    <div className="text-xs uppercase tracking-[0.24em] text-white/46">Execution Diagnostics</div>
+                  <div className="border border-border-subtle bg-black/15 px-4 py-4">
+                    <div className="text-xs uppercase tracking-[0.24em] text-text-primary/46">Execution Diagnostics</div>
                     <div className="mt-4 grid gap-3">
                       {getParsedDiagnostics(selectedExecutionArtifact).map((item, index) => (
-                        <div className="rounded-2xl border border-white/8 bg-white/3 px-4 py-4" key={`${item.code}-${item.target ?? "global"}-${index}`}>
+                        <div className="border border-border-subtle bg-surface-tertiary px-4 py-4" key={`${item.code}-${item.target ?? "global"}-${index}`}>
                           <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div className="text-sm font-semibold text-white">{item.summary}</div>
-                            <span className={`rounded-full px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName(diagnosticTone(item.kind))}`}>
+                            <div className="text-sm font-semibold text-text-primary">{item.summary}</div>
+                            <span className={`px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName(diagnosticTone(item.kind))}`}>
                               {item.kind}
                             </span>
                           </div>
                           <div className="mt-3 grid gap-3 md:grid-cols-2">
-                            <div className="rounded-2xl border border-white/8 bg-black/20 px-3 py-3 text-xs text-white/70">
-                              <div className="text-[11px] uppercase tracking-[0.22em] text-white/44">Code</div>
+                            <div className="border border-border-subtle bg-surface-tertiary px-3 py-3 text-xs text-text-secondary">
+                              <div className="text-[11px] uppercase tracking-[0.22em] text-text-primary/44">Code</div>
                               <div className="mt-2 font-mono">{item.code}</div>
                             </div>
-                            <div className="rounded-2xl border border-white/8 bg-black/20 px-3 py-3 text-xs text-white/70">
-                              <div className="text-[11px] uppercase tracking-[0.22em] text-white/44">Scope</div>
+                            <div className="border border-border-subtle bg-surface-tertiary px-3 py-3 text-xs text-text-secondary">
+                              <div className="text-[11px] uppercase tracking-[0.22em] text-text-primary/44">Scope</div>
                               <div className="mt-2 font-mono">
                                 {item.target
                                   ? `${item.target}${item.port ? `:${item.port}` : ""}`
@@ -1693,8 +1689,8 @@ export function OperatorConsole() {
                               </div>
                             </div>
                           </div>
-                          <div className="mt-3 rounded-2xl border border-white/8 bg-black/20 px-3 py-3 text-xs text-white/70">
-                            <div className="text-[11px] uppercase tracking-[0.22em] text-white/44">Observed Detail</div>
+                          <div className="mt-3 border border-border-subtle bg-surface-tertiary px-3 py-3 text-xs text-text-secondary">
+                            <div className="text-[11px] uppercase tracking-[0.22em] text-text-primary/44">Observed Detail</div>
                             <div className="mt-2 font-mono">{item.detail}</div>
                           </div>
                         </div>
@@ -1704,9 +1700,9 @@ export function OperatorConsole() {
                 ) : null}
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4">
-                    <div className="text-xs uppercase tracking-[0.24em] text-white/46">Execution Summary</div>
-                    <div className="mt-3 font-mono text-xs leading-6 text-white/70">
+                  <div className="border border-border-subtle bg-black/15 px-4 py-4">
+                    <div className="text-xs uppercase tracking-[0.24em] text-text-primary/46">Execution Summary</div>
+                    <div className="mt-3 font-mono text-xs leading-6 text-text-secondary">
                       {previewJson({
                         execution_id: selectedExecutionArtifact.execution.id,
                         invocation_id: selectedExecutionArtifact.execution.invocation_id,
@@ -1717,22 +1713,22 @@ export function OperatorConsole() {
                       })}
                     </div>
                   </div>
-                  <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4">
-                    <div className="text-xs uppercase tracking-[0.24em] text-white/46">Artifact Snapshot</div>
-                    <div className="mt-3 font-mono text-xs leading-6 text-white/70">
+                  <div className="border border-border-subtle bg-black/15 px-4 py-4">
+                    <div className="text-xs uppercase tracking-[0.24em] text-text-primary/46">Artifact Snapshot</div>
+                    <div className="mt-3 font-mono text-xs leading-6 text-text-secondary">
                       {previewJson(selectedExecutionArtifact.content)}
                     </div>
                   </div>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4">
-                  <div className="text-xs uppercase tracking-[0.24em] text-white/46">Parsed Observations</div>
-                  <div className="mt-3 font-mono text-xs leading-6 text-white/70">
+                <div className="border border-border-subtle bg-black/15 px-4 py-4">
+                  <div className="text-xs uppercase tracking-[0.24em] text-text-primary/46">Parsed Observations</div>
+                  <div className="mt-3 font-mono text-xs leading-6 text-text-secondary">
                     {previewJson(getParsedExecutionContent(selectedExecutionArtifact) ?? {})}
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="mt-6 rounded-2xl border border-dashed border-white/10 bg-black/15 px-4 py-6 text-sm text-white/58">
+              <div className="mt-6 border border-dashed border-border-subtle bg-black/15 px-4 py-6 text-sm text-text-primary/58">
                 Execute a validated request, or select a stored execution from the history panel, to preview its artifact.
               </div>
             )}
@@ -1740,16 +1736,16 @@ export function OperatorConsole() {
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[0.85fr_1.15fr]">
-          <article className="rounded-[28px] border border-white/10 bg-panel/90 p-6">
+          <article className="border border-border-subtle bg-panel/90 p-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-accent">Reports</p>
-                <p className="mt-2 text-sm leading-7 text-white/72">
+                <p className="text-sm uppercase tracking-[0.3em] text-primary">Reports</p>
+                <p className="mt-2 text-sm leading-7 text-text-secondary">
                   Generate a stored engagement artifact from findings, approvals, inventory, evidence refs, and the audit chain.
                 </p>
               </div>
               <button
-                className="rounded-2xl bg-accent px-5 py-3 text-sm font-semibold text-canvas transition hover:bg-[#e1ff7f] disabled:cursor-not-allowed disabled:opacity-60"
+                className="bg-primary px-5 py-3 text-sm font-semibold text-canvas transition hover:bg-[#e1ff7f] disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={interactionsDisabled || !selectedEngagement}
                 onClick={() => void handleGenerateReport()}
                 type="button"
@@ -1760,16 +1756,16 @@ export function OperatorConsole() {
 
             <div className="mt-6 grid gap-3">
               {reports.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-white/10 bg-black/15 px-4 py-6 text-sm text-white/58">
+                <div className="border border-dashed border-border-subtle bg-black/15 px-4 py-6 text-sm text-text-primary/58">
                   No reports generated yet for the selected engagement.
                 </div>
               ) : (
                 reports.map((report) => (
                   <button
-                    className={`rounded-2xl border px-4 py-4 text-left transition ${
+                    className={`border px-4 py-4 text-left transition ${
                       selectedReport?.report.id === report.id
-                        ? "border-accent/40 bg-accent/10"
-                        : "border-white/10 bg-black/15 hover:border-white/20"
+                        ? "border-primary/40 bg-primary/10"
+                        : "border-border-subtle bg-black/15 hover:border-border-subtle"
                     }`}
                     key={report.id}
                     onClick={() => void handleSelectReport(report.id)}
@@ -1777,16 +1773,16 @@ export function OperatorConsole() {
                   >
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <div className="text-base font-semibold text-white">
+                        <div className="text-base font-semibold text-text-primary">
                           {report.report_format.toUpperCase()} report
                         </div>
-                        <div className="mt-1 font-mono text-xs text-white/46">{report.id}</div>
+                        <div className="mt-1 font-mono text-xs text-text-primary/46">{report.id}</div>
                       </div>
-                      <span className={`rounded-full px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName("neutral")}`}>
+                      <span className={`px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName("neutral")}`}>
                         {formatTimestamp(report.created_at)}
                       </span>
                     </div>
-                    <div className="mt-3 rounded-2xl border border-white/8 bg-white/3 px-4 py-3 font-mono text-xs leading-6 text-white/70">
+                    <div className="mt-3 border border-border-subtle bg-surface-tertiary px-4 py-3 font-mono text-xs leading-6 text-text-secondary">
                       {report.artifact_path}
                     </div>
                   </button>
@@ -1795,16 +1791,16 @@ export function OperatorConsole() {
             </div>
           </article>
 
-          <article className="rounded-[28px] border border-white/10 bg-white/5 p-6">
+          <article className="border border-border-subtle bg-surface-secondary p-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-caution">Report Preview</p>
-                <p className="mt-2 text-sm leading-7 text-white/72">
+                <p className="text-sm uppercase tracking-[0.3em] text-severity-medium">Report Preview</p>
+                <p className="mt-2 text-sm leading-7 text-text-secondary">
                   Preview the generated artifact summary before handing it off or extending the report format.
                 </p>
               </div>
               {selectedReport ? (
-                <span className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("accent")}`}>
+                <span className={`px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("accent")}`}>
                   {selectedReport.report.report_format}
                 </span>
               ) : null}
@@ -1812,29 +1808,29 @@ export function OperatorConsole() {
 
             {selectedReport ? (
               <div className="mt-6 grid gap-4">
-                <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4">
-                  <div className="text-xs uppercase tracking-[0.24em] text-white/46">Artifact Path</div>
-                  <div className="mt-2 font-mono text-sm break-all text-white/76">
+                <div className="border border-border-subtle bg-black/15 px-4 py-4">
+                  <div className="text-xs uppercase tracking-[0.24em] text-text-primary/46">Artifact Path</div>
+                  <div className="mt-2 font-mono text-sm break-all text-text-secondary">
                     {selectedReport.report.artifact_path}
                   </div>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
-                  <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4">
-                    <div className="text-xs uppercase tracking-[0.24em] text-white/46">Summary</div>
-                    <div className="mt-3 font-mono text-xs leading-6 text-white/70">
+                  <div className="border border-border-subtle bg-black/15 px-4 py-4">
+                    <div className="text-xs uppercase tracking-[0.24em] text-text-primary/46">Summary</div>
+                    <div className="mt-3 font-mono text-xs leading-6 text-text-secondary">
                       {previewJson(selectedReport.content.summary ?? {})}
                     </div>
                   </div>
-                  <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4">
-                    <div className="text-xs uppercase tracking-[0.24em] text-white/46">Engagement Snapshot</div>
-                    <div className="mt-3 font-mono text-xs leading-6 text-white/70">
+                  <div className="border border-border-subtle bg-black/15 px-4 py-4">
+                    <div className="text-xs uppercase tracking-[0.24em] text-text-primary/46">Engagement Snapshot</div>
+                    <div className="mt-3 font-mono text-xs leading-6 text-text-secondary">
                       {previewJson(selectedReport.content.engagement ?? {})}
                     </div>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="mt-6 rounded-2xl border border-dashed border-white/10 bg-black/15 px-4 py-6 text-sm text-white/58">
+              <div className="mt-6 border border-dashed border-border-subtle bg-black/15 px-4 py-6 text-sm text-text-primary/58">
                 Generate or select a report to preview its stored artifact content.
               </div>
             )}
@@ -1842,64 +1838,64 @@ export function OperatorConsole() {
         </section>
 
         <section className="grid gap-6 2xl:grid-cols-[0.9fr_1.1fr]">
-          <article className="rounded-[28px] border border-white/10 bg-panel/90 p-6">
+          <article className="border border-border-subtle bg-panel/90 p-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-accent">Findings</p>
-                <p className="mt-2 text-sm leading-7 text-white/72">
+                <p className="text-sm uppercase tracking-[0.3em] text-primary">Findings</p>
+                <p className="mt-2 text-sm leading-7 text-text-secondary">
                   Record evidence-backed findings so the control plane and audit trail stay aligned. Parser-derived suggestions can prefill the form.
                 </p>
               </div>
-              <span className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("neutral")}`}>
+              <span className={`px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("neutral")}`}>
                 {findings.length} records
               </span>
             </div>
 
-            <div className="mt-6 rounded-[24px] border border-white/10 bg-black/15 p-4">
+            <div className="mt-6 border border-border-subtle bg-black/15 p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <div className="text-xs uppercase tracking-[0.24em] text-white/46">Finding Suggestions</div>
-                  <div className="mt-2 text-sm text-white/68">
+                  <div className="text-xs uppercase tracking-[0.24em] text-text-primary/46">Finding Suggestions</div>
+                  <div className="mt-2 text-sm text-text-primary/68">
                     Suggestions are derived from execution-artifact parsers and from agent vuln-mapper runs. They still require operator review before they become real findings.
                   </div>
                 </div>
-                <span className={`rounded-full px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName("neutral")}`}>
+                <span className={`px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName("neutral")}`}>
                   {findingSuggestions.length} suggestions
                 </span>
               </div>
 
               <div className="mt-4 grid gap-3">
                 {findingSuggestions.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-white/10 bg-black/20 px-4 py-5 text-sm text-white/58">
+                  <div className="border border-dashed border-border-subtle bg-surface-tertiary px-4 py-5 text-sm text-text-primary/58">
                     No suggestions yet. Execute a validated request or run the agent vuln-mapper to populate this panel.
                   </div>
                 ) : (
                   findingSuggestions.map((suggestion) => (
-                    <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-4" key={suggestion.suggestion_id}>
+                    <div className="border border-border-subtle bg-surface-tertiary px-4 py-4" key={suggestion.suggestion_id}>
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
                           <div className="flex items-center gap-2">
-                            <div className="text-sm font-semibold text-white">{suggestion.title}</div>
+                            <div className="text-sm font-semibold text-text-primary">{suggestion.title}</div>
                             {suggestion.suggestion_id.startsWith("agent-run:") ? (
-                              <span className="rounded-full bg-accent/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
+                              <span className="bg-primary/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">
                                 Agent
                               </span>
                             ) : (
-                              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/64">
+                              <span className="bg-surface-tertiary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-text-secondary">
                                 Parser
                               </span>
                             )}
                           </div>
-                          <div className="mt-1 text-xs uppercase tracking-[0.22em] text-white/44">
+                          <div className="mt-1 text-xs uppercase tracking-[0.22em] text-text-primary/44">
                             execution {suggestion.execution_id}
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className={`rounded-full px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName(severityTone(suggestion.severity))}`}>
+                          <span className={`px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName(severityTone(suggestion.severity))}`}>
                             {suggestion.severity}
                           </span>
                           <button
-                            className="rounded-full bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-canvas transition hover:bg-[#e1ff7f] disabled:cursor-not-allowed disabled:opacity-60"
+                            className="bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-canvas transition hover:bg-[#e1ff7f] disabled:cursor-not-allowed disabled:opacity-60"
                             disabled={interactionsDisabled}
                             onClick={() => handleApplyFindingSuggestion(suggestion)}
                             type="button"
@@ -1908,9 +1904,9 @@ export function OperatorConsole() {
                           </button>
                         </div>
                       </div>
-                      <div className="mt-3 text-sm leading-7 text-white/70">{suggestion.summary}</div>
+                      <div className="mt-3 text-sm leading-7 text-text-secondary">{suggestion.summary}</div>
                       {suggestion.evidence.length > 0 ? (
-                        <div className="mt-3 rounded-2xl border border-white/8 bg-white/3 px-4 py-3 font-mono text-xs leading-6 text-white/70">
+                        <div className="mt-3 border border-border-subtle bg-surface-tertiary px-4 py-3 font-mono text-xs leading-6 text-text-secondary">
                           {suggestion.evidence.join("\n")}
                         </div>
                       ) : null}
@@ -1921,18 +1917,18 @@ export function OperatorConsole() {
             </div>
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <label className="grid gap-2 text-sm text-white/76">
+              <label className="grid gap-2 text-sm text-text-secondary">
                 Title
                 <input
-                  className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-accent/40"
+                  className="border border-border-subtle bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none transition focus:border-primary/40"
                   onChange={(event) => setFindingForm((current) => ({ ...current, title: event.target.value }))}
                   value={findingForm.title}
                 />
               </label>
-              <label className="grid gap-2 text-sm text-white/76">
+              <label className="grid gap-2 text-sm text-text-secondary">
                 Severity
                 <select
-                  className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-accent/40"
+                  className="border border-border-subtle bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none transition focus:border-primary/40"
                   onChange={(event) =>
                     setFindingForm((current) => ({
                       ...current,
@@ -1951,53 +1947,53 @@ export function OperatorConsole() {
             </div>
 
             <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <label className="grid gap-2 text-sm text-white/76">
+              <label className="grid gap-2 text-sm text-text-secondary">
                 ATT&CK Technique
                 <input
-                  className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-accent/40"
+                  className="border border-border-subtle bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none transition focus:border-primary/40"
                   onChange={(event) => setFindingForm((current) => ({ ...current, attackTechnique: event.target.value }))}
                   value={findingForm.attackTechnique}
                 />
               </label>
-              <label className="grid gap-2 text-sm text-white/76">
+              <label className="grid gap-2 text-sm text-text-secondary">
                 Reported By
                 <input
-                  className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-accent/40"
+                  className="border border-border-subtle bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none transition focus:border-primary/40"
                   onChange={(event) => setFindingForm((current) => ({ ...current, reportedBy: event.target.value }))}
                   value={findingForm.reportedBy}
                 />
               </label>
             </div>
 
-            <label className="mt-4 grid gap-2 text-sm text-white/76">
+            <label className="mt-4 grid gap-2 text-sm text-text-secondary">
               Summary
               <textarea
-                className="min-h-28 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none transition focus:border-accent/40"
+                className="min-h-28 border border-border-subtle bg-surface-tertiary px-4 py-3 text-sm text-text-primary outline-none transition focus:border-primary/40"
                 onChange={(event) => setFindingForm((current) => ({ ...current, summary: event.target.value }))}
                 value={findingForm.summary}
               />
             </label>
-            <label className="mt-4 grid gap-2 text-sm text-white/76">
+            <label className="mt-4 grid gap-2 text-sm text-text-secondary">
               Evidence Items
               <textarea
-                className="min-h-28 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 font-mono text-sm text-white outline-none transition focus:border-accent/40"
+                className="min-h-28 border border-border-subtle bg-surface-tertiary px-4 py-3 font-mono text-sm text-text-primary outline-none transition focus:border-primary/40"
                 onChange={(event) => setFindingForm((current) => ({ ...current, evidenceText: event.target.value }))}
                 value={findingForm.evidenceText}
               />
             </label>
-            <div className="mt-4 rounded-2xl border border-white/10 bg-black/15 px-4 py-4 text-sm text-white/74">
-              <div className="text-xs uppercase tracking-[0.24em] text-white/46">
+            <div className="mt-4 border border-border-subtle bg-black/15 px-4 py-4 text-sm text-text-primary/74">
+              <div className="text-xs uppercase tracking-[0.24em] text-text-primary/46">
                 Linked Evidence References
               </div>
               {findingForm.evidenceRefs.length === 0 ? (
-                <div className="mt-2 text-white/58">
+                <div className="mt-2 text-text-primary/58">
                   No persisted validation records linked yet. Select entries from the Validated Evidence panel.
                 </div>
               ) : (
                 <div className="mt-3 flex flex-wrap gap-2">
                   {findingForm.evidenceRefs.map((evidenceRef) => (
                     <span
-                      className="rounded-full border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-xs text-accent"
+                      className="border border-primary/30 bg-primary/10 px-3 py-1 font-mono text-xs text-primary"
                       key={evidenceRef}
                     >
                       {evidenceRef}
@@ -2008,7 +2004,7 @@ export function OperatorConsole() {
             </div>
 
             <button
-              className="mt-4 rounded-2xl bg-accent px-5 py-3 text-sm font-semibold text-canvas transition hover:bg-[#e1ff7f] disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-4 bg-primary px-5 py-3 text-sm font-semibold text-canvas transition hover:bg-[#e1ff7f] disabled:cursor-not-allowed disabled:opacity-60"
               disabled={interactionsDisabled || !selectedEngagement}
               onClick={() => void handleCreateFinding()}
               type="button"
@@ -2018,28 +2014,28 @@ export function OperatorConsole() {
 
             <div className="mt-6 grid gap-3">
               {findings.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-white/10 bg-black/15 px-4 py-6 text-sm text-white/58">
+                <div className="border border-dashed border-border-subtle bg-black/15 px-4 py-6 text-sm text-text-primary/58">
                   No findings yet for the selected engagement.
                 </div>
               ) : (
                 findings.map((finding) => (
-                  <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4" key={finding.id}>
+                  <div className="border border-border-subtle bg-black/15 px-4 py-4" key={finding.id}>
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <div className="text-base font-semibold text-white">{finding.title}</div>
-                        <div className="mt-1 text-xs uppercase tracking-[0.24em] text-white/46">
+                        <div className="text-base font-semibold text-text-primary">{finding.title}</div>
+                        <div className="mt-1 text-xs uppercase tracking-[0.24em] text-text-primary/46">
                           {finding.attack_technique ?? "No ATT&CK mapping"}
                         </div>
                       </div>
-                      <span className={`rounded-full px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName(severityTone(finding.severity))}`}>
+                      <span className={`px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName(severityTone(finding.severity))}`}>
                         {finding.severity}
                       </span>
                     </div>
-                    <p className="mt-3 text-sm leading-7 text-white/74">{finding.summary}</p>
+                    <p className="mt-3 text-sm leading-7 text-text-primary/74">{finding.summary}</p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       {finding.evidence.map((item, index) => (
                         <span
-                          className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/68"
+                          className="border border-border-subtle bg-surface-secondary px-3 py-1 text-xs text-text-primary/68"
                           key={`${finding.id}-${index}`}
                         >
                           {item}
@@ -2050,7 +2046,7 @@ export function OperatorConsole() {
                       <div className="mt-4 flex flex-wrap gap-2">
                         {finding.evidence_refs.map((evidenceRef) => (
                           <span
-                            className="rounded-full border border-accent/30 bg-accent/10 px-3 py-1 font-mono text-xs text-accent"
+                            className="border border-primary/30 bg-primary/10 px-3 py-1 font-mono text-xs text-primary"
                             key={`${finding.id}-${evidenceRef}`}
                           >
                             {evidenceRef}
@@ -2058,7 +2054,7 @@ export function OperatorConsole() {
                         ))}
                       </div>
                     ) : null}
-                    <div className="mt-4 text-xs uppercase tracking-[0.22em] text-white/44">
+                    <div className="mt-4 text-xs uppercase tracking-[0.22em] text-text-primary/44">
                       {finding.reported_by} • {formatTimestamp(finding.created_at)}
                     </div>
                   </div>
@@ -2067,22 +2063,22 @@ export function OperatorConsole() {
             </div>
           </article>
 
-          <article className="rounded-[28px] border border-white/10 bg-white/5 p-6">
+          <article className="border border-border-subtle bg-surface-secondary p-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-caution">Audit Timeline</p>
-                <p className="mt-2 text-sm leading-7 text-white/72">
+                <p className="text-sm uppercase tracking-[0.3em] text-severity-medium">Audit Timeline</p>
+                <p className="mt-2 text-sm leading-7 text-text-secondary">
                   Review the tamper-evident sequence of approvals, validations, and findings for the selected engagement.
                 </p>
               </div>
-              <span className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("neutral")}`}>
+              <span className={`px-4 py-2 text-xs uppercase tracking-[0.24em] ${pillClassName("neutral")}`}>
                 {auditEvents.length} events
               </span>
             </div>
 
             <div className="mt-6 grid gap-3">
               {auditEvents.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-white/10 bg-black/15 px-4 py-6 text-sm text-white/58">
+                <div className="border border-dashed border-border-subtle bg-black/15 px-4 py-6 text-sm text-text-primary/58">
                   No audit events yet for the selected engagement.
                 </div>
               ) : (
@@ -2090,21 +2086,21 @@ export function OperatorConsole() {
                   .slice()
                   .reverse()
                   .map((event) => (
-                    <div className="rounded-2xl border border-white/10 bg-black/15 px-4 py-4" key={event.evidence_hash}>
+                    <div className="border border-border-subtle bg-black/15 px-4 py-4" key={event.evidence_hash}>
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                          <div className="text-base font-semibold capitalize text-white">
+                          <div className="text-base font-semibold capitalize text-text-primary">
                             {formatEventLabel(event.event_type)}
                           </div>
-                          <div className="mt-1 text-xs uppercase tracking-[0.24em] text-white/46">
+                          <div className="mt-1 text-xs uppercase tracking-[0.24em] text-text-primary/46">
                             {event.actor ?? "System"} • {formatTimestamp(event.occurred_at)}
                           </div>
                         </div>
-                        <span className={`rounded-full px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName("neutral")}`}>
+                        <span className={`px-3 py-1 text-xs uppercase tracking-[0.22em] ${pillClassName("neutral")}`}>
                           {truncateHash(event.evidence_hash)}
                         </span>
                       </div>
-                      <div className="mt-3 rounded-2xl border border-white/8 bg-white/3 px-4 py-3 font-mono text-xs leading-6 text-white/70">
+                      <div className="mt-3 border border-border-subtle bg-surface-tertiary px-4 py-3 font-mono text-xs leading-6 text-text-secondary">
                         {previewPayload(event.payload)}
                       </div>
                     </div>
@@ -2114,12 +2110,12 @@ export function OperatorConsole() {
           </article>
         </section>
 
-        <section className="rounded-[28px] border border-white/10 bg-black/20 px-6 py-4 text-sm">
+        <section className="border border-border-subtle bg-surface-tertiary px-6 py-4 text-sm">
           <div className="flex flex-wrap items-center gap-3">
-            <span className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.22em] ${error ? pillClassName("danger") : pillClassName("accent")}`}>
+            <span className={`px-4 py-2 text-xs uppercase tracking-[0.22em] ${error ? pillClassName("danger") : pillClassName("accent")}`}>
               {error ? "Operator Error" : "Operator Status"}
             </span>
-            <span className="text-white/78">{error ?? notice}</span>
+            <span className="text-text-primary/78">{error ?? notice}</span>
           </div>
         </section>
       </section>

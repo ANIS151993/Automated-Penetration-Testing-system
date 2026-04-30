@@ -9,12 +9,12 @@ import httpx
 MODEL_ROUTING: dict[str, str] = {
     "classify": "llama3.2:3b-instruct-q4_K_M",
     "parse_tool_output": "llama3.2:3b-instruct-q4_K_M",
-    "reason": "qwen2.5:7b-instruct-q4_K_M",
-    "map_vulnerability": "qwen2.5:7b-instruct-q4_K_M",
-    "plan_exploit": "qwen2.5:7b-instruct-q4_K_M",
-    "write_finding": "qwen2.5:7b-instruct-q4_K_M",
-    "plan_recon": "qwen2.5:7b-instruct-q4_K_M",
-    "plan_enumeration": "qwen2.5:7b-instruct-q4_K_M",
+    "reason": "qwen2.5:14b-instruct-q4_K_M",
+    "map_vulnerability": "qwen2.5:14b-instruct-q4_K_M",
+    "plan_exploit": "qwen2.5:14b-instruct-q4_K_M",
+    "write_finding": "qwen2.5:14b-instruct-q4_K_M",
+    "plan_recon": "qwen2.5:14b-instruct-q4_K_M",
+    "plan_enumeration": "qwen2.5:14b-instruct-q4_K_M",
     "embed": "nomic-embed-text",
 }
 

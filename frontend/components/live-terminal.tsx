@@ -139,7 +139,7 @@ export function LiveTerminal({ events }: LiveTerminalProps) {
   return (
     <div
       ref={containerRef}
-      className="h-[420px] w-full rounded-2xl border border-white/10 bg-black/60 p-2"
+      className="h-[420px] w-full border border-border-subtle bg-bg-primary p-2"
     />
   );
 }

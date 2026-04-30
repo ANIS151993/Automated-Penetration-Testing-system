@@ -21,8 +21,7 @@ function AuthScreen() {
 
   function onSignInSuccess() {
     const next = searchParams.get("next") || "/";
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    router.push(next as any);
+    router.push(next as never);
     router.refresh();
   }
 
@@ -60,8 +59,8 @@ function AuthScreen() {
 
           <div className="pt-4 text-center border-t border-border-subtle">
             <p className="font-mono text-[10px] text-text-tertiary uppercase leading-tight">
-              Terminal Version: 4.2.0-STABLE
-              <br />© 2024 PentAI Security Systems
+              APTS Version: 1.1.0-STABLE
+              <br />© 2026 Automated-Penetration-Testing-system
             </p>
           </div>
         </div>

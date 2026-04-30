@@ -161,6 +161,31 @@ def create_app() -> FastAPI:
         path = request.url.path
         if path in public_paths or path.startswith("/api/v1/ws/"):
             return await call_next(request)
+
+        # Bearer path — try Supabase JWT first, then legacy JWT
+        auth_header = request.headers.get("authorization", "")
+        if auth_header.lower().startswith("bearer "):
+            bearer_token = auth_header.split(" ", 1)[1].strip()
+            # Try Supabase JWT
+            try:
+                jwt.decode(
+                    bearer_token,
+                    settings.supabase_jwt_secret,
+                    algorithms=["HS256"],
+                    audience="authenticated",
+                )
+                return await call_next(request)
+            except jwt.PyJWTError:
+                pass
+            # Try legacy JWT
+            try:
+                jwt.decode(bearer_token, settings.auth_jwt_secret, algorithms=["HS256"])
+                return await call_next(request)
+            except jwt.PyJWTError:
+                pass
+            return JSONResponse({"detail": "invalid_token"}, status_code=401)
+
+        # Cookie fallback (legacy sessions)
         token = request.cookies.get(settings.auth_cookie_name)
         if not token:
             return JSONResponse({"detail": "not_authenticated"}, status_code=401)

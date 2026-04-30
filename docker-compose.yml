@@ -51,6 +51,9 @@ services:
       PENTAI_OLLAMA_URL: ${PENTAI_OLLAMA_URL:-http://ollama:11434}
       PENTAI_GATEWAY_AUDIENCE: ${PENTAI_GATEWAY_AUDIENCE:-pentai-tool-gateway}
       PENTAI_GATEWAY_JWT_SECRET: ${PENTAI_GATEWAY_JWT_SECRET:-replace-this-before-use}
+      PENTAI_SUPABASE_JWT_SECRET: ${PENTAI_SUPABASE_JWT_SECRET:-replace-with-supabase-project-jwt-secret}
+      PENTAI_CORS_ALLOW_ORIGINS: ${PENTAI_CORS_ALLOW_ORIGINS:-http://localhost:3000}
+      PENTAI_AUTH_JWT_SECRET: ${PENTAI_AUTH_JWT_SECRET:-replace-this-before-use-with-32-plus-bytes-secret}
       PENTAI_GATEWAY_CA_CERT_PATH: ${PENTAI_GATEWAY_CA_CERT_PATH:-/app/certs/ca-cert.pem}
       PENTAI_GATEWAY_CLIENT_CERT_PATH: ${PENTAI_GATEWAY_CLIENT_CERT_PATH:-/app/certs/command-client-cert.pem}
       PENTAI_GATEWAY_CLIENT_KEY_PATH: ${PENTAI_GATEWAY_CLIENT_KEY_PATH:-/app/certs/command-client-key.pem}
