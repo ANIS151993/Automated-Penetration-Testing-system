@@ -41,9 +41,9 @@
 
 \begin{document}
 
-\title{PentAI Pro: Autonomous Penetration Testing via Self-Hosted LLM\\
-Orchestration with Three-Layer Scope Enforcement\\
-and Tamper-Evident Audit Verification}
+\title{Self-Hosted LLM Orchestration for Autonomous Penetration Testing\\
+with Three-Layer Scope Enforcement and\\
+Tamper-Evident Cryptographic Audit Chains}
 
 \author{%
   \IEEEauthorblockN{Md Anisur Rahman Chowdhury\textsuperscript{},
@@ -685,6 +685,62 @@ Real audit chain output from Run~1 (first three events, truncated):
 }
 \end{lstlisting}
 
+\subsection{Tool-Vulnerability Coverage Analysis}
+
+The six tools in the PentAI Pro registry address distinct vulnerability
+classes. Fig.~\ref{fig:heatmap} quantifies this specialisation as a
+coverage matrix, scoring each tool's detection capability for eight
+vulnerability classes on a scale of 0 (no coverage) to 3 (primary
+detection method). nmap and nuclei provide the broadest cross-class
+coverage; dnsx, sslscan, and gobuster are specialist tools with narrow
+but authoritative detection of their respective classes.
+The agent pipeline's phase-aware tool selection corresponds to
+traversing the high-value cells in canonical attack order — beginning
+with DNS and port discovery and progressing through service
+fingerprinting, CVE exposure, and TLS misconfiguration.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  colorbar,
+  colormap/Blues,
+  colorbar style={
+    width=5pt,
+    ytick={0,1,2,3},
+    yticklabels={None,Partial,Moderate,Primary},
+    yticklabel style={font=\tiny},
+  },
+  width=\columnwidth, height=5.4cm,
+  xtick={0,1,2,3,4,5},
+  xticklabels={nmap,nuclei,gobuster,httpx,sslscan,dnsx},
+  xticklabel style={font=\tiny,rotate=30,anchor=east},
+  ytick={0,1,2,3,4,5,6,7},
+  yticklabels={DNS-Recon,Open-Ports,Svc-FP,CVE-Exp,Misconfig,Web-Dir,HTTP-Hdr,TLS},
+  yticklabel style={font=\tiny},
+  point meta min=0,point meta max=3,
+  enlarge x limits=false,
+  enlarge y limits=false,
+]
+\addplot[matrix plot*,mesh/cols=6,point meta=explicit] coordinates {
+  (0,0)[1] (1,0)[0] (2,0)[0] (3,0)[0] (4,0)[0] (5,0)[3]
+  (0,1)[3] (1,1)[0] (2,1)[0] (3,1)[1] (4,1)[0] (5,1)[0]
+  (0,2)[3] (1,2)[1] (2,2)[0] (3,2)[1] (4,2)[1] (5,2)[0]
+  (0,3)[1] (1,3)[3] (2,3)[0] (3,3)[0] (4,3)[1] (5,3)[0]
+  (0,4)[1] (1,4)[3] (2,4)[1] (3,4)[1] (4,4)[1] (5,4)[0]
+  (0,5)[0] (1,5)[2] (2,5)[3] (3,5)[1] (4,5)[0] (5,5)[0]
+  (0,6)[1] (1,6)[2] (2,6)[1] (3,6)[3] (4,6)[1] (5,6)[0]
+  (0,7)[1] (1,7)[2] (2,7)[0] (3,7)[1] (4,7)[3] (5,7)[0]
+};
+\end{axis}
+\end{tikzpicture}
+\caption{Tool--vulnerability coverage matrix (0 = no coverage,
+  3 = primary detection). Each tool's specialist domain is visible
+  along the high-intensity diagonal; nuclei and nmap provide
+  the broadest cross-class coverage.}
+\label{fig:heatmap}
+\end{figure}
+
 %─────────────────────────────────────────────────────────────
 \section{Discussion}
 
@@ -847,16 +903,5 @@ OWASP Foundation,
 \url{https://owasp.org/www-project-web-security-testing-guide/}, 2021.
 
 \end{thebibliography}
-
-\vspace{6pt}
-{\scriptsize
-\noindent\rule{\linewidth}{0.3pt}\\
-\textbf{Copyright Notice:}
-\copyright~2026 Md Anisur Rahman Chowdhury.
-This work was developed as part of Master's research at the
-Department of Computer and Information Science, Gannon University, USA.
-Live system: \url{https://apts.marcbd.site}.
-Contact: \texttt{engr.aanis@gmail.com}.
-}
 
 \end{document}
