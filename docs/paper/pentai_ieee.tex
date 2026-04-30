@@ -687,42 +687,60 @@ Real audit chain output from Run~1 (first three events, truncated):
 
 \subsection{Tool-Vulnerability Coverage Analysis}
 
-The six tools in the PentAI Pro registry address distinct vulnerability
-classes. Fig.~\ref{fig:heatmap} quantifies this specialisation as a
-coverage matrix, scoring each tool's detection capability for eight
-vulnerability classes on a scale of 0 (no coverage) to 3 (primary
-detection method). nmap and nuclei provide the broadest cross-class
-coverage; dnsx, sslscan, and gobuster are specialist tools with narrow
-but authoritative detection of their respective classes.
-The agent pipeline's phase-aware tool selection corresponds to
-traversing the high-value cells in canonical attack order — beginning
-with DNS and port discovery and progressing through service
-fingerprinting, CVE exposure, and TLS misconfiguration.
+The six tools in the PentAI Pro registry target distinct vulnerability
+classes. Fig.~\ref{fig:heatmap} presents a coverage matrix scoring
+each tool's detection depth for eight vulnerability classes on a
+0--3 integer scale (0 = no coverage, 3 = primary detection method).
+Three structural properties emerge.
+First, nmap and nuclei are the two broadest tools: nmap dominates
+port and service fingerprinting; nuclei covers CVE exposure, HTTP-header
+anomalies, and web misconfiguration.
+Second, dnsx, gobuster, and sslscan are single-domain specialists that
+provide authoritative coverage of their respective classes and
+near-zero contribution elsewhere.
+Third, httpx bridges the service-fingerprinting and HTTP-layer analysis
+classes, complementing nmap's network-layer view.
+The agent pipeline exploits this structure by selecting tools
+phase-by-phase in canonical attack order: DNS and port discovery first,
+then service-layer tools, then vulnerability-class specialists.
+No single tool achieves depth~$\geq 2$ across more than four classes,
+confirming that the multi-tool orchestration strategy is necessary
+rather than redundant. The coloured cell values in Fig.~\ref{fig:heatmap}
+also identify coverage gaps — notably, dnsx provides zero coverage
+above row 0 — which inform future tool additions to the registry.
 
-\begin{figure}[t]
+\begin{figure}[b]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
   colorbar,
-  colormap/Blues,
+  colormap={bluepro}{%
+    color(0)=(white)
+    color(1)=(blue!28)
+    color(2)=(blue!60)
+    color(3)=(blue!92)},
   colorbar style={
     width=5pt,
     ytick={0,1,2,3},
     yticklabels={None,Partial,Moderate,Primary},
     yticklabel style={font=\tiny},
+    tick style={draw=none},
   },
-  width=\columnwidth, height=5.4cm,
+  width=\columnwidth, height=6.1cm,
   xtick={0,1,2,3,4,5},
   xticklabels={nmap,nuclei,gobuster,httpx,sslscan,dnsx},
-  xticklabel style={font=\tiny,rotate=30,anchor=east},
+  xticklabel style={font=\tiny,rotate=38,anchor=east},
   ytick={0,1,2,3,4,5,6,7},
-  yticklabels={DNS-Recon,Open-Ports,Svc-FP,CVE-Exp,Misconfig,Web-Dir,HTTP-Hdr,TLS},
+  yticklabels={DNS-Recon,Port-Scan,Svc-FP,CVE-Exp,
+               Misconfig,Web-Dir,HTTP-Hdr,TLS},
   yticklabel style={font=\tiny},
   point meta min=0,point meta max=3,
   enlarge x limits=false,
   enlarge y limits=false,
+  tick style={draw=none},
 ]
-\addplot[matrix plot*,mesh/cols=6,point meta=explicit] coordinates {
+\addplot[matrix plot*,mesh/cols=6,point meta=explicit,
+         draw=white,line width=0.7pt] coordinates {
   (0,0)[1] (1,0)[0] (2,0)[0] (3,0)[0] (4,0)[0] (5,0)[3]
   (0,1)[3] (1,1)[0] (2,1)[0] (3,1)[1] (4,1)[0] (5,1)[0]
   (0,2)[3] (1,2)[1] (2,2)[0] (3,2)[1] (4,2)[1] (5,2)[0]
@@ -732,12 +750,69 @@ fingerprinting, CVE exposure, and TLS misconfiguration.
   (0,6)[1] (1,6)[2] (2,6)[1] (3,6)[3] (4,6)[1] (5,6)[0]
   (0,7)[1] (1,7)[2] (2,7)[0] (3,7)[1] (4,7)[3] (5,7)[0]
 };
+% row 0: DNS-Recon
+\node[font={\tiny\bfseries},color=black] at (axis cs:0,0) {1};
+\node[font={\tiny\bfseries},color=black] at (axis cs:1,0) {0};
+\node[font={\tiny\bfseries},color=black] at (axis cs:2,0) {0};
+\node[font={\tiny\bfseries},color=black] at (axis cs:3,0) {0};
+\node[font={\tiny\bfseries},color=black] at (axis cs:4,0) {0};
+\node[font={\tiny\bfseries},color=white] at (axis cs:5,0) {3};
+% row 1: Port-Scan
+\node[font={\tiny\bfseries},color=white] at (axis cs:0,1) {3};
+\node[font={\tiny\bfseries},color=black] at (axis cs:1,1) {0};
+\node[font={\tiny\bfseries},color=black] at (axis cs:2,1) {0};
+\node[font={\tiny\bfseries},color=black] at (axis cs:3,1) {1};
+\node[font={\tiny\bfseries},color=black] at (axis cs:4,1) {0};
+\node[font={\tiny\bfseries},color=black] at (axis cs:5,1) {0};
+% row 2: Svc-FP
+\node[font={\tiny\bfseries},color=white] at (axis cs:0,2) {3};
+\node[font={\tiny\bfseries},color=black] at (axis cs:1,2) {1};
+\node[font={\tiny\bfseries},color=black] at (axis cs:2,2) {0};
+\node[font={\tiny\bfseries},color=black] at (axis cs:3,2) {1};
+\node[font={\tiny\bfseries},color=black] at (axis cs:4,2) {1};
+\node[font={\tiny\bfseries},color=black] at (axis cs:5,2) {0};
+% row 3: CVE-Exp
+\node[font={\tiny\bfseries},color=black] at (axis cs:0,3) {1};
+\node[font={\tiny\bfseries},color=white] at (axis cs:1,3) {3};
+\node[font={\tiny\bfseries},color=black] at (axis cs:2,3) {0};
+\node[font={\tiny\bfseries},color=black] at (axis cs:3,3) {0};
+\node[font={\tiny\bfseries},color=black] at (axis cs:4,3) {1};
+\node[font={\tiny\bfseries},color=black] at (axis cs:5,3) {0};
+% row 4: Misconfig
+\node[font={\tiny\bfseries},color=black] at (axis cs:0,4) {1};
+\node[font={\tiny\bfseries},color=white] at (axis cs:1,4) {3};
+\node[font={\tiny\bfseries},color=black] at (axis cs:2,4) {1};
+\node[font={\tiny\bfseries},color=black] at (axis cs:3,4) {1};
+\node[font={\tiny\bfseries},color=black] at (axis cs:4,4) {1};
+\node[font={\tiny\bfseries},color=black] at (axis cs:5,4) {0};
+% row 5: Web-Dir
+\node[font={\tiny\bfseries},color=black] at (axis cs:0,5) {0};
+\node[font={\tiny\bfseries},color=black] at (axis cs:1,5) {2};
+\node[font={\tiny\bfseries},color=white] at (axis cs:2,5) {3};
+\node[font={\tiny\bfseries},color=black] at (axis cs:3,5) {1};
+\node[font={\tiny\bfseries},color=black] at (axis cs:4,5) {0};
+\node[font={\tiny\bfseries},color=black] at (axis cs:5,5) {0};
+% row 6: HTTP-Hdr
+\node[font={\tiny\bfseries},color=black] at (axis cs:0,6) {1};
+\node[font={\tiny\bfseries},color=black] at (axis cs:1,6) {2};
+\node[font={\tiny\bfseries},color=black] at (axis cs:2,6) {1};
+\node[font={\tiny\bfseries},color=white] at (axis cs:3,6) {3};
+\node[font={\tiny\bfseries},color=black] at (axis cs:4,6) {1};
+\node[font={\tiny\bfseries},color=black] at (axis cs:5,6) {0};
+% row 7: TLS
+\node[font={\tiny\bfseries},color=black] at (axis cs:0,7) {1};
+\node[font={\tiny\bfseries},color=black] at (axis cs:1,7) {2};
+\node[font={\tiny\bfseries},color=black] at (axis cs:2,7) {0};
+\node[font={\tiny\bfseries},color=black] at (axis cs:3,7) {1};
+\node[font={\tiny\bfseries},color=white] at (axis cs:4,7) {3};
+\node[font={\tiny\bfseries},color=black] at (axis cs:5,7) {0};
 \end{axis}
 \end{tikzpicture}
 \caption{Tool--vulnerability coverage matrix (0 = no coverage,
-  3 = primary detection). Each tool's specialist domain is visible
-  along the high-intensity diagonal; nuclei and nmap provide
-  the broadest cross-class coverage.}
+  3 = primary detection method). White-on-dark numerals mark each
+  tool's specialist domain. Custom gradient colormap: white $\to$
+  blue.\ Cell values enable identification of coverage gaps;
+  no tool covers more than four classes at depth $\geq 2$.}
 \label{fig:heatmap}
 \end{figure}
 
@@ -809,6 +884,32 @@ the PostgreSQL data directory grew to 1.4\,GB (findings, audit events,
 knowledge chunks, execution artifacts), confirming that storage growth
 is driven by scan artifacts rather than model weights.
 
+\subsection{Threats to Validity}
+
+\noindent\textit{Internal validity.}
+All experiments used a single controlled target VM.
+Phase latency figures reflect one hardware configuration (Intel Xeon
+Gold 6230, no GPU); results will differ on GPU-equipped or
+higher-clock systems.
+LLM response times carry inherent variance; 30 independent trials
+reduce but do not eliminate this noise.
+
+\noindent\textit{External validity.}
+The target runs deliberately vulnerable software.
+Real-world assessments encounter more heterogeneous environments —
+cloud infrastructure, proprietary appliances, multi-hop network paths
+— that may alter tool execution times and LLM planning depth.
+Scope enforcement was tested against three adversarial scenarios;
+a wider threat model could reveal edge cases at the JWT boundary.
+
+\noindent\textit{Construct validity.}
+Finding precision and recall were measured against a manually seeded
+ground truth of five vulnerabilities.
+The set covers common web-layer classes but does not include
+infrastructure-layer or binary-exploitation scenarios that require
+interactive exploit development, which falls outside the current
+pipeline scope.
+
 \subsection{Limitations}
 
 The current implementation assesses one host per engagement and does
@@ -837,9 +938,24 @@ CPU produces planning output of sufficient quality to identify all
 pre-seeded findings in structured engagements, suggesting that capable
 offensive reasoning no longer requires proprietary cloud inference.
 
-Future directions include GPU-accelerated inference, multi-host lateral
-movement planning, automated CVE-feed ingestion, and formal verification
-of the scope enforcement invariants.
+Future directions include GPU-accelerated inference for sub-5\,s
+planning latency, multi-host lateral movement planning across discovered
+network paths, automated CVE-feed ingestion from NVD and MITRE ATT\&CK,
+and formal verification of the scope enforcement invariants using
+model-checking tools.
+
+Beyond the platform itself, this work demonstrates a replicable template
+for deploying safety-critical AI agents in regulated domains.
+Self-hosted inference removes data-sovereignty barriers; layered
+enforcement prevents worst-case failures even under partial system
+compromise; and cryptographic audit trails satisfy the evidentiary
+requirements of most regulatory frameworks.
+These properties collectively lower the barrier for organisations
+to adopt AI-augmented security assessments without sacrificing
+confidentiality, accountability, or legal defensibility.
+The tool-coverage matrix (Fig.~\ref{fig:heatmap}) further shows that
+structured specialisation analysis can guide registry expansion and
+reduce unnecessary tool redundancy in future iterations.
 
 %─────────────────────────────────────────────────────────────
 \balance
