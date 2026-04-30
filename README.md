@@ -18,7 +18,7 @@
 
 ---
 
-> **Copyright © 2024–2025 Md Anisur Rahman Chowdhury. All rights reserved.**  
+> **Copyright © 2026 Md Anisur Rahman Chowdhury. All rights reserved.**  
 > Developed as part of Master's research — Department of Computer and Information Science, Gannon University, USA.
 
 </div>

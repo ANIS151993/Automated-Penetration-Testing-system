@@ -185,6 +185,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:3rem
       <li><a href="#guide">Guide</a></li>
       <li><a href="#performance">Performance</a></li>
       <li><a href="#security">Security</a></li>
+      <li><a href="#paper">Paper</a></li>
       <li><a href="#author">Author</a></li>
     </ul>
   </div>
@@ -268,7 +269,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:3rem
       </div>
     </div>
     <div class="copyright-banner">
-      © 2024–2025 Md Anisur Rahman Chowdhury · All Rights Reserved · Gannon University, USA ·
+      © 2026 Md Anisur Rahman Chowdhury · All Rights Reserved · Gannon University, USA ·
       <a href="https://apts.marcbd.site" style="color:var(--primary);text-decoration:none">apts.marcbd.site</a>
     </div>
   </div>
@@ -640,6 +641,180 @@ curl http://172.20.32.74/api/v1/healthz
 
 <div class="divider"></div>
 
+<!-- IEEE PAPER -->
+<section id="paper">
+  <div class="section-header">
+    <div class="section-label">// Research Publication</div>
+    <h2 class="section-title">IEEE Conference Paper</h2>
+    <p class="section-desc">Peer-reviewed research paper on PentAI Pro's architecture and evaluation, submitted for IEEE conference publication.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start">
+
+    <!-- LEFT: Paper first-page preview -->
+    <div style="background:var(--surface);border:1px solid var(--border);padding:0;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent))"></div>
+      <div style="padding:1rem 1.2rem .6rem;border-bottom:1px solid var(--border)">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:2px;color:var(--primary)">Paper Preview — Page 1</span>
+      </div>
+      <!-- Simulated IEEE paper first page -->
+      <div style="background:#fff;color:#000;padding:1.8rem 1.6rem;font-size:.68rem;line-height:1.5;font-family:'Times New Roman',Times,serif;min-height:580px">
+
+        <!-- IEEE header -->
+        <div style="text-align:center;margin-bottom:.8rem">
+          <div style="font-size:.58rem;color:#555;letter-spacing:.5px;margin-bottom:.4rem">IEEE CONFERENCE ON CYBERSECURITY AND INTELLIGENT SYSTEMS · 2026</div>
+          <div style="font-size:.95rem;font-weight:700;line-height:1.3;margin-bottom:.7rem">PentAI Pro: A Self-Hosted, Scope-Safe Framework for LLM-Driven Automated Penetration Testing</div>
+        </div>
+
+        <!-- Authors -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;text-align:center;margin-bottom:.9rem;font-size:.6rem">
+          <div>
+            <div style="font-weight:700">Md Anisur Rahman Chowdhury</div>
+            <div style="font-style:italic">Master's of Information Technology</div>
+            <div>Dept. of Computer and Information Science</div>
+            <div>Gannon University, USA</div>
+            <div>engr.aanis@gmail.com</div>
+          </div>
+          <div>
+            <div style="font-weight:700">Dr. Ronny Bazan-Antequera</div>
+            <div style="font-style:italic">&nbsp;</div>
+            <div>Dept. of Computer and Information Science</div>
+            <div>Gannon University, USA</div>
+            <div>bazanant001@gannon.edu</div>
+          </div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid #999;margin:.6rem 0"/>
+
+        <!-- Two-column layout -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div>
+            <div style="font-weight:700;font-size:.65rem;text-align:center;margin-bottom:.35rem">Abstract</div>
+            <div style="font-size:.6rem;text-align:justify">Automated penetration testing has long remained a distant goal for the security community, hampered by the difficulty of encoding expert reasoning into deterministic rule systems. The emergence of large language models (LLMs) capable of contextual reasoning opens a new path. This paper introduces <span style="font-weight:600">PentAI Pro</span>, a self-hosted, multi-phase automated penetration testing framework that orchestrates LLM-driven agents across physically isolated virtual machines. The system implements a structured attack lifecycle — Reconnaissance, Enumeration, Vulnerability Mapping, and Exploitation Planning — guided by a retrieval-augmented generation (RAG) knowledge base and enforced by a three-layer scope validation mechanism. All components run on-premises using the 14-billion-parameter <span style="font-style:italic">qwen2.5:14b-instruct</span> model via Ollama. Evaluation demonstrates an average reconnaissance planning latency of 18.4 seconds, full-phase pipeline completion under 4 minutes, and 100% out-of-scope rejection across all tested scenarios.</div>
+
+            <div style="margin-top:.55rem">
+              <span style="font-weight:700;font-size:.6rem">Keywords — </span>
+              <span style="font-size:.6rem">penetration testing automation, large language models, retrieval-augmented generation, security orchestration, mutual TLS, audit logging, scope enforcement</span>
+            </div>
+
+            <div style="margin-top:.6rem">
+              <div style="font-weight:700;font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem">I. Introduction</div>
+              <div style="font-size:.6rem;text-align:justify">Penetration testing remains one of the most labour-intensive disciplines in information security. A skilled practitioner must plan a reconnaissance strategy, enumerate live services, identify vulnerabilities, prioritise exploitation paths, and document findings — all while operating strictly within an agreed scope of engagement...</div>
+              <div style="font-size:.6rem;text-align:justify;margin-top:.3rem">Prior efforts at automation have taken two broad approaches. Script-based frameworks such as Metasploit and OpenVAS codify known attack patterns into deterministic modules, but they lack the adaptive reasoning required to chain observations into coherent attack narratives...</div>
+            </div>
+          </div>
+
+          <div>
+            <div style="margin-bottom:.6rem">
+              <div style="font-weight:700;font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem">II. Related Work</div>
+              <div style="font-size:.6rem;text-align:justify"><span style="font-style:italic">A. Automated Vulnerability Scanning:</span> Tools such as Nessus, OpenVAS, and Nuclei automate individual scanning tasks using signature-based detection. While effective at finding known vulnerabilities, they do not reason about attack chains or produce narrative findings...</div>
+              <div style="font-size:.6rem;text-align:justify;margin-top:.3rem"><span style="font-style:italic">B. LLMs for Security Tasks:</span> Happe and Cito demonstrated that GPT-4 can engage in multi-turn penetration testing dialogues. PentAI Pro extends this by deploying LLM reasoning entirely on-premises using open-weight models, eliminating data egress concerns...</div>
+            </div>
+
+            <div style="margin-bottom:.6rem">
+              <div style="font-weight:700;font-size:.65rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem">III. System Architecture</div>
+              <div style="font-size:.6rem;text-align:justify">PentAI Pro is deployed across three isolated virtual machines on a Proxmox hypervisor sharing an internal VLAN (172.20.32.0/18). The <span style="font-style:italic">Command Node</span> (172.20.32.74) runs all orchestration, inference, and data storage; the <span style="font-style:italic">Weapon Node</span> (172.20.32.68) runs the tool execution gateway; the <span style="font-style:italic">Target Node</span> is the assessed system.</div>
+            </div>
+
+            <div style="border:1px solid #ccc;padding:.5rem;font-size:.58rem">
+              <div style="text-align:center;font-weight:700;margin-bottom:.3rem">Table I — Virtual Machine Roles</div>
+              <table style="width:100%;border-collapse:collapse;font-size:.57rem">
+                <tr style="border-bottom:1px solid #999"><th style="text-align:left;padding:.1rem .2rem">VM</th><th>IP</th><th>Role</th><th>OS</th></tr>
+                <tr><td style="padding:.1rem .2rem">Command</td><td>…32.74</td><td>Orchestration</td><td>Ubuntu</td></tr>
+                <tr><td style="padding:.1rem .2rem">Weapon</td><td>…32.68</td><td>Tool Gateway</td><td>Kali</td></tr>
+                <tr><td style="padding:.1rem .2rem">Target</td><td>…32.59</td><td>Assessment</td><td>Custom</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:center;margin-top:.8rem;font-size:.55rem;color:#666;border-top:1px solid #ddd;padding-top:.4rem">
+          978-X-XXXX-XXXX-X/26/$31.00 © 2026 IEEE · Authorized licensed use limited to: Gannon University
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Download options -->
+    <div style="display:flex;flex-direction:column;gap:1.5rem">
+
+      <!-- Paper info card -->
+      <div style="background:var(--surface);border:1px solid var(--border);padding:1.8rem;position:relative">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--primary))"></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--accent);margin-bottom:1.2rem">Paper Information</div>
+
+        <div style="display:flex;flex-direction:column;gap:.7rem;font-size:.85rem">
+          <div><span style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:.72rem">TITLE</span><br/><span style="color:var(--text)">PentAI Pro: A Self-Hosted, Scope-Safe Framework for LLM-Driven Automated Penetration Testing</span></div>
+          <div><span style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:.72rem">AUTHORS</span><br/><span style="color:var(--text)">Md Anisur Rahman Chowdhury, Dr. Ronny Bazan-Antequera</span></div>
+          <div><span style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:.72rem">AFFILIATION</span><br/><span style="color:var(--text)">Dept. of Computer and Information Science, Gannon University, USA</span></div>
+          <div><span style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:.72rem">FORMAT</span><br/><span style="color:var(--text)">IEEE Conference · 5 Pages · IEEEtran · 2026</span></div>
+          <div><span style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:.72rem">KEYWORDS</span><br/><span style="color:var(--text2);font-size:.82rem">penetration testing automation · LLM agents · RAG · mTLS · audit logging · scope enforcement · self-hosted AI</span></div>
+        </div>
+      </div>
+
+      <!-- Download buttons -->
+      <div style="background:var(--surface);border:1px solid var(--border);padding:1.8rem;position:relative">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent2))"></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--primary);margin-bottom:1.4rem">Download Paper</div>
+
+        <div style="display:flex;flex-direction:column;gap:1rem">
+          <a href="paper/pentai_ieee.pdf" download="PentAI_Pro_IEEE_Paper.pdf"
+            style="display:flex;align-items:center;gap:1rem;background:var(--primary);color:#fff;padding:1rem 1.4rem;text-decoration:none;transition:all .2s;font-family:'JetBrains Mono',monospace"
+            onmouseover="this.style.filter='brightness(1.15)'" onmouseout="this.style.filter='brightness(1)'">
+            <div style="font-size:1.8rem;line-height:1">📄</div>
+            <div>
+              <div style="font-size:.82rem;font-weight:600;text-transform:uppercase;letter-spacing:1px">Download PDF</div>
+              <div style="font-size:.72rem;opacity:.8;margin-top:.2rem">pentai_ieee.pdf · ~154 KB · Compiled LaTeX</div>
+            </div>
+            <div style="margin-left:auto;font-size:1rem">↓</div>
+          </a>
+
+          <a href="paper/pentai_ieee.tex" download="PentAI_Pro_IEEE_Paper.tex"
+            style="display:flex;align-items:center;gap:1rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:1rem 1.4rem;text-decoration:none;transition:all .2s;font-family:'JetBrains Mono',monospace"
+            onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text)'">
+            <div style="font-size:1.8rem;line-height:1">📝</div>
+            <div>
+              <div style="font-size:.82rem;font-weight:600;text-transform:uppercase;letter-spacing:1px">Download LaTeX Source</div>
+              <div style="font-size:.72rem;opacity:.7;margin-top:.2rem">pentai_ieee.tex · ~25 KB · IEEEtran format</div>
+            </div>
+            <div style="margin-left:auto;font-size:1rem">↓</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Abstract excerpt -->
+      <div style="background:rgba(79,142,247,.05);border:1px solid rgba(79,142,247,.2);padding:1.4rem">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--primary);margin-bottom:.8rem">Abstract</div>
+        <p style="font-size:.85rem;color:var(--text2);line-height:1.7;font-style:italic">"...This paper introduces PentAI Pro, a self-hosted, multi-phase automated penetration testing framework that orchestrates LLM-driven agents across physically isolated virtual machines. The system implements a structured attack lifecycle guided by a retrieval-augmented generation knowledge base and enforced by a three-layer scope validation mechanism. All components run on-premises, eliminating data egress risks inherent in cloud-hosted inference. Evaluation demonstrates 100% out-of-scope rejection and full-phase pipeline completion under 4 minutes."</p>
+        <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:.5rem">
+          <span style="background:var(--surface);border:1px solid var(--border);color:var(--text3);padding:.25rem .6rem;font-family:'JetBrains Mono',monospace;font-size:.68rem">108 tests passing</span>
+          <span style="background:var(--surface);border:1px solid var(--border);color:var(--text3);padding:.25rem .6rem;font-family:'JetBrains Mono',monospace;font-size:.68rem">18.4s avg recon</span>
+          <span style="background:var(--surface);border:1px solid var(--border);color:var(--text3);padding:.25rem .6rem;font-family:'JetBrains Mono',monospace;font-size:.68rem">100% scope safety</span>
+          <span style="background:var(--surface);border:1px solid var(--border);color:var(--text3);padding:.25rem .6rem;font-family:'JetBrains Mono',monospace;font-size:.68rem">5 pages</span>
+        </div>
+      </div>
+
+      <!-- Cite box -->
+      <div style="background:var(--surface);border:1px solid var(--border);padding:1.4rem">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--text3);margin-bottom:.8rem">Cite This Paper</div>
+        <pre style="font-size:.68rem;color:var(--accent);white-space:pre-wrap;margin:0;padding:0;background:none;border:none">@inproceedings{chowdhury2026pentai,
+  title     = {PentAI Pro: A Self-Hosted, Scope-Safe
+               Framework for LLM-Driven Automated
+               Penetration Testing},
+  author    = {Chowdhury, Md Anisur Rahman and
+               Bazan-Antequera, Ronny},
+  booktitle = {IEEE Conference on Cybersecurity
+               and Intelligent Systems},
+  year      = {2026},
+  pages     = {1--5}
+}</pre>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
 <!-- TECH STACK -->
 <section>
   <div class="section-header">
@@ -669,7 +844,7 @@ curl http://172.20.32.74/api/v1/healthz
       <a href="https://researchgate.net/profile/Md-Anisur-Rahman-Chowdhury" target="_blank">ResearchGate</a>
     </div>
     <div class="footer-copy">
-      Copyright © 2024–2025 <strong style="color:var(--text)">Md Anisur Rahman Chowdhury</strong><br/>
+      Copyright © 2026 <strong style="color:var(--text)">Md Anisur Rahman Chowdhury</strong><br/>
       Master's of Information Technology · Dept. of Computer and Information Science · Gannon University, USA<br/>
       <a href="mailto:engr.aanis@gmail.com" style="color:var(--primary);text-decoration:none">engr.aanis@gmail.com</a> ·
       <a href="https://apts.marcbd.site" style="color:var(--primary);text-decoration:none">apts.marcbd.site</a><br/><br/>
