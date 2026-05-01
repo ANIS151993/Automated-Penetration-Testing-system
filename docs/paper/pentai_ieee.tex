@@ -25,15 +25,17 @@
 
 \lstdefinestyle{terminal}{
   backgroundcolor=\color{backgray},
-  basicstyle=\ttfamily\scriptsize,
+  basicstyle=\ttfamily\tiny,
   breaklines=true,
+  breakatwhitespace=false,
+  columns=flexible,
   frame=single,
   rulecolor=\color{codegray},
   keywordstyle=\color{codeblue},
   commentstyle=\color{codegreen},
   numbers=none,
-  xleftmargin=4pt,xrightmargin=4pt,
-  aboveskip=4pt,belowskip=4pt
+  xleftmargin=2pt,xrightmargin=2pt,
+  aboveskip=3pt,belowskip=3pt
 }
 
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
@@ -158,6 +160,10 @@ every decision point.
 PentAI Pro removes that per-step dependency: the operator defines scope
 and goal once; the agent executes autonomously, surfacing only
 high-risk approval requests.
+Parallel work on deep learning for digital forensics~\cite{chowdhury2025deepfake}
+demonstrates that domain-specific AI achieves expert-level accuracy
+on previously manual security tasks, reinforcing the case for
+ML-driven automation across security operations.
 ReAct~\cite{yao2022} formalises reasoning-action-observation loops for
 general LLM agents. PentAI Pro specialises this pattern with
 typed tool schemas, phase-aware supervisors, and prompt-injection defences
@@ -189,6 +195,9 @@ The OWASP Testing Guide~\cite{owasp} defines the methodological baseline
 that informed our phase decomposition (Reconnaissance, Enumeration,
 Vulnerability Identification, Exploitation): PentAI Pro's four-phase
 pipeline maps directly onto Sections 4--7 of that guide.
+The authors' prior work on AI-driven serverless firewalls~\cite{chowdhury2025serverless}
+addresses the defensive perimeter of the same threat model; PentAI Pro
+extends that line to autonomous offensive assessment.
 
 %─────────────────────────────────────────────────────────────
 \section{System Architecture}
@@ -432,47 +441,47 @@ regardless of query complexity.
 
 \begin{figure}[t]
 \centering
+\resizebox{\columnwidth}{!}{%
 \begin{tikzpicture}
 \begin{axis}[
   xbar,
-  width=\columnwidth,height=5.2cm,
+  height=5.2cm,
   bar width=6pt,
-  xlabel={Time (seconds)},
+  xlabel={Time (s)},
   symbolic y coords={
-    KB Retrieval,
+    KB-Retrieval,
     Classify,
-    Write Finding,
-    Plan Enum,
-    Plan Recon,
-    Map Vulns,
-    Plan Exploit},
+    Write-Find,
+    Plan-Enum,
+    Plan-Recon,
+    Map-Vulns,
+    Plan-Exploit},
   ytick=data,
-  yticklabel style={font=\scriptsize},
-  xticklabel style={font=\scriptsize},
-  xlabel style={font=\scriptsize},
+  yticklabel style={font=\tiny},
+  xticklabel style={font=\tiny},
+  xlabel style={font=\tiny},
   nodes near coords,
   nodes near coords style={font=\tiny,xshift=2pt},
   every node near coord/.append style={/pgf/number format/.cd,fixed,precision=1},
-  xmin=0,xmax=38,
+  xmin=0,xmax=36,
   enlarge y limits=0.12,
   grid=major,grid style={dotted,gray!40},
-  legend pos=south east,
-  legend style={font=\scriptsize},
 ]
 \addplot+[fill=blue!40,draw=blue!60] coordinates {
-  (0.8,KB Retrieval)
+  (0.8,KB-Retrieval)
   (1.2,Classify)
-  (11.2,Write Finding)
-  (15.1,Plan Enum)
-  (18.4,Plan Recon)
-  (22.3,Map Vulns)
-  (28.1,Plan Exploit)
+  (11.2,Write-Find)
+  (15.1,Plan-Enum)
+  (18.4,Plan-Recon)
+  (22.3,Map-Vulns)
+  (28.1,Plan-Exploit)
 };
 \end{axis}
-\end{tikzpicture}
-\caption{Mean phase latency (30 trials, error bars = 1 SD).
-  KB retrieval is nearly constant; exploitation planning shows the
-  highest variance due to variable finding depth.}
+\end{tikzpicture}%
+}
+\caption{Mean phase latency (30 trials). KB retrieval is nearly
+  constant; exploitation planning shows the highest variance due
+  to variable finding depth.}
 \label{fig:latency}
 \end{figure}
 
@@ -485,19 +494,20 @@ due to template enumeration.
 
 \begin{figure}[t]
 \centering
+\resizebox{\columnwidth}{!}{%
 \begin{tikzpicture}
 \begin{axis}[
   ybar,
-  width=\columnwidth,height=4.6cm,
+  height=4.6cm,
   bar width=7pt,
-  ylabel={Time (seconds)},
+  ylabel={Time (s)},
   symbolic x coords={
     dnsx, httpx, whatweb, sslscan,
     nmap-top, nmap-svc, nmap-os, nuclei},
   xtick=data,
-  xticklabel style={font=\tiny,rotate=30,anchor=east},
-  yticklabel style={font=\scriptsize},
-  ylabel style={font=\scriptsize},
+  xticklabel style={font=\tiny,rotate=35,anchor=east},
+  yticklabel style={font=\tiny},
+  ylabel style={font=\tiny},
   ymin=0,ymax=105,
   nodes near coords,
   nodes near coords style={font=\tiny,rotate=90,anchor=west},
@@ -516,8 +526,9 @@ due to template enumeration.
   (nuclei,  78.4)
 };
 \end{axis}
-\end{tikzpicture}
-\caption{Mean tool execution times (30 trials per tool, error bars = 1 SD).
+\end{tikzpicture}%
+}
+\caption{Mean tool execution times (30 trials per tool).
   Nuclei's high variance reflects variable template match counts.}
 \label{fig:tools}
 \end{figure}
@@ -532,16 +543,16 @@ Table~\ref{tab:scope} shows results across 50 trials per scenario.
 
 \begin{table}[t]
 \caption{Scope Enforcement Verification (50 trials each)}
-\centering\small
+\centering\scriptsize
 \begin{tabular}{llrr}
 \toprule
 Scenario & Blocked at & Blocked & Escaped\\
 \midrule
-S1: Crafted LLM output  & Layer 1 (planner) & 50/50 & 0\\
-S2: Direct API bypass   & Layer 2 (backend) & 50/50 & 0\\
-S3: Forged JWT to gateway & Layer 3 (gateway) & 50/50 & 0\\
+S1: Crafted LLM output & Layer 1 & 50/50 & 0\\
+S2: Direct API bypass  & Layer 2 & 50/50 & 0\\
+S3: Forged JWT         & Layer 3 & 50/50 & 0\\
 \midrule
-\textbf{Overall} & & \textbf{150/150} & \textbf{0}\\
+\textbf{Total} & & \textbf{150/150} & \textbf{0}\\
 \bottomrule
 \end{tabular}
 \label{tab:scope}
@@ -556,14 +567,14 @@ in all cases.
 
 \begin{table}[t]
 \caption{Audit Chain Validation Performance (10 trials each)}
-\centering\small
+\centering\scriptsize
 \begin{tabular}{lrrr}
 \toprule
-Chain Length & Validation (ms) & Tamper Detected & Position Correct\\
+Chain & Validation (ms) & Tamper Det. & Pos.\ Correct\\
 \midrule
-50  events & $82  \pm 9$  & 10/10 & 10/10\\
-100 events & $178 \pm 14$ & 10/10 & 10/10\\
-200 events & $351 \pm 27$ & 10/10 & 10/10\\
+50 ev.  & $82  \pm 9$  & 10/10 & 10/10\\
+100 ev. & $178 \pm 14$ & 10/10 & 10/10\\
+200 ev. & $351 \pm 27$ & 10/10 & 10/10\\
 \bottomrule
 \end{tabular}
 \label{tab:audit}
@@ -608,18 +619,19 @@ the 14B model produces planning outputs of 320--520 tokens at 12\,tok/s.
 
 \begin{figure}[t]
 \centering
+\resizebox{\columnwidth}{!}{%
 \begin{tikzpicture}
 \begin{axis}[
   ybar,
-  width=\columnwidth, height=4.5cm,
+  height=4.5cm,
   bar width=8pt,
   ylabel={Output tokens},
   symbolic x coords={Classify, Parse, Recon-Plan, Enum-Plan,
-                     Vuln-Map, Exploit-Plan, Write-Finding},
+                     Vuln-Map, Exploit-Plan, Write-Find},
   xtick=data,
-  xticklabel style={font=\tiny,rotate=32,anchor=east},
-  yticklabel style={font=\scriptsize},
-  ylabel style={font=\scriptsize},
+  xticklabel style={font=\tiny,rotate=35,anchor=east},
+  yticklabel style={font=\tiny},
+  ylabel style={font=\tiny},
   ymin=0, ymax=580,
   nodes near coords,
   nodes near coords style={font=\tiny},
@@ -627,22 +639,22 @@ the 14B model produces planning outputs of 320--520 tokens at 12\,tok/s.
     {/pgf/number format/.cd,fixed,precision=0},
   grid=major, grid style={dotted,gray!40},
   enlarge x limits=0.06,
-  legend style={at={(0.98,0.97)},anchor=north east,font=\scriptsize},
+  legend style={at={(0.98,0.97)},anchor=north east,font=\tiny},
 ]
 \addplot+[fill=teal!40,draw=teal!70] coordinates {
   (Classify,62)   (Parse,78)     (Recon-Plan,0)
-  (Enum-Plan,0)   (Vuln-Map,0)   (Exploit-Plan,0) (Write-Finding,0)
+  (Enum-Plan,0)   (Vuln-Map,0)   (Exploit-Plan,0) (Write-Find,0)
 };
 \addplot+[fill=blue!40,draw=blue!70] coordinates {
   (Classify,0)     (Parse,0)       (Recon-Plan,348)
-  (Enum-Plan,312)  (Vuln-Map,421)  (Exploit-Plan,518) (Write-Finding,284)
+  (Enum-Plan,312)  (Vuln-Map,421)  (Exploit-Plan,518) (Write-Find,284)
 };
 \legend{llama3.2:3b, qwen2.5:14b}
 \end{axis}
-\end{tikzpicture}
-\caption{Mean output token counts per task type across both models
-  (30 trials each). Zero bars indicate that task type is not assigned
-  to that model.}
+\end{tikzpicture}%
+}
+\caption{Mean output token counts per task type (30 trials each).
+  Zero bars: task not assigned to that model.}
 \label{fig:tokens}
 \end{figure}
 
@@ -688,29 +700,19 @@ Real audit chain output from Run~1 (first three events, truncated):
 \subsection{Tool-Vulnerability Coverage Analysis}
 
 The six tools in the PentAI Pro registry target distinct vulnerability
-classes. Fig.~\ref{fig:heatmap} presents a coverage matrix scoring
-each tool's detection depth for eight vulnerability classes on a
-0--3 integer scale (0 = no coverage, 3 = primary detection method).
-Three structural properties emerge.
-First, nmap and nuclei are the two broadest tools: nmap dominates
-port and service fingerprinting; nuclei covers CVE exposure, HTTP-header
-anomalies, and web misconfiguration.
-Second, dnsx, gobuster, and sslscan are single-domain specialists that
-provide authoritative coverage of their respective classes and
-near-zero contribution elsewhere.
-Third, httpx bridges the service-fingerprinting and HTTP-layer analysis
-classes, complementing nmap's network-layer view.
-The agent pipeline exploits this structure by selecting tools
-phase-by-phase in canonical attack order: DNS and port discovery first,
-then service-layer tools, then vulnerability-class specialists.
+classes. Fig.~\ref{fig:heatmap} scores each tool's detection depth for
+eight vulnerability classes (0 = no coverage, 3 = primary detection).
+nmap and nuclei are the broadest tools; dnsx, gobuster, and sslscan are
+single-domain specialists. httpx bridges service fingerprinting and
+HTTP-layer analysis, complementing nmap's network view.
 No single tool achieves depth~$\geq 2$ across more than four classes,
-confirming that the multi-tool orchestration strategy is necessary
-rather than redundant. The coloured cell values in Fig.~\ref{fig:heatmap}
-also identify coverage gaps — notably, dnsx provides zero coverage
-above row 0 — which inform future tool additions to the registry.
+confirming that multi-tool orchestration is necessary for complete
+coverage. Cell values also identify gaps — dnsx contributes zero above
+row 0 — guiding future registry additions.
 
 \begin{figure}[b]
 \centering
+\resizebox{\columnwidth}{!}{%
 \begin{tikzpicture}
 \begin{axis}[
   colorbar,
@@ -726,7 +728,7 @@ above row 0 — which inform future tool additions to the registry.
     yticklabel style={font=\tiny},
     tick style={draw=none},
   },
-  width=\columnwidth, height=6.1cm,
+  height=6.1cm,
   xtick={0,1,2,3,4,5},
   xticklabels={nmap,nuclei,gobuster,httpx,sslscan,dnsx},
   xticklabel style={font=\tiny,rotate=38,anchor=east},
@@ -807,12 +809,12 @@ above row 0 — which inform future tool additions to the registry.
 \node[font={\tiny\bfseries},color=white] at (axis cs:4,7) {3};
 \node[font={\tiny\bfseries},color=black] at (axis cs:5,7) {0};
 \end{axis}
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{Tool--vulnerability coverage matrix (0 = no coverage,
   3 = primary detection method). White-on-dark numerals mark each
-  tool's specialist domain. Custom gradient colormap: white $\to$
-  blue.\ Cell values enable identification of coverage gaps;
-  no tool covers more than four classes at depth $\geq 2$.}
+  tool's specialist domain. Custom white-to-blue gradient; no tool
+  covers more than four classes at depth $\geq 2$.}
 \label{fig:heatmap}
 \end{figure}
 
@@ -884,31 +886,19 @@ the PostgreSQL data directory grew to 1.4\,GB (findings, audit events,
 knowledge chunks, execution artifacts), confirming that storage growth
 is driven by scan artifacts rather than model weights.
 
-\subsection{Threats to Validity}
+\subsection{Responsible Deployment}
 
-\noindent\textit{Internal validity.}
-All experiments used a single controlled target VM.
-Phase latency figures reflect one hardware configuration (Intel Xeon
-Gold 6230, no GPU); results will differ on GPU-equipped or
-higher-clock systems.
-LLM response times carry inherent variance; 30 independent trials
-reduce but do not eliminate this noise.
-
-\noindent\textit{External validity.}
-The target runs deliberately vulnerable software.
-Real-world assessments encounter more heterogeneous environments —
-cloud infrastructure, proprietary appliances, multi-hop network paths
-— that may alter tool execution times and LLM planning depth.
-Scope enforcement was tested against three adversarial scenarios;
-a wider threat model could reveal edge cases at the JWT boundary.
-
-\noindent\textit{Construct validity.}
-Finding precision and recall were measured against a manually seeded
-ground truth of five vulnerabilities.
-The set covers common web-layer classes but does not include
-infrastructure-layer or binary-exploitation scenarios that require
-interactive exploit development, which falls outside the current
-pipeline scope.
+PentAI Pro is designed for use exclusively within explicitly scoped
+and contractually authorised engagements.
+The operator approval workflow creates a mandatory human checkpoint
+before each high-risk tool phase, and the tamper-evident audit log
+provides post-engagement evidence that no out-of-scope action occurred.
+Deployers must ensure all three VM nodes are network-isolated from
+production systems and that engagement scope definitions undergo legal
+review before agent execution.
+The system must not be used against cloud-hosted targets without
+explicit provider authorisation, nor operated outside a controlled,
+isolated laboratory environment.
 
 \subsection{Limitations}
 
@@ -1017,6 +1007,21 @@ Supabase Inc.,
 OWASP Foundation,
 ``OWASP Testing Guide v4.2,''
 \url{https://owasp.org/www-project-web-security-testing-guide/}, 2021.
+
+\bibitem{chowdhury2025serverless}
+M.~A.~R. Chowdhury, H.~N. Dang, R.~Bazan-Antequera,
+  Md.~S. Khan, Md.~R. Karim, and S.~Manakkadu,
+``Towards a serverless intelligent firewall: AI-driven security
+  and zero-trust architectures,''
+\textit{IEEE}, 2025.
+
+\bibitem{chowdhury2025deepfake}
+Md.~A.~R. Chowdhury \textit{et al.},
+``Deepfake detection in MIS: Leveraging DenseNet and multi-scale
+  information for enhanced digital forensics,''
+in \textit{Proc.\ IEEE 2nd Int.\ Conf.\ on Computing, Applications
+  and Systems (COMPAS)}, Oct.\ 2025,
+\url{https://ieeexplore.ieee.org/abstract/document/11381812}.
 
 \end{thebibliography}
 
