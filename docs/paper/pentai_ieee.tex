@@ -622,46 +622,40 @@ the 14B model produces planning outputs of 320--520 tokens at 12\,tok/s.
 \resizebox{\columnwidth}{!}{%
 \begin{tikzpicture}
 \begin{axis}[
-  ybar,
-  height=4.5cm,
-  bar width=11pt,
-  ylabel={Output tokens},
-  symbolic x coords={Classify,Parse,Recon-Plan,Enum-Plan,
-                     Vuln-Map,Exploit-Plan,Write-Find},
-  xtick=data,
-  xticklabel style={font=\tiny,rotate=35,anchor=east},
-  yticklabel style={font=\tiny},
-  ylabel style={font=\tiny},
-  ymin=0,ymax=580,
-  grid=major,grid style={dotted,gray!40},
-  enlarge x limits=0.09,
-  legend style={at={(0.02,0.97)},anchor=north west,font=\tiny},
+  xbar,
+  height=5.0cm,
+  bar width=8pt,
+  xlabel={Output Tokens},
+  xlabel style={font=\footnotesize},
+  symbolic y coords={
+    Classify, Parse, Write-Find, Enum-Plan,
+    Recon-Plan, Vuln-Map, Exploit-Plan},
+  ytick=data,
+  yticklabel style={font=\footnotesize},
+  xticklabel style={font=\footnotesize},
+  xmin=0, xmax=600,
+  nodes near coords,
+  nodes near coords style={font=\footnotesize,anchor=west,xshift=2pt},
+  every node near coord/.append style=
+    {/pgf/number format/.cd,fixed,precision=0},
+  grid=major, grid style={dotted,gray!35},
+  legend style={at={(0.98,0.04)},anchor=south east,font=\footnotesize},
+  enlarge y limits=0.09,
 ]
-% 3B model: only Classify and Parse (no zero-value placeholders)
-\addplot+[fill=teal!50,draw=teal!80,
-  nodes near coords,
-  nodes near coords style={font=\tiny,anchor=south},
-  every node near coord/.append style=
-    {/pgf/number format/.cd,fixed,precision=0}
-] coordinates {
-  (Classify,62) (Parse,78)
+\addplot+[fill=teal!45,draw=teal!70,bar shift=0pt] coordinates {
+  (62,Classify) (78,Parse)
 };
-% 14B model: planning tasks only
-\addplot+[fill=blue!50,draw=blue!80,
-  nodes near coords,
-  nodes near coords style={font=\tiny,anchor=south},
-  every node near coord/.append style=
-    {/pgf/number format/.cd,fixed,precision=0}
-] coordinates {
-  (Recon-Plan,348) (Enum-Plan,312) (Vuln-Map,421)
-  (Exploit-Plan,518) (Write-Find,284)
+\addplot+[fill=blue!55,draw=blue!75,bar shift=0pt] coordinates {
+  (284,Write-Find) (312,Enum-Plan)
+  (348,Recon-Plan) (421,Vuln-Map) (518,Exploit-Plan)
 };
-\legend{llama3.2:3b,qwen2.5:14b}
+\legend{llama3.2:3b,\ qwen2.5:14b}
 \end{axis}
 \end{tikzpicture}%
 }
-\caption{Mean output token counts per task (30 trials). Teal:
-  3B model tasks (classify/parse). Blue: 14B model planning tasks.}
+\caption{LLM output token counts per task type (30 trials each).
+  3B model handles lightweight tasks (62--78 tokens);
+  14B generates extended plans (284--518 tokens).}
 \label{fig:tokens}
 \end{figure}
 
@@ -722,95 +716,102 @@ row 0 — guiding future registry additions.
 \resizebox{\columnwidth}{!}{%
 \begin{tikzpicture}
 
-\def\CW{1.12} % cell width  (cm — tikz default unit)
-\def\CH{0.56} % cell height (cm)
+\def\CW{1.18}
+\def\CH{0.60}
 
-% \hcell{col}{row}{score}  — score in {0,1,2,3}
+% hcell{col}{row}{score}: score 0-3, green severity palette
 \newcommand{\hcell}[3]{%
   \ifnum#3=0
-    \def\bgcol{gray!14}\def\fgcol{black!50}%
+    \def\bgcol{gray!12}\def\fgcol{black!40}%
   \else\ifnum#3=1
-    \def\bgcol{blue!24}\def\fgcol{black}%
+    \def\bgcol{green!30!white}\def\fgcol{black!70}%
   \else\ifnum#3=2
-    \def\bgcol{blue!58}\def\fgcol{white}%
+    \def\bgcol{green!62!black}\def\fgcol{white}%
   \else
-    \def\bgcol{blue!90}\def\fgcol{white}%
+    \def\bgcol{green!85!black}\def\fgcol{white}%
   \fi\fi\fi
   \fill[\bgcol]
     ({#1*\CW},{#2*\CH}) rectangle +(\CW,\CH);
-  \draw[white,line width=0.7pt]
+  \draw[white!80,line width=0.55pt]
     ({#1*\CW},{#2*\CH}) rectangle +(\CW,\CH);
-  \node[font={\scriptsize\bfseries},text=\fgcol]
+  \node[font={\footnotesize\bfseries},text=\fgcol]
     at ({(#1+0.5)*\CW},{(#2+0.5)*\CH}) {#3};
 }
 
-% ── grid data ──────────────────────────────────────────────
-% rows 0–7 (bottom–top): DNS-Recon Port-Scan Svc-FP CVE-Exp
-%                         Misconfig  Web-Dir  HTTP-Hdr  TLS
-% cols 0–5: nmap nuclei gobuster httpx sslscan dnsx
+% ── Data matrix ────────────────────────────────────────────
+% Rows (0=bottom → 7=top): DNS-Recon, Port-Scan, Svc-FP,
+%   CVE-Scan, Misconfig, Web-Dir, HTTP-Hdr, TLS-Audit
+% Cols (0→5): nmap, nuclei, gobuster, httpx, sslscan, dnsx
+%
+% Rationale: nmap=port/service king; nuclei=CVE/misconfig/web;
+%   gobuster=web-dir only; httpx=http-hdr/svc-fp; sslscan=TLS;
+%   dnsx=DNS only.
 \hcell{0}{0}{1}\hcell{1}{0}{0}\hcell{2}{0}{0}%
 \hcell{3}{0}{0}\hcell{4}{0}{0}\hcell{5}{0}{3}
 
-\hcell{0}{1}{3}\hcell{1}{1}{0}\hcell{2}{1}{0}%
+\hcell{0}{1}{3}\hcell{1}{1}{1}\hcell{2}{1}{0}%
 \hcell{3}{1}{1}\hcell{4}{1}{0}\hcell{5}{1}{0}
 
 \hcell{0}{2}{3}\hcell{1}{2}{1}\hcell{2}{2}{0}%
-\hcell{3}{2}{1}\hcell{4}{2}{1}\hcell{5}{2}{0}
+\hcell{3}{2}{2}\hcell{4}{2}{1}\hcell{5}{2}{0}
 
 \hcell{0}{3}{1}\hcell{1}{3}{3}\hcell{2}{3}{0}%
-\hcell{3}{3}{0}\hcell{4}{3}{1}\hcell{5}{3}{0}
+\hcell{3}{3}{1}\hcell{4}{3}{0}\hcell{5}{3}{0}
 
 \hcell{0}{4}{1}\hcell{1}{4}{3}\hcell{2}{4}{1}%
-\hcell{3}{4}{1}\hcell{4}{4}{1}\hcell{5}{4}{0}
+\hcell{3}{4}{2}\hcell{4}{4}{1}\hcell{5}{4}{0}
 
 \hcell{0}{5}{0}\hcell{1}{5}{2}\hcell{2}{5}{3}%
 \hcell{3}{5}{1}\hcell{4}{5}{0}\hcell{5}{5}{0}
 
-\hcell{0}{6}{1}\hcell{1}{6}{2}\hcell{2}{6}{1}%
+\hcell{0}{6}{1}\hcell{1}{6}{2}\hcell{2}{6}{0}%
 \hcell{3}{6}{3}\hcell{4}{6}{1}\hcell{5}{6}{0}
 
-\hcell{0}{7}{1}\hcell{1}{7}{2}\hcell{2}{7}{0}%
+\hcell{0}{7}{0}\hcell{1}{7}{1}\hcell{2}{7}{0}%
 \hcell{3}{7}{1}\hcell{4}{7}{3}\hcell{5}{7}{0}
 
-% ── outer border ───────────────────────────────────────────
-\draw[black!35,line width=0.5pt]
+% ── Outer border ───────────────────────────────────────────
+\draw[black!45,line width=0.7pt]
   (0,0) rectangle ({6*\CW},{8*\CH});
 
-% ── column labels (rotated 45°, above grid) ────────────────
+% ── Column labels (45° above grid) ────────────────────────
 \foreach \lbl [count=\ci from 0] in
   {nmap,nuclei,gobuster,httpx,sslscan,dnsx}{
-  \node[rotate=45,anchor=south west,font=\tiny]
-    at ({(\ci+0.35)*\CW},{8*\CH+0.05}) {\lbl};
+  \node[rotate=45,anchor=south west,font=\small\bfseries]
+    at ({(\ci+0.28)*\CW},{8*\CH+0.07}) {\lbl};
 }
 
-% ── row labels (horizontal, left of grid) ─────────────────
+% ── Row labels (left of grid) ─────────────────────────────
 \foreach \lbl [count=\ri from 0] in
-  {DNS-Recon,Port-Scan,Svc-FP,CVE-Exp,
-   Misconfig,Web-Dir,HTTP-Hdr,TLS}{
-  \node[anchor=east,font=\tiny]
-    at ({-0.06},{(\ri+0.5)*\CH}) {\lbl};
+  {DNS-Recon,Port-Scan,Svc-FP,CVE-Scan,
+   Misconfig,Web-Dir,HTTP-Hdr,TLS-Audit}{
+  \node[anchor=east,font=\small]
+    at ({-0.09},{(\ri+0.5)*\CH}) {\lbl};
 }
 
-% ── compact legend (right of grid) ────────────────────────
-\def\lx{6.3}  % legend column x-offset (in CW units)
-\foreach \score/\bg [count=\li from 0] in
-  {0/gray!14, 1/blue!24, 2/blue!58, 3/blue!90}{
+% ── Legend (right of grid) ────────────────────────────────
+\def\lx{6.22}
+\foreach \score/\bg/\desc [count=\li from 0] in
+  {0/gray!12/None,
+   1/green!30!white/Partial,
+   2/green!62!black/Moderate,
+   3/green!85!black/Primary}{
   \fill[\bg]
-    ({\lx*\CW},     {\li*\CH+0.10}) rectangle +(0.24,{\CH-0.20});
-  \draw[gray!50,line width=0.3pt]
-    ({\lx*\CW},     {\li*\CH+0.10}) rectangle +(0.24,{\CH-0.20});
-  \node[anchor=west,font=\tiny]
-    at ({\lx*\CW+0.28},{(\li+0.5)*\CH}) {\score};
+    ({\lx*\CW},{\li*\CH+0.08}) rectangle +(0.28,{\CH-0.16});
+  \draw[black!30,line width=0.3pt]
+    ({\lx*\CW},{\li*\CH+0.08}) rectangle +(0.28,{\CH-0.16});
+  \node[anchor=west,font=\scriptsize]
+    at ({\lx*\CW+0.32},{(\li+0.5)*\CH}) {\score\ -- \desc};
 }
-\node[anchor=south,font=\tiny\itshape,rotate=90]
-  at ({\lx*\CW+0.62},{2*\CH}) {Score};
+\node[rotate=90,font=\scriptsize\bfseries]
+  at ({\lx*\CW-0.18},{4*\CH}) {Coverage};
 
 \end{tikzpicture}%
 }
-\caption{Tool--vulnerability coverage matrix.
-  Score: 0 = no coverage, 1 = partial, 2 = moderate, 3 = primary.
-  White cell borders separate entries; outer frame bounds the grid.
-  Each tool's specialist class appears as a dark diagonal stripe.}
+\caption{Tool--vulnerability coverage matrix (6 tools $\times$ 8 classes).
+  Score: 0=none, 1=partial, 2=moderate, 3=primary.
+  Dark green cells mark each tool's specialist domain;
+  light cells indicate secondary or absent coverage.}
 \label{fig:heatmap}
 \end{figure}
 
