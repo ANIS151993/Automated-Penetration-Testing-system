@@ -751,33 +751,47 @@ curl http://172.20.32.74/api/v1/healthz
         </div>
       </div>
 
-      <!-- Download buttons -->
+      <!-- Download policy card -->
+      <div class="policy-card">
+        <h3 style="margin:0 0 .75rem;font-size:1rem;letter-spacing:.04em">Download Policy</h3>
+        <p style="margin:0 0 .9rem;font-size:.84rem;opacity:.88">All documents are password-protected and accessible through the secure download gate. Complete the steps below to unlock the encrypted archives.</p>
+        <ol class="policy-list" style="font-size:.84rem">
+          <li>Follow the author on GitHub.</li>
+          <li>Subscribe to the YouTube channel.</li>
+          <li>Send a password request email to the author.</li>
+          <li>Use the password to unlock and download the files.</li>
+        </ol>
+        <div style="margin-top:1.2rem;display:flex;flex-direction:column;gap:.7rem">
+          <button class="gate-open-btn" type="button" onclick="openGate()">Open Secure Download Gate</button>
+          <a class="gate-report-btn" href="#metrics">View Public Metrics</a>
+        </div>
+      </div>
+
+      <!-- Download trigger card -->
       <div style="background:var(--surface);border:1px solid var(--border);padding:1.8rem;position:relative">
         <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary),var(--accent2))"></div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--primary);margin-bottom:1.4rem">Download Paper</div>
-
-        <div style="display:flex;flex-direction:column;gap:1rem">
-          <a href="paper/pentai_ieee.pdf" download="PentAI_Pro_IEEE_Paper.pdf"
-            style="display:flex;align-items:center;gap:1rem;background:var(--primary);color:#fff;padding:1rem 1.4rem;text-decoration:none;transition:all .2s;font-family:'JetBrains Mono',monospace"
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:2px;color:var(--primary);margin-bottom:1.4rem">Secure Downloads (PDF + LaTeX)</div>
+        <div style="display:flex;flex-direction:column;gap:.9rem">
+          <button onclick="openGate()"
+            style="display:flex;align-items:center;gap:1rem;background:var(--primary);color:#fff;padding:1rem 1.4rem;border:none;cursor:pointer;width:100%;font-family:'JetBrains Mono',monospace;transition:filter .2s"
             onmouseover="this.style.filter='brightness(1.15)'" onmouseout="this.style.filter='brightness(1)'">
-            <div style="font-size:1.8rem;line-height:1">📄</div>
-            <div>
-              <div style="font-size:.82rem;font-weight:600;text-transform:uppercase;letter-spacing:1px">Download PDF</div>
-              <div style="font-size:.72rem;opacity:.8;margin-top:.2rem">pentai_ieee.pdf · ~272 KB · 6 pages · Compiled LaTeX</div>
+            <div style="font-size:1.8rem;line-height:1">🔒</div>
+            <div style="text-align:left">
+              <div style="font-size:.82rem;font-weight:600;text-transform:uppercase;letter-spacing:1px">Unlock Paper PDF</div>
+              <div style="font-size:.72rem;opacity:.8;margin-top:.2rem">pentai_ieee.pdf · ~272 KB · 6 pages · Password required</div>
             </div>
-            <div style="margin-left:auto;font-size:1rem">↓</div>
-          </a>
-
-          <a href="paper/pentai_latex_source.zip" download="PentAI_Pro_LaTeX_Source.zip"
-            style="display:flex;align-items:center;gap:1rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:1rem 1.4rem;text-decoration:none;transition:all .2s;font-family:'JetBrains Mono',monospace"
+            <div style="margin-left:auto;font-size:1rem">→</div>
+          </button>
+          <button onclick="openGate()"
+            style="display:flex;align-items:center;gap:1rem;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:1rem 1.4rem;cursor:pointer;width:100%;font-family:'JetBrains Mono',monospace;transition:all .2s"
             onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text)'">
             <div style="font-size:1.8rem;line-height:1">🗜</div>
-            <div>
-              <div style="font-size:.82rem;font-weight:600;text-transform:uppercase;letter-spacing:1px">Download LaTeX Source</div>
-              <div style="font-size:.72rem;opacity:.7;margin-top:.2rem">pentai_latex_source.zip · ~344 KB · .tex + .bib + IEEEtran.cls + PDF</div>
+            <div style="text-align:left">
+              <div style="font-size:.82rem;font-weight:600;text-transform:uppercase;letter-spacing:1px">Unlock LaTeX Source ZIP</div>
+              <div style="font-size:.72rem;opacity:.7;margin-top:.2rem">pentai_latex_source.zip · ~344 KB · .tex + .bib + IEEEtran.cls · Password required</div>
             </div>
-            <div style="margin-left:auto;font-size:1rem">↓</div>
-          </a>
+            <div style="margin-left:auto;font-size:1rem">→</div>
+          </button>
         </div>
       </div>
 
@@ -960,6 +974,207 @@ const margin={l:50,r:30,t:30,b:50};
     xaxis3:{...axisStyle,domain:[0.82,1],anchor:'y3',showticklabels:false},
     yaxis3:{...axisStyle,domain:[0,0.78],anchor:'x3',showticklabels:false},
     margin:{l:60,r:20,t:20,b:60},barmode:'overlay',showlegend:false
+  });
+})();
+</script>
+
+<!-- ── Gate overlay ───────────────────────────────────────────── -->
+<div class="gate-overlay is-hidden" id="download-gate">
+  <div class="gate-modal" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+    <div class="gate-head">
+      <div>
+        <h3 id="gate-title">Secure Download Gate</h3>
+        <p>Complete the public policy steps, then unlock the encrypted archives.</p>
+      </div>
+      <button class="gate-close" type="button" aria-label="Close" onclick="closeGate()">&times;</button>
+    </div>
+
+    <div class="gate-steps">
+      <!-- Step 1 -->
+      <section class="download-step" data-gate-step="1">
+        <span class="step-badge">Step 1</span>
+        <h4>Follow the public channels</h4>
+        <p>Open the official profile and video links, then confirm both checks below.</p>
+        <div style="display:flex;flex-direction:column;gap:.6rem;margin-top:.8rem">
+          <a class="gate-btn-dark" href="https://github.com/ANIS151993" target="_blank" rel="noreferrer">Open GitHub Profile</a>
+          <a class="gate-btn-dark" href="https://www.youtube.com/@marcbd" target="_blank" rel="noreferrer">Open YouTube Channel</a>
+        </div>
+        <label class="gate-check"><input id="gate-github" type="checkbox"> I followed the GitHub profile.</label>
+        <label class="gate-check"><input id="gate-youtube" type="checkbox"> I subscribed to the YouTube channel.</label>
+        <div class="gate-actions">
+          <button class="gate-btn-primary" id="gate-next-1" type="button" onclick="continueGate(2)" disabled>Continue</button>
+        </div>
+      </section>
+
+      <!-- Step 2 -->
+      <section class="download-step is-hidden" data-gate-step="2">
+        <span class="step-badge">Step 2</span>
+        <h4>Request the password by email</h4>
+        <p>Send a short request so the author can verify your purpose before sharing the archive password.</p>
+        <a class="gate-btn-dark" style="display:block;margin-top:.8rem" href="mailto:engr.aanis@gmail.com?subject=Password%20request%20for%20PentAI%20Pro%20research%20download">Email the Author</a>
+        <div class="email-template">Subject: Password request for PentAI Pro research download
+
+Hello Md Anisur Rahman Chowdhury,
+I followed the GitHub profile, subscribed to the YouTube channel, and would like the password for the encrypted PentAI Pro research package.
+Name:
+Institution:
+Purpose of use:</div>
+        <button class="copy-btn" type="button" onclick="copyEmailTemplate(this)">Copy email template</button>
+        <label class="gate-check"><input id="gate-request" type="checkbox"> I sent the password request email.</label>
+        <div class="gate-actions">
+          <button class="gate-btn-secondary" type="button" onclick="goToGateStep(1)">Back</button>
+          <button class="gate-btn-primary" id="gate-next-2" type="button" onclick="continueGate(3)" disabled>Continue</button>
+        </div>
+      </section>
+
+      <!-- Step 3 -->
+      <section class="download-step is-hidden" data-gate-step="3">
+        <span class="step-badge">Step 3</span>
+        <h4>Enter the password</h4>
+        <p>Enter the password received from the author to unlock the download links.</p>
+        <input class="gate-input" id="gate-password" type="password" placeholder="Enter the archive password">
+        <p class="gate-error is-hidden" id="gate-error">The password is incorrect. Request the correct password from the author and try again.</p>
+        <div class="gate-actions">
+          <button class="gate-btn-secondary" type="button" onclick="goToGateStep(2)">Back</button>
+          <button class="gate-btn-primary" type="button" onclick="unlockDownloads()">Unlock Downloads</button>
+        </div>
+      </section>
+
+      <!-- Step 4 — unlocked -->
+      <section class="download-step is-hidden" data-gate-step="4">
+        <span class="step-badge" style="background:rgba(0,180,100,.12);color:#00a85a">Unlocked</span>
+        <h4>Documents ready to download</h4>
+        <p>Use the same password to extract the archives after download.</p>
+        <div class="download-links">
+          <a class="gate-btn-primary" href="paper/pentai_ieee.pdf" download="PentAI_Pro_IEEE_Paper.pdf">Download Paper PDF (272 KB · 6 pages)</a>
+          <a class="gate-btn-primary" href="paper/pentai_latex_source.zip" download="PentAI_Pro_LaTeX_Source.zip">Download Complete LaTeX Source ZIP (344 KB)</a>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ── Gate overlay ── */
+.gate-overlay{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(7,14,30,.72);backdrop-filter:blur(8px)}
+body.gate-locked{overflow:hidden}
+.is-hidden{display:none!important}
+.gate-modal{width:min(100%,540px);max-height:min(92vh,740px);overflow:auto;padding:26px;border-radius:16px;background:#fff;box-shadow:0 28px 70px rgba(7,14,30,.35)}
+.gate-head{display:flex;justify-content:space-between;gap:14px;align-items:start;margin-bottom:18px}
+.gate-head h3{margin:0 0 4px;color:#0f1f3d;font-size:1.25rem}
+.gate-head p{margin:0;color:#64748b;font-size:.875rem}
+.gate-close{border:0;background:transparent;color:#94a3b8;cursor:pointer;font-size:1.6rem;line-height:1;padding:0}
+.gate-steps{display:grid;gap:12px}
+.download-step{padding:18px;border:1px solid #e2e8f0;border-radius:10px}
+.download-step h4{margin:0 0 6px;color:#0f1f3d;font-size:.95rem}
+.download-step p{margin:0;color:#64748b;font-size:.84rem}
+.step-badge{display:inline-flex;align-items:center;justify-content:center;margin-bottom:10px;padding:5px 10px;border-radius:999px;background:rgba(79,142,247,.1);color:#3b6fd4;font-size:.72rem;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.gate-check{display:flex;gap:10px;align-items:start;margin-top:12px;color:#64748b;font-size:.84rem;cursor:pointer}
+.gate-actions{margin-top:14px;display:grid;gap:8px;grid-template-columns:1fr}
+.gate-actions button+button{grid-column:auto}
+.gate-input{width:100%;margin-top:12px;padding:11px 13px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;font-size:.9rem;box-sizing:border-box}
+.gate-input:focus{outline:2px solid #4f8ef7;border-color:transparent}
+.gate-error{margin-top:8px;color:#ef4444;font-size:.82rem;font-weight:700}
+.download-links{display:grid;gap:10px;margin-top:14px}
+.gate-btn-primary{display:flex;align-items:center;justify-content:center;padding:11px 16px;background:#4f8ef7;color:#fff;border:none;border-radius:8px;font-size:.84rem;font-weight:700;cursor:pointer;text-decoration:none;transition:filter .2s;font-family:inherit}
+.gate-btn-primary:hover{filter:brightness(1.12)}
+.gate-btn-primary:disabled{opacity:.45;cursor:default;filter:none}
+.gate-btn-secondary{display:flex;align-items:center;justify-content:center;padding:11px 16px;background:transparent;color:#4f8ef7;border:1px solid #4f8ef7;border-radius:8px;font-size:.84rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit}
+.gate-btn-secondary:hover{background:#4f8ef7;color:#fff}
+.gate-btn-dark{display:block;padding:10px 14px;background:#0f1f3d;color:#fff;border-radius:8px;font-size:.83rem;font-weight:600;text-decoration:none;text-align:center;transition:filter .2s}
+.gate-btn-dark:hover{filter:brightness(1.25)}
+.email-template{margin-top:12px;padding:12px;border-radius:8px;background:#f8fafc;color:#475569;border:1px solid #e2e8f0;font-size:.82rem;white-space:pre-wrap;font-family:'JetBrains Mono',monospace}
+.copy-btn{margin-top:8px;border:0;background:#eef2ff;color:#3b6fd4;border-radius:8px;padding:8px 12px;cursor:pointer;font-size:.8rem;font-weight:700}
+.copy-btn:hover{background:#dde7ff}
+
+/* ── Policy card ── */
+.policy-card{padding:22px;background:linear-gradient(160deg,#0f1f3d 0%,#1a3a6b 100%);color:#fff;border-radius:4px}
+.policy-card h3{margin:0 0 10px;color:#fff;font-size:1rem}
+.policy-list{margin:0;padding-left:1.2rem}
+.policy-list li{margin-bottom:.55rem;color:rgba(255,255,255,.82);font-size:.84rem}
+.gate-open-btn{display:block;width:100%;padding:11px;background:#4f8ef7;color:#fff;border:none;border-radius:6px;font-size:.84rem;font-weight:700;cursor:pointer;font-family:inherit;transition:filter .2s}
+.gate-open-btn:hover{filter:brightness(1.12)}
+.gate-report-btn{display:block;text-align:center;padding:10px;background:transparent;color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.25);border-radius:6px;font-size:.83rem;text-decoration:none;transition:all .2s}
+.gate-report-btn:hover{background:rgba(255,255,255,.1);color:#fff}
+
+/* ── Gate actions two-column layout ── */
+.gate-actions.two-col{grid-template-columns:1fr 1fr}
+</style>
+
+<script>
+(function(){
+  const PASS_HASH='5b484d8b2799daf74779ce686501847d4a08b5e917c1e8395e1da7f7e73bce0d';
+
+  async function sha256(str){
+    const data=new TextEncoder().encode(str);
+    const buf=await crypto.subtle.digest('SHA-256',data);
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+
+  window.openGate=function(){
+    const el=document.getElementById('download-gate');
+    if(el){el.classList.remove('is-hidden');document.body.classList.add('gate-locked');goToGateStep(1);}
+  };
+  window.closeGate=function(){
+    const el=document.getElementById('download-gate');
+    if(el){el.classList.add('is-hidden');document.body.classList.remove('gate-locked');}
+  };
+  window.goToGateStep=function(step){
+    document.querySelectorAll('[data-gate-step]').forEach(n=>n.classList.add('is-hidden'));
+    const active=document.querySelector('[data-gate-step="'+step+'"]');
+    if(active)active.classList.remove('is-hidden');
+    const err=document.getElementById('gate-error');
+    if(err)err.classList.add('is-hidden');
+  };
+  function step1Ready(){
+    const g=document.getElementById('gate-github'),y=document.getElementById('gate-youtube');
+    return g&&g.checked&&y&&y.checked;
+  }
+  function step2Ready(){
+    const r=document.getElementById('gate-request');
+    return r&&r.checked;
+  }
+  function syncButtons(){
+    const b1=document.getElementById('gate-next-1'),b2=document.getElementById('gate-next-2');
+    if(b1)b1.disabled=!step1Ready();
+    if(b2)b2.disabled=!step2Ready();
+  }
+  window.continueGate=function(step){
+    if(step===2&&!step1Ready())return;
+    if(step===3&&!step2Ready())return;
+    goToGateStep(step);
+  };
+  window.unlockDownloads=async function(){
+    const input=document.getElementById('gate-password');
+    const err=document.getElementById('gate-error');
+    if(!input)return;
+    const hash=await sha256(input.value.trim());
+    if(hash===PASS_HASH){goToGateStep(4);input.value='';return;}
+    if(err)err.classList.remove('is-hidden');
+    input.value='';
+  };
+  window.copyEmailTemplate=function(btn){
+    const tmpl=btn&&btn.previousElementSibling&&btn.previousElementSibling.classList.contains('email-template')
+      ?btn.previousElementSibling.textContent:'';
+    navigator.clipboard.writeText(tmpl.trimEnd()).then(()=>{
+      if(!btn)return;
+      const prev=btn.textContent;
+      btn.textContent='Copied!';
+      setTimeout(()=>{btn.textContent=prev;},1500);
+    });
+  };
+
+  document.addEventListener('DOMContentLoaded',function(){
+    ['gate-github','gate-youtube','gate-request'].forEach(function(id){
+      const el=document.getElementById(id);
+      if(el)el.addEventListener('change',syncButtons);
+    });
+    const pw=document.getElementById('gate-password');
+    if(pw)pw.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();unlockDownloads();}});
+    document.getElementById('download-gate')?.addEventListener('click',function(e){
+      if(e.target===this)closeGate();
+    });
+    syncButtons();
   });
 })();
 </script>
