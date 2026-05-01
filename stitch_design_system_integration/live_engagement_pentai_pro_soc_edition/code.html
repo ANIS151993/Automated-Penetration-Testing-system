@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;700&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "border-subtle": "#252836",
+                        "inverse-on-surface": "#2e3037",
+                        "surface-container-highest": "#32353c",
+                        "text-primary": "#E8EAED",
+                        "tertiary": "#ffb873",
+                        "inverse-primary": "#005bbf",
+                        "border-accent": "#2F3447",
+                        "on-tertiary-container": "#412200",
+                        "tertiary-fixed-dim": "#ffb873",
+                        "text-secondary": "#9AA0B4",
+                        "on-secondary-container": "#005840",
+                        "secondary": "#44f5bd",
+                        "on-primary-fixed-variant": "#004492",
+                        "on-secondary-fixed-variant": "#00513b",
+                        "outline-variant": "#424753",
+                        "on-background": "#e1e2eb",
+                        "on-surface-variant": "#c2c6d5",
+                        "surface-container": "#1d2026",
+                        "severity-info": "#5C6378",
+                        "on-secondary-fixed": "#002116",
+                        "primary-container": "#4F8EF7",
+                        "surface-dim": "#11131a",
+                        "severity-critical": "#FF3366",
+                        "secondary-container": "#00d8a2",
+                        "error": "#ffb4ab",
+                        "inverse-surface": "#e1e2eb",
+                        "on-tertiary-fixed-variant": "#6a3b00",
+                        "surface": "#11131a",
+                        "severity-high": "#FF8C42",
+                        "on-primary": "#002f68",
+                        "surface-container-high": "#272a31",
+                        "severity-medium": "#FFB800",
+                        "error-container": "#93000a",
+                        "outline": "#8c909e",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed": "#ffdcbf",
+                        "bg-primary": "#0A0B0F",
+                        "surface-variant": "#32353c",
+                        "secondary-fixed-dim": "#1fe0aa",
+                        "severity-low": "#4F8EF7",
+                        "surface-container-lowest": "#0b0e14",
+                        "primary": "#acc7ff",
+                        "on-primary-fixed": "#001a40",
+                        "surface-bright": "#373940",
+                        "on-primary-container": "#00285b",
+                        "on-tertiary": "#4b2800",
+                        "on-error": "#690005",
+                        "secondary-fixed": "#50fec5",
+                        "on-tertiary-fixed": "#2d1600",
+                        "surface-secondary": "#141620",
+                        "on-secondary": "#003828",
+                        "surface-tertiary": "#1C1F2E",
+                        "tertiary-container": "#d37b02",
+                        "primary-fixed": "#d7e2ff",
+                        "on-surface": "#e1e2eb",
+                        "primary-fixed-dim": "#acc7ff",
+                        "background": "#11131a",
+                        "surface-tint": "#acc7ff",
+                        "surface-container-low": "#191c22",
+                        "text-tertiary": "#5C6378"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "row-regular": "48px",
+                        "padding-card": "24px",
+                        "sidebar-expanded": "240px",
+                        "row-dense": "40px",
+                        "sidebar-collapsed": "64px",
+                        "gutter": "24px",
+                        "nav-height": "40px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "h1": ["Space Grotesk"],
+                        "mono-code": ["JetBrains Mono"],
+                        "h3": ["Space Grotesk"],
+                        "h2": ["Space Grotesk"],
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["11px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "h1": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "mono-code": ["13px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "h3": ["20px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "h2": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "body-sm": ["12px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 18px;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0A0B0F;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #252836;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2F3447;
+        }
+    </style>
+</head>
+<body class="bg-bg-primary text-text-primary font-body-md overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="h-10 fixed top-0 w-full z-50 bg-[#0A0B0F] border-b border-[#252836] flex justify-between items-center px-4 w-full h-10">
+<div class="flex items-center gap-4">
+<span class="text-sm font-bold tracking-tighter text-[#E8EAED]">PentAI Pro</span>
+<nav class="hidden md:flex gap-6">
+<a class="font-mono text-xs uppercase tracking-wider text-[#4F8EF7] font-bold" href="#">Engagement</a>
+<a class="font-mono text-xs uppercase tracking-wider text-[#E8EAED]/60 hover:bg-[#1C1F2E] transition-colors" href="#">Tactical</a>
+<a class="font-mono text-xs uppercase tracking-wider text-[#E8EAED]/60 hover:bg-[#1C1F2E] transition-colors" href="#">Intelligence</a>
+</nav>
+</div>
+<div class="flex items-center gap-3">
+<div class="bg-[#141620] border border-[#252836] h-7 px-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-text-secondary">search</span>
+<input class="bg-transparent border-none focus:ring-0 font-mono-code text-[11px] w-48 text-text-primary placeholder:text-text-tertiary p-0 uppercase" placeholder="CMD_SEARCH..." type="text"/>
+</div>
+<button class="material-symbols-outlined text-text-secondary hover:bg-[#1C1F2E] p-1 transition-colors">notifications</button>
+<button class="material-symbols-outlined text-text-secondary hover:bg-[#1C1F2E] p-1 transition-colors">person</button>
+</div>
+</header>
+<div class="flex flex-1 pt-10 pb-8 h-full overflow-hidden">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-10 h-[calc(100vh-48px)] w-16 hover:w-48 transition-all duration-200 z-40 bg-[#0A0B0F] border-r border-[#252836] flex flex-col h-full py-4 overflow-hidden">
+<div class="flex flex-col gap-1 px-3">
+<a class="flex items-center gap-4 py-2 border-l-2 border-[#4F8EF7] bg-[#141620] text-[#4F8EF7] transition-all group" href="#">
+<span class="material-symbols-outlined ml-2" data-icon="grid_view">grid_view</span>
+<span class="font-mono text-[10px] uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Dashboard</span>
+</a>
+<a class="flex items-center gap-4 py-2 text-[#E8EAED]/40 hover:text-[#E8EAED] hover:bg-[#141620] transition-all group" href="#">
+<span class="material-symbols-outlined ml-2" data-icon="lan">lan</span>
+<span class="font-mono text-[10px] uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Assets</span>
+</a>
+<a class="flex items-center gap-4 py-2 text-[#E8EAED]/40 hover:text-[#E8EAED] hover:bg-[#141620] transition-all group" href="#">
+<span class="material-symbols-outlined ml-2" data-icon="security">security</span>
+<span class="font-mono text-[10px] uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Attacks</span>
+</a>
+<a class="flex items-center gap-4 py-2 text-[#E8EAED]/40 hover:text-[#E8EAED] hover:bg-[#141620] transition-all group" href="#">
+<span class="material-symbols-outlined ml-2" data-icon="radar">radar</span>
+<span class="font-mono text-[10px] uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Scans</span>
+</a>
+<a class="flex items-center gap-4 py-2 text-[#E8EAED]/40 hover:text-[#E8EAED] hover:bg-[#141620] transition-all group" href="#">
+<span class="material-symbols-outlined ml-2" data-icon="terminal">terminal</span>
+<span class="font-mono text-[10px] uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Logs</span>
+</a>
+<a class="flex items-center gap-4 py-2 text-[#E8EAED]/40 hover:text-[#E8EAED] hover:bg-[#141620] transition-all group" href="#">
+<span class="material-symbols-outlined ml-2" data-icon="settings">settings</span>
+<span class="font-mono text-[10px] uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Config</span>
+</a>
+</div>
+<div class="mt-auto flex flex-col gap-1 px-3">
+<a class="flex items-center gap-4 py-2 text-[#E8EAED]/40 hover:text-[#E8EAED] hover:bg-[#141620] group" href="#">
+<span class="material-symbols-outlined ml-2" data-icon="help_outline">help_outline</span>
+<span class="font-mono text-[10px] uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Support</span>
+</a>
+<a class="flex items-center gap-4 py-2 text-[#E8EAED]/40 hover:text-[#E8EAED] hover:bg-[#141620] group" href="#">
+<span class="material-symbols-outlined ml-2" data-icon="logout">logout</span>
+<span class="font-mono text-[10px] uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">Sign Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="ml-16 w-full grid grid-cols-12 overflow-hidden h-full">
+<!-- Left Panel: Findings -->
+<section class="col-span-3 border-r border-border-subtle bg-surface-dim flex flex-col overflow-hidden">
+<div class="p-3 border-b border-border-subtle flex justify-between items-center bg-surface-container-low">
+<h2 class="font-label-caps text-label-caps uppercase text-text-primary">Live Findings</h2>
+<span class="font-mono-code text-[10px] text-severity-critical px-1 border border-severity-critical/30">REC: 124</span>
+</div>
+<div class="flex-1 overflow-y-auto space-y-[1px]">
+<!-- Finding Item 1 -->
+<div class="relative pl-3 pr-4 py-3 bg-surface hover:bg-surface-tertiary transition-colors border-b border-border-subtle/50 group cursor-pointer">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-severity-critical"></div>
+<div class="flex justify-between items-start mb-1">
+<span class="font-mono-code text-[10px] text-severity-critical uppercase">Critical #F-920</span>
+<span class="font-mono-code text-[10px] text-text-tertiary">02:14:10</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-text-primary mb-1">Remote Code Execution on Prod-DB-01</h3>
+<p class="font-body-sm text-[11px] text-text-secondary leading-tight line-clamp-2">Exploited CVE-2023-XXXX via malformed SQL injection string at /api/v1/query.</p>
+<div class="mt-2 flex gap-2">
+<span class="bg-surface-container-highest px-1.5 py-0.5 text-[10px] font-mono-code text-text-secondary border border-border-subtle">IP: 10.0.4.12</span>
+<span class="bg-surface-container-highest px-1.5 py-0.5 text-[10px] font-mono-code text-text-secondary border border-border-subtle">PORT: 5432</span>
+</div>
+</div>
+<!-- Finding Item 2 -->
+<div class="relative pl-3 pr-4 py-3 bg-surface hover:bg-surface-tertiary transition-colors border-b border-border-subtle/50 group cursor-pointer">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-severity-high"></div>
+<div class="flex justify-between items-start mb-1">
+<span class="font-mono-code text-[10px] text-severity-high uppercase">High Risk #F-918</span>
+<span class="font-mono-code text-[10px] text-text-tertiary">02:12:45</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-text-primary mb-1">Privilege Escalation: Service Account</h3>
+<p class="font-body-sm text-[11px] text-text-secondary leading-tight line-clamp-2">Insecure file permissions detected on /etc/shadow-backup-copy. Access granted.</p>
+<div class="mt-2 flex gap-2">
+<span class="bg-surface-container-highest px-1.5 py-0.5 text-[10px] font-mono-code text-text-secondary border border-border-subtle">SVC_01</span>
+</div>
+</div>
+<!-- Finding Item 3 -->
+<div class="relative pl-3 pr-4 py-3 bg-surface hover:bg-surface-tertiary transition-colors border-b border-border-subtle/50 group cursor-pointer">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-severity-medium"></div>
+<div class="flex justify-between items-start mb-1">
+<span class="font-mono-code text-[10px] text-severity-medium uppercase">Medium #F-884</span>
+<span class="font-mono-code text-[10px] text-text-tertiary">01:55:22</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-text-primary mb-1">Sensitive Data in Logs</h3>
+<p class="font-body-sm text-[11px] text-text-secondary leading-tight line-clamp-2">API key fragments detected in plaintext log files within /var/log/app.err</p>
+</div>
+<!-- Finding Item 4 -->
+<div class="relative pl-3 pr-4 py-3 bg-surface hover:bg-surface-tertiary transition-colors border-b border-border-subtle/50 group cursor-pointer">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-severity-low"></div>
+<div class="flex justify-between items-start mb-1">
+<span class="font-mono-code text-[10px] text-severity-low uppercase">Low #F-872</span>
+<span class="font-mono-code text-[10px] text-text-tertiary">01:40:01</span>
+</div>
+<h3 class="font-label-caps text-label-caps text-text-primary mb-1">Information Leak: Server Header</h3>
+<p class="font-body-sm text-[11px] text-text-secondary leading-tight line-clamp-2">Exposed Nginx version 1.18.0 in HTTP response headers. Informational only.</p>
+</div>
+</div>
+</section>
+<!-- Center: Attack Graph -->
+<section class="col-span-6 bg-[#0A0B0F] relative overflow-hidden flex flex-col">
+<div class="p-3 border-b border-border-subtle flex justify-between items-center z-10 bg-surface-dim/80 backdrop-blur-sm">
+<div class="flex items-center gap-3">
+<h2 class="font-label-caps text-label-caps uppercase text-text-primary">Tactical View: Attack Vector Graph</h2>
+<div class="flex gap-1">
+<div class="w-2 h-2 bg-secondary animate-pulse rounded-full"></div>
+<span class="text-[10px] font-mono-code text-secondary uppercase">Active Session</span>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="w-6 h-6 border border-border-subtle bg-surface-container hover:bg-border-subtle flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px]">zoom_in</span>
+</button>
+<button class="w-6 h-6 border border-border-subtle bg-surface-container hover:bg-border-subtle flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px]">refresh</span>
+</button>
+</div>
+</div>
+<!-- SVG Graph Area -->
+<div class="flex-1 relative cursor-crosshair">
+<!-- Grid Background Overlay -->
+<div class="absolute inset-0" style="background-image: radial-gradient(#252836 1px, transparent 1px); background-size: 20px 20px;"></div>
+<!-- SVG Content -->
+<svg class="absolute inset-0 w-full h-full" viewbox="0 0 800 600">
+<!-- Connecting Lines (Sharp) -->
+<path d="M400,300 L200,150" fill="none" stroke="#2F3447" stroke-width="1.5"></path>
+<path d="M400,300 L600,150" fill="none" stroke="#2F3447" stroke-width="1.5"></path>
+<path d="M400,300 L400,500" fill="none" stroke="#4F8EF7" stroke-dasharray="4" stroke-width="2"></path>
+<path d="M600,150 L700,250" fill="none" stroke="#2F3447" stroke-width="1.5"></path>
+<path d="M200,150 L100,250" fill="none" stroke="#FF3366" stroke-width="2"></path>
+<!-- Attack Nodes (Square) -->
+<!-- Origin -->
+<rect fill="#141620" height="30" stroke="#4F8EF7" stroke-width="2" width="30" x="385" y="285"></rect>
+<text fill="#4F8EF7" font-family="JetBrains Mono" font-size="10" font-weight="bold" text-anchor="middle" x="400" y="330">GATEWAY_EXT</text>
+<text fill="#9AA0B4" font-family="JetBrains Mono" font-size="9" text-anchor="middle" x="400" y="342">172.16.0.1</text>
+<!-- Internal A -->
+<rect fill="#141620" height="30" stroke="#FF3366" stroke-width="2" width="30" x="185" y="135"></rect>
+<text fill="#E8EAED" font-family="JetBrains Mono" font-size="10" text-anchor="middle" x="200" y="180">PROD_AUTH</text>
+<text fill="#9AA0B4" font-family="JetBrains Mono" font-size="9" text-anchor="middle" x="200" y="192">10.0.1.45</text>
+<!-- Internal B -->
+<rect fill="#141620" height="30" stroke="#2F3447" stroke-width="2" width="30" x="585" y="135"></rect>
+<text fill="#E8EAED" font-family="JetBrains Mono" font-size="10" text-anchor="middle" x="600" y="180">STAGING_DB</text>
+<text fill="#9AA0B4" font-family="JetBrains Mono" font-size="9" text-anchor="middle" x="600" y="192">10.0.2.11</text>
+<!-- Leaf Node -->
+<rect fill="#FF3366" height="30" stroke="#FF3366" stroke-width="2" width="30" x="85" y="235"></rect>
+<text fill="#FF3366" font-family="JetBrains Mono" font-size="10" font-weight="bold" text-anchor="middle" x="100" y="280">TARGET_DC</text>
+</svg>
+<!-- Tactical Overlay Info -->
+<div class="absolute bottom-4 left-4 bg-[#141620]/90 border border-[#252836] p-2 flex flex-col gap-1 w-40">
+<div class="flex justify-between border-b border-[#252836] pb-1">
+<span class="text-[9px] font-mono-code text-text-tertiary">NODES_DISCOVERED</span>
+<span class="text-[9px] font-mono-code text-text-primary">42</span>
+</div>
+<div class="flex justify-between">
+<span class="text-[9px] font-mono-code text-text-tertiary">SESSION_ID</span>
+<span class="text-[9px] font-mono-code text-secondary">PT-99X</span>
+</div>
+</div>
+</div>
+<!-- Terminal Overlay Area (Floating but anchored to bottom) -->
+<div class="h-48 border-t border-border-subtle bg-black p-3 font-mono-code text-[11px] overflow-y-auto">
+<div class="text-text-tertiary mb-1 uppercase text-[10px] tracking-widest border-b border-white/10 pb-1">Primary Payload Terminal</div>
+<div class="flex gap-2">
+<span class="text-secondary">[02:15:01]</span>
+<span class="text-text-primary">root@target-dc:~$ whoami</span>
+</div>
+<div class="text-text-secondary ml-16">nt authority\system</div>
+<div class="flex gap-2 mt-1">
+<span class="text-secondary">[02:15:10]</span>
+<span class="text-text-primary">root@target-dc:~$ net user /domain</span>
+</div>
+<div class="text-text-secondary ml-16">The request will be processed at a domain controller for domain pentai.local...</div>
+<div class="flex gap-2 mt-1">
+<span class="text-severity-medium animate-pulse">root@target-dc:~$ _</span>
+</div>
+</div>
+</section>
+<!-- Right Panel: Controls & Terminal -->
+<section class="col-span-3 border-l border-border-subtle bg-surface-dim flex flex-col overflow-hidden">
+<!-- Pending Approvals -->
+<div class="p-3 border-b border-border-subtle bg-surface-container-low">
+<h2 class="font-label-caps text-label-caps uppercase text-text-primary">Critical Approvals</h2>
+</div>
+<div class="p-3 space-y-3 overflow-y-auto">
+<!-- Approval Card 1 -->
+<div class="bg-surface-tertiary border border-severity-critical/50 p-3">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-severity-critical text-[16px]">warning</span>
+<span class="font-label-caps text-[10px] text-severity-critical uppercase font-bold">High Risk Action</span>
+</div>
+<h4 class="font-mono-code text-[11px] text-text-primary mb-1">DUMP_LOCAL_HASHES</h4>
+<p class="font-body-sm text-[11px] text-text-secondary mb-3">Initiating memory dump of LSASS process. High probability of EDR detection.</p>
+<div class="grid grid-cols-2 gap-2">
+<button class="bg-severity-critical h-8 font-label-caps text-[11px] text-white hover:bg-severity-critical/80 transition-colors uppercase">Execute</button>
+<button class="border border-border-subtle h-8 font-label-caps text-[11px] text-text-primary hover:bg-[#2F3447] transition-colors uppercase">Abort</button>
+</div>
+</div>
+<!-- Approval Card 2 -->
+<div class="bg-surface-tertiary border border-border-accent p-3">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-severity-medium text-[16px]">info</span>
+<span class="font-label-caps text-[10px] text-severity-medium uppercase font-bold">Lateral Movement</span>
+</div>
+<h4 class="font-mono-code text-[11px] text-text-primary mb-1">SMB_RELAY_CONN</h4>
+<p class="font-body-sm text-[11px] text-text-secondary mb-3">Establish persistent connection to 10.0.1.45 via stolen credentials.</p>
+<div class="grid grid-cols-1 gap-2">
+<button class="bg-primary-container h-8 font-label-caps text-[11px] text-on-primary-container hover:opacity-80 transition-all uppercase">Authorize</button>
+</div>
+</div>
+</div>
+<!-- Target Metadata -->
+<div class="mt-auto border-t border-border-subtle p-3 bg-surface-container-low">
+<h2 class="font-label-caps text-label-caps uppercase text-text-tertiary mb-3">Tactical Status</h2>
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<span class="text-[10px] font-mono-code text-text-secondary">AI_CONFIDENCE</span>
+<div class="flex gap-1">
+<div class="w-1.5 h-3 bg-secondary"></div>
+<div class="w-1.5 h-3 bg-secondary"></div>
+<div class="w-1.5 h-3 bg-secondary"></div>
+<div class="w-1.5 h-3 bg-secondary"></div>
+<div class="w-1.5 h-3 bg-border-subtle"></div>
+</div>
+</div>
+<div class="flex justify-between">
+<span class="text-[10px] font-mono-code text-text-secondary">STEALTH_LVL</span>
+<span class="text-[10px] font-mono-code text-severity-high uppercase">Compromised</span>
+</div>
+<div class="flex justify-between">
+<span class="text-[10px] font-mono-code text-text-secondary">UPLINK_STABILITY</span>
+<span class="text-[10px] font-mono-code text-secondary uppercase">Nominal</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<!-- Bottom Bar: Streaming Logs -->
+<footer class="fixed bottom-0 w-full h-8 bg-surface-dim border-t border-border-subtle flex items-center px-4 overflow-hidden z-50">
+<div class="flex items-center gap-2 shrink-0 border-r border-border-subtle pr-4 mr-4">
+<span class="w-2 h-2 bg-secondary rounded-full"></span>
+<span class="font-mono text-[10px] text-text-primary font-bold uppercase tracking-widest">Live_Stream</span>
+</div>
+<div class="flex gap-6 animate-marquee whitespace-nowrap overflow-hidden">
+<span class="font-mono-code text-[11px] text-text-secondary"><span class="text-severity-low">INFO</span> [Core] Payload delivery initiated to target node PROD_V_09...</span>
+<span class="font-mono-code text-[11px] text-text-secondary"><span class="text-severity-medium">WARN</span> [Network] Latency spikes detected on relay node 10.0.12.1...</span>
+<span class="font-mono-code text-[11px] text-text-secondary"><span class="text-severity-critical">CRIT</span> [Exploit] Memory corruption detected on SRV-01, re-aligning shellcode...</span>
+<span class="font-mono-code text-[11px] text-text-secondary"><span class="text-severity-low">INFO</span> [Scan] Ports 445, 139 verified active on subnet 10.0.4.0/24...</span>
+<span class="font-mono-code text-[11px] text-text-secondary"><span class="text-secondary">PASS</span> [Auth] Hash-extraction successful for user: admin_backup...</span>
+</div>
+</footer>
+<style>
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+            display: flex;
+            animation: marquee 30s linear infinite;
+        }
+    </style>
+</body></html>

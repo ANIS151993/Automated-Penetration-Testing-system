@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;700&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #0A0B0F;
+            color: #E8EAED;
+            font-family: 'Inter', sans-serif;
+        }
+        .mono-text {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Custom scrollbar for terminal feel */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0A0B0F;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #252836;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "border-subtle": "#252836",
+                      "inverse-on-surface": "#2e3037",
+                      "surface-container-highest": "#32353c",
+                      "text-primary": "#E8EAED",
+                      "tertiary": "#ffb873",
+                      "inverse-primary": "#005bbf",
+                      "border-accent": "#2F3447",
+                      "on-tertiary-container": "#412200",
+                      "tertiary-fixed-dim": "#ffb873",
+                      "text-secondary": "#9AA0B4",
+                      "on-secondary-container": "#005840",
+                      "secondary": "#44f5bd",
+                      "on-primary-fixed-variant": "#004492",
+                      "on-secondary-fixed-variant": "#00513b",
+                      "outline-variant": "#424753",
+                      "on-background": "#e1e2eb",
+                      "on-surface-variant": "#c2c6d5",
+                      "surface-container": "#1d2026",
+                      "severity-info": "#5C6378",
+                      "on-secondary-fixed": "#002116",
+                      "primary-container": "#508ff8",
+                      "surface-dim": "#11131a",
+                      "severity-critical": "#FF3366",
+                      "secondary-container": "#00d8a2",
+                      "error": "#ffb4ab",
+                      "inverse-surface": "#e1e2eb",
+                      "on-tertiary-fixed-variant": "#6a3b00",
+                      "surface": "#11131a",
+                      "severity-high": "#FF8C42",
+                      "on-primary": "#002f68",
+                      "surface-container-high": "#272a31",
+                      "severity-medium": "#FFB800",
+                      "error-container": "#93000a",
+                      "outline": "#8c909e",
+                      "on-error-container": "#ffdad6",
+                      "tertiary-fixed": "#ffdcbf",
+                      "bg-primary": "#0A0B0F",
+                      "surface-variant": "#32353c",
+                      "secondary-fixed-dim": "#1fe0aa",
+                      "severity-low": "#4F8EF7",
+                      "surface-container-lowest": "#0b0e14",
+                      "primary": "#acc7ff",
+                      "on-primary-fixed": "#001a40",
+                      "surface-bright": "#373940",
+                      "on-primary-container": "#00285b",
+                      "on-tertiary": "#4b2800",
+                      "on-error": "#690005",
+                      "secondary-fixed": "#50fec5",
+                      "on-tertiary-fixed": "#2d1600",
+                      "surface-secondary": "#141620",
+                      "on-secondary": "#003828",
+                      "surface-tertiary": "#1C1F2E",
+                      "tertiary-container": "#d37b02",
+                      "primary-fixed": "#d7e2ff",
+                      "on-surface": "#e1e2eb",
+                      "primary-fixed-dim": "#acc7ff",
+                      "background": "#11131a",
+                      "surface-tint": "#acc7ff",
+                      "surface-container-low": "#191c22",
+                      "text-tertiary": "#5C6378"
+              },
+              "borderRadius": {
+                      "DEFAULT": "2px",
+                      "lg": "2px",
+                      "xl": "2px",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "row-regular": "48px",
+                      "padding-card": "24px",
+                      "sidebar-expanded": "240px",
+                      "row-dense": "40px",
+                      "sidebar-collapsed": "64px",
+                      "gutter": "24px",
+                      "nav-height": "56px",
+                      "base": "4px"
+              },
+              "fontFamily": {
+                      "label-caps": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "h1": ["Space Grotesk"],
+                      "mono-code": ["JetBrains Mono"],
+                      "h3": ["Space Grotesk"],
+                      "h2": ["Space Grotesk"],
+                      "body-sm": ["Inter"],
+                      "body-md": ["Inter"]
+              },
+              "fontSize": {
+                      "label-caps": ["11px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "body-lg": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "h1": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "mono-code": ["13px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "h3": ["20px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "h2": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "body-sm": ["12px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                      "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+      </script>
+</head>
+<body class="bg-bg-primary text-text-primary">
+<!-- TopAppBar -->
+<header class="bg-[#0A0B0F] text-[#4F8EF7] font-mono text-xs uppercase tracking-wider h-10 fixed top-0 w-full z-50 border-b border-[#252836] flex justify-between items-center px-4">
+<div class="flex items-center gap-4">
+<span class="text-sm font-bold tracking-tighter text-[#E8EAED]">PentAI Pro</span>
+<div class="h-4 w-[1px] bg-border-subtle mx-2"></div>
+<div class="flex items-center gap-2 text-text-secondary">
+<span class="material-symbols-outlined text-[14px]">search</span>
+<span>Search...</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-sm hover:bg-[#1C1F2E] transition-colors p-1 cursor-pointer" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-sm hover:bg-[#1C1F2E] transition-colors p-1 cursor-pointer" data-icon="person">person</span>
+</div>
+</header>
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-10 h-[calc(100vh-40px)] w-16 hover:w-48 transition-all duration-200 z-40 bg-[#0A0B0F] border-r border-[#252836] flex flex-col py-4 overflow-hidden group">
+<div class="flex-1 flex flex-col gap-1">
+<!-- Active Tab: Dashboard -->
+<a class="flex items-center px-4 py-3 border-l-2 border-[#4F8EF7] bg-[#141620] text-[#4F8EF7] font-mono text-[10px] uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined mr-4 shrink-0" data-icon="grid_view">grid_view</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity">Dashboard</span>
+</a>
+<a class="flex items-center px-4 py-3 text-[#E8EAED]/40 hover:text-[#E8EAED] hover:bg-[#141620] transition-colors font-mono text-[10px] uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined mr-4 shrink-0" data-icon="lan">lan</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity">Assets</span>
+</a>
+<a class="flex items-center px-4 py-3 text-[#E8EAED]/40 hover:text-[#E8EAED] hover:bg-[#141620] transition-colors font-mono text-[10px] uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined mr-4 shrink-0" data-icon="security">security</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity">Attacks</span>
+</a>
+<a class="flex items-center px-4 py-3 text-[#E8EAED]/40 hover:text-[#E8EAED] hover:bg-[#141620] transition-colors font-mono text-[10px] uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined mr-4 shrink-0" data-icon="radar">radar</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity">Scans</span>
+</a>
+<a class="flex items-center px-4 py-3 text-[#E8EAED]/40 hover:text-[#E8EAED] hover:bg-[#141620] transition-colors font-mono text-[10px] uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined mr-4 shrink-0" data-icon="terminal">terminal</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity">Logs</span>
+</a>
+<a class="flex items-center px-4 py-3 text-[#E8EAED]/40 hover:text-[#E8EAED] hover:bg-[#141620] transition-colors font-mono text-[10px] uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined mr-4 shrink-0" data-icon="settings">settings</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity">Config</span>
+</a>
+</div>
+<div class="mt-auto border-t border-border-subtle pt-4">
+<a class="flex items-center px-4 py-3 text-[#E8EAED]/40 hover:text-[#E8EAED] hover:bg-[#141620] transition-colors font-mono text-[10px] uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined mr-4 shrink-0" data-icon="help_outline">help_outline</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity">Support</span>
+</a>
+<a class="flex items-center px-4 py-3 text-[#E8EAED]/40 hover:text-[#E8EAED] hover:bg-[#141620] transition-colors font-mono text-[10px] uppercase tracking-widest" href="#">
+<span class="material-symbols-outlined mr-4 shrink-0" data-icon="logout">logout</span>
+<span class="opacity-0 group-hover:opacity-100 transition-opacity">Sign Out</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="ml-16 mt-10 p-4 space-y-4">
+<!-- KPI Strip -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="bg-surface-secondary border border-border-subtle p-4">
+<div class="font-mono text-[10px] uppercase tracking-widest text-text-secondary mb-1">Active Agents</div>
+<div class="font-mono text-2xl font-bold text-secondary">2,481</div>
+<div class="h-1 w-full bg-border-subtle mt-4">
+<div class="h-full bg-secondary w-3/4"></div>
+</div>
+</div>
+<div class="bg-surface-secondary border border-border-subtle p-4">
+<div class="font-mono text-[10px] uppercase tracking-widest text-text-secondary mb-1">Critical Vulnerabilities</div>
+<div class="font-mono text-2xl font-bold text-severity-critical">124</div>
+<div class="h-1 w-full bg-border-subtle mt-4">
+<div class="h-full bg-severity-critical w-1/4"></div>
+</div>
+</div>
+<div class="bg-surface-secondary border border-border-subtle p-4">
+<div class="font-mono text-[10px] uppercase tracking-widest text-text-secondary mb-1">Network Requests/s</div>
+<div class="font-mono text-2xl font-bold text-primary">84.2k</div>
+<div class="h-1 w-full bg-border-subtle mt-4">
+<div class="h-full bg-primary w-2/3"></div>
+</div>
+</div>
+<div class="bg-surface-secondary border border-border-subtle p-4">
+<div class="font-mono text-[10px] uppercase tracking-widest text-text-secondary mb-1">System Uptime</div>
+<div class="font-mono text-2xl font-bold text-text-primary">99.998%</div>
+<div class="h-1 w-full bg-border-subtle mt-4">
+<div class="h-full bg-text-secondary w-full"></div>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-12 gap-4">
+<!-- Recent Engagements Table -->
+<section class="col-span-12 lg:col-span-8 bg-surface-secondary border border-border-subtle overflow-hidden">
+<div class="px-4 py-3 border-b border-border-subtle flex justify-between items-center bg-surface-container-low">
+<h2 class="font-mono text-[11px] uppercase tracking-widest text-primary">Recent Engagements</h2>
+<span class="material-symbols-outlined text-sm text-text-secondary cursor-pointer" data-icon="filter_list">filter_list</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-lowest">
+<tr class="h-[32px] border-b border-[#252836] font-mono text-[10px] uppercase tracking-wider text-text-secondary">
+<th class="px-4">Target IP / CIDR</th>
+<th class="px-4">Service</th>
+<th class="px-4">Severity</th>
+<th class="px-4">Timestamp</th>
+<th class="px-4">Status</th>
+</tr>
+</thead>
+<tbody class="font-body-sm">
+<tr class="h-[32px] border-b border-[#252836] hover:bg-surface-tertiary transition-colors">
+<td class="px-4 font-mono-code">192.168.1.104</td>
+<td class="px-4">SSH (22)</td>
+<td class="px-4">
+<span class="inline-block px-2 py-0.5 rounded-sm bg-severity-critical/15 text-severity-critical border border-severity-critical font-mono text-[9px] uppercase">Critical</span>
+</td>
+<td class="px-4 text-text-secondary">2023-11-14 09:12:04</td>
+<td class="px-4"><div class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_4px_#44f5bd]"></div></td>
+</tr>
+<tr class="h-[32px] border-b border-[#252836] hover:bg-surface-tertiary transition-colors">
+<td class="px-4 font-mono-code">10.0.4.0/24</td>
+<td class="px-4">DNS (53)</td>
+<td class="px-4">
+<span class="inline-block px-2 py-0.5 rounded-sm bg-severity-high/15 text-severity-high/70 border border-severity-high/70 font-mono text-[9px] uppercase">High</span>
+</td>
+<td class="px-4 text-text-secondary">2023-11-14 09:10:55</td>
+<td class="px-4"><div class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_4px_#44f5bd]"></div></td>
+</tr>
+<tr class="h-[32px] border-b border-[#252836] hover:bg-surface-tertiary transition-colors">
+<td class="px-4 font-mono-code">172.16.254.1</td>
+<td class="px-4">HTTPS (443)</td>
+<td class="px-4">
+<span class="inline-block px-2 py-0.5 rounded-sm bg-severity-medium/15 text-severity-medium/70 border border-severity-medium/70 font-mono text-[9px] uppercase">Medium</span>
+</td>
+<td class="px-4 text-text-secondary">2023-11-14 09:08:12</td>
+<td class="px-4"><div class="w-2 h-2 rounded-full bg-text-tertiary"></div></td>
+</tr>
+<tr class="h-[32px] border-b border-[#252836] hover:bg-surface-tertiary transition-colors">
+<td class="px-4 font-mono-code">192.168.1.55</td>
+<td class="px-4">SMB (445)</td>
+<td class="px-4">
+<span class="inline-block px-2 py-0.5 rounded-sm bg-severity-critical/15 text-severity-critical border border-severity-critical font-mono text-[9px] uppercase">Critical</span>
+</td>
+<td class="px-4 text-text-secondary">2023-11-14 08:55:30</td>
+<td class="px-4"><div class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_4px_#44f5bd]"></div></td>
+</tr>
+<tr class="h-[32px] border-b border-[#252836] hover:bg-surface-tertiary transition-colors">
+<td class="px-4 font-mono-code">10.0.2.110</td>
+<td class="px-4">RDP (3389)</td>
+<td class="px-4">
+<span class="inline-block px-2 py-0.5 rounded-sm bg-severity-low/15 text-severity-low border border-severity-low font-mono text-[9px] uppercase">Low</span>
+</td>
+<td class="px-4 text-text-secondary">2023-11-14 08:42:01</td>
+<td class="px-4"><div class="w-2 h-2 rounded-full bg-text-tertiary"></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- System Health & Activity -->
+<aside class="col-span-12 lg:col-span-4 flex flex-col gap-4">
+<!-- System Health -->
+<div class="bg-surface-secondary border border-border-subtle flex-1">
+<div class="px-4 py-3 border-b border-border-subtle bg-surface-container-low">
+<h2 class="font-mono text-[11px] uppercase tracking-widest text-primary">System Health</h2>
+</div>
+<div class="p-4 space-y-3">
+<div class="flex items-center justify-between">
+<span class="font-body-md text-text-secondary">Core Engine</span>
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-md text-text-secondary">AI Reasoning Module</span>
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-md text-text-secondary">Database Cluster</span>
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-md text-text-secondary">API Gateway</span>
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-body-md text-text-secondary">External Connectors</span>
+<div class="w-2 h-2 rounded-full bg-text-tertiary"></div>
+</div>
+</div>
+</div>
+<!-- Visual Graph Area (Placeholder for Tactical UI feel) -->
+<div class="bg-surface-secondary border border-border-subtle h-48 relative overflow-hidden">
+<div class="absolute inset-0 opacity-20 pointer-events-none">
+<div class="w-full h-full" style="background-image: linear-gradient(#252836 1px, transparent 1px), linear-gradient(90deg, #252836 1px, transparent 1px); background-size: 20px 20px;"></div>
+</div>
+<div class="absolute bottom-4 left-4 right-4 h-24 flex items-end gap-1">
+<div class="bg-primary/40 w-full h-[60%]"></div>
+<div class="bg-primary/40 w-full h-[45%]"></div>
+<div class="bg-primary/40 w-full h-[80%]"></div>
+<div class="bg-primary/40 w-full h-[55%]"></div>
+<div class="bg-secondary/40 w-full h-[95%]"></div>
+<div class="bg-primary/40 w-full h-[70%]"></div>
+<div class="bg-primary/40 w-full h-[40%]"></div>
+<div class="bg-primary/40 w-full h-[85%]"></div>
+</div>
+<div class="absolute top-2 right-2 px-2 py-1 bg-surface-tertiary border border-border-subtle text-[9px] font-mono uppercase text-text-secondary">Threat Surface Level: Alpha</div>
+</div>
+</aside>
+</div>
+<!-- Terminal Feed -->
+<section class="bg-[#0A0B0F] border border-border-subtle overflow-hidden">
+<div class="px-4 py-2 border-b border-border-subtle bg-surface-container-low flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="terminal">terminal</span>
+<h2 class="font-mono text-[10px] uppercase tracking-widest text-primary">Live Terminal Feed</h2>
+</div>
+<div class="flex gap-2">
+<div class="w-2 h-2 border border-border-subtle"></div>
+<div class="w-2 h-2 border border-border-subtle"></div>
+</div>
+</div>
+<div class="p-4 h-48 overflow-y-auto font-mono-code text-[12px] leading-relaxed text-secondary/80">
+<div class="flex gap-3">
+<span class="text-text-tertiary">[09:14:22]</span>
+<span class="text-primary">INFO</span>
+<span>Initializing heuristic scan on subnet 192.168.1.0/24...</span>
+</div>
+<div class="flex gap-3">
+<span class="text-text-tertiary">[09:14:23]</span>
+<span class="text-secondary">SUCCESS</span>
+<span>Agent 0x4F2A established secure tunnel to node_primary.</span>
+</div>
+<div class="flex gap-3">
+<span class="text-text-tertiary">[09:14:25]</span>
+<span class="text-severity-critical">CRITICAL</span>
+<span>Exploit attempt detected: CVE-2023-44487 on 192.168.1.104</span>
+</div>
+<div class="flex gap-3">
+<span class="text-text-tertiary">[09:14:28]</span>
+<span class="text-primary">INFO</span>
+<span>AI Model "Sentinel-9" updating risk parameters for 'Enterprise-Core'.</span>
+</div>
+<div class="flex gap-3">
+<span class="text-text-tertiary">[09:14:31]</span>
+<span class="text-severity-high">WARNING</span>
+<span>Memory threshold exceeded on DB-Mirror-02 (89%). Scaling instances...</span>
+</div>
+<div class="flex gap-3">
+<span class="text-text-tertiary">[09:14:35]</span>
+<span class="text-primary">INFO</span>
+<span>Log aggregation complete for session ID 994-AC-02.</span>
+</div>
+<div class="flex gap-3">
+<span class="text-text-tertiary">[09:14:38]</span>
+<span class="text-text-primary">EXEC</span>
+<span>Running cleanup script /opt/pentai/bin/purge_temp.sh --force</span>
+</div>
+<div class="flex gap-3">
+<span class="text-text-tertiary">[09:14:40]</span>
+<span class="text-secondary">READY</span>
+<span>Waiting for command input...</span>
+</div>
+<div class="mt-2 flex gap-2">
+<span class="text-secondary">$</span>
+<span class="w-2 h-4 bg-secondary animate-pulse"></span>
+</div>
+</div>
+</section>
+</main>
+</body></html>

@@ -1,0 +1,1025 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage{balance}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows.meta,positioning,fit,backgrounds,calc}
+
+\definecolor{codegreen}{rgb}{0.1,0.5,0.1}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codeblue}{rgb}{0.0,0.2,0.6}
+\definecolor{backgray}{rgb}{0.96,0.96,0.96}
+
+\lstdefinestyle{terminal}{
+  backgroundcolor=\color{backgray},
+  basicstyle=\ttfamily\tiny,
+  breaklines=true,
+  breakatwhitespace=false,
+  columns=flexible,
+  frame=single,
+  rulecolor=\color{codegray},
+  keywordstyle=\color{codeblue},
+  commentstyle=\color{codegreen},
+  numbers=none,
+  xleftmargin=2pt,xrightmargin=2pt,
+  aboveskip=3pt,belowskip=3pt
+}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Self-Hosted LLM Orchestration for Autonomous Penetration Testing\\
+with Three-Layer Scope Enforcement and\\
+Tamper-Evident Cryptographic Audit Chains}
+
+\author{%
+  \IEEEauthorblockN{Md Anisur Rahman Chowdhury\textsuperscript{},
+                    Ronny Bazan-Antequera\textsuperscript{}}
+  \IEEEauthorblockA{%
+    \textsuperscript{}Dept.\ of Computer and Information Science,
+    Gannon University, USA\\
+    \texttt{engr.aanis@gmail.com,\; bazanant001@gannon.edu}}
+}
+
+\maketitle
+
+%─────────────────────────────────────────────────────────────
+\begin{abstract}
+Penetration testing is a labour-intensive discipline that demands expert judgement
+at every step of the assessment lifecycle. Existing automation tools cover
+individual scan tasks well, but none offer a coherent, scope-safe reasoning layer
+capable of chaining observations into a multi-phase attack narrative.
+This paper presents \textbf{PentAI Pro}, a platform that orchestrates
+self-hosted large language models (LLMs) across physically isolated
+virtual machines to automate the full penetration-testing pipeline:
+Reconnaissance, Enumeration, Vulnerability Mapping, and Exploitation Planning.
+A three-layer scope-enforcement architecture independently validates every
+planned and executed action at the LLM planning stage, the backend API,
+and the remote tool gateway, yielding 100\,\% out-of-scope rejection in
+all tested scenarios.
+A SHA-256 hash-chained event log provides cryptographically verifiable
+evidence of all system actions.
+All inference is handled by a locally deployed 14-billion-parameter
+open-weight model (\textit{qwen2.5:14b-instruct}), eliminating data-egress
+risks inherent in cloud-hosted inference.
+Evaluation on a three-VM Proxmox laboratory reports a mean reconnaissance
+planning latency of 18.4\,s, full-pipeline completion under 4\,min,
+and a 108-test integration suite that passes in 43.5\,s.
+\end{abstract}
+
+\begin{IEEEkeywords}
+penetration testing automation, large language models,
+retrieval-augmented generation, scope enforcement, mTLS,
+tamper-evident audit, self-hosted AI, security orchestration
+\end{IEEEkeywords}
+
+%─────────────────────────────────────────────────────────────
+\section{Introduction}
+
+Security assessments are commissioned to find weaknesses before attackers
+do. A human practitioner working a typical external assessment spends
+time on reconnaissance, port scanning, service enumeration, and
+vulnerability correlation — largely mechanical work punctuated by
+occasional insight. As the scale of modern infrastructure grows,
+the mechanical fraction of that work has become a bottleneck.
+
+Scan-based tools (Nessus, OpenVAS, Nuclei) handle the mechanical steps
+efficiently but produce flat lists of findings rather than coherent
+attack narratives. They do not reason about how a misconfigured TLS
+setting and an outdated web framework on the same host combine into an
+exploitable path. Filling that gap has, until recently, required a human.
+
+Large language models introduce a new option. Models trained on security
+documentation, CVE descriptions, and published offensive research
+carry enough domain knowledge to propose multi-step attack plans,
+interpret raw scanner output, and draft professional findings.
+The central challenge is not whether such a model can reason about
+offensive security — recent work has confirmed it can~\cite{happe2023,deng2023}.
+The challenge is how to deploy that reasoning safely: respecting engagement
+scope, preserving an immutable record of every action, and preventing
+adversarially crafted target responses from manipulating the agent.
+
+This paper addresses those challenges through three concrete contributions:
+
+\begin{enumerate}
+\item A \textbf{multi-phase LLM agent pipeline} integrating a
+  retrieval-augmented knowledge base, phase-aware planning nodes,
+  and a typed tool registry — all running on-premises.
+\item A \textbf{three-layer scope-enforcement architecture} that
+  independently validates every action at the LLM planning,
+  backend API, and weapon-gateway levels.
+\item A \textbf{SHA-256 hash-chained audit log} that links every
+  security event into a forensically verifiable chain.
+\end{enumerate}
+
+We describe the design, implementation, and experimental evaluation of
+PentAI Pro, deployed on a three-VM Proxmox laboratory with real pentest
+tools (nmap, Nuclei, Gobuster, httpx, sslscan).
+The remainder of this paper is organised as follows.
+Section~II surveys related work.
+Section~III presents the system architecture.
+Section~IV describes the implementation.
+Section~V reports experimental results.
+Section~VI discusses implications and limitations, and
+Section~VII concludes.
+
+%─────────────────────────────────────────────────────────────
+\section{Background and Related Work}
+
+\subsection{Scan-Based Automation}
+
+Nessus~\cite{nessus} and OpenVAS follow a plug-in model: each plug-in
+tests one condition, and the aggregated results form a vulnerability
+report. Nuclei~\cite{nuclei} generalises this with community-maintained
+YAML templates. These tools excel at breadth but have no mechanism
+for reasoning about the interdependence of findings or planning follow-on
+steps based on prior observations.
+
+\subsection{LLMs Applied to Offensive Security}
+
+Happe and Cito~\cite{happe2023} ran GPT-4 in a penetration-testing loop,
+showing measurable progress on capture-the-flag challenges.
+PentestGPT~\cite{deng2023} introduced a multi-turn dialogue between
+the operator and an LLM planner; operator interaction was needed at
+every decision point.
+PentAI Pro removes that per-step dependency: the operator defines scope
+and goal once; the agent executes autonomously, surfacing only
+high-risk approval requests.
+Parallel work on deep learning for digital forensics~\cite{chowdhury2025deepfake}
+demonstrates that domain-specific AI achieves expert-level accuracy
+on previously manual security tasks, reinforcing the case for
+ML-driven automation across security operations.
+ReAct~\cite{yao2022} formalises reasoning-action-observation loops for
+general LLM agents. PentAI Pro specialises this pattern with
+typed tool schemas, phase-aware supervisors, and prompt-injection defences
+absent from general-purpose frameworks.
+
+\subsection{Retrieval-Augmented Generation}
+
+Lewis et al.~\cite{lewis2020} showed that conditioning generation on
+retrieved passages significantly improves factual accuracy for knowledge-intensive
+tasks. Penetration testing is knowledge-intensive: the quality of a
+reconnaissance plan depends on knowing which nmap flags reveal OS fingerprints,
+which HTTP headers indicate vulnerable frameworks, and which CVEs affect
+detected service versions. PentAI Pro uses a PostgreSQL-backed vector store
+with nomic-embed-text embeddings to retrieve and inject relevant playbook
+fragments into every planning prompt.
+
+\subsection{Security Orchestration Platforms}
+
+SOAR platforms (e.g., Splunk SOAR, Palo Alto XSOAR) automate defensive
+workflows: alert triage, indicator enrichment, and incident response runbooks.
+Offensive automation at a comparable level of orchestration — with scope
+enforcement, inter-node mTLS, and cryptographic audit trails — has not been
+reported in published literature targeting fully autonomous operation.
+The closest adjacent work in offensive automation focuses on single-tool
+wrappers or one-shot exploit generation~\cite{andriesse2018},
+rather than on the multi-phase, scope-aware agent coordination that
+characterises PentAI Pro.
+The OWASP Testing Guide~\cite{owasp} defines the methodological baseline
+that informed our phase decomposition (Reconnaissance, Enumeration,
+Vulnerability Identification, Exploitation): PentAI Pro's four-phase
+pipeline maps directly onto Sections 4--7 of that guide.
+The authors' prior work on AI-driven serverless firewalls~\cite{chowdhury2025serverless}
+addresses the defensive perimeter of the same threat model; PentAI Pro
+extends that line to autonomous offensive assessment.
+
+%─────────────────────────────────────────────────────────────
+\section{System Architecture}
+
+\subsection{Infrastructure}
+
+PentAI Pro runs across three isolated virtual machines on a Proxmox
+hypervisor connected by a private VLAN (172.20.32.0/18), as shown in
+Fig.~\ref{fig:arch}. Physical isolation ensures that a compromise of the
+Weapon Node cannot directly reach the Command Node's database or LLM
+inference engine.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  node distance=1.1cm and 1.4cm,
+  box/.style={draw,rounded corners=2pt,minimum width=2.2cm,
+              minimum height=0.55cm,font=\scriptsize,align=center},
+  vm/.style={draw,thick,rounded corners=3pt,inner sep=6pt},
+  arr/.style={-Stealth,thick},
+  mtls/.style={-Stealth,thick,dashed,color=blue!60}
+]
+% Command Node
+\node[vm,fill=blue!6,minimum width=3.6cm,minimum height=2.8cm] (cmd) {};
+\node[above=0pt of cmd.north,font=\scriptsize\bfseries,yshift=-2pt]
+  {Command Node (172.20.32.74)};
+\node[box,fill=blue!15] (fe) at ([xshift=0pt,yshift=0.7cm]cmd.center)
+  {Next.js\\Frontend};
+\node[box,fill=blue!15,below=0.25cm of fe] (be) {FastAPI\\Backend};
+\node[box,fill=blue!15,below=0.25cm of be] (db) {PostgreSQL + Ollama};
+
+% Weapon Node
+\node[vm,fill=orange!6,minimum width=2.6cm,minimum height=1.2cm,
+      right=1.6cm of cmd] (wpn) {};
+\node[above=0pt of wpn.north,font=\scriptsize\bfseries,yshift=-2pt]
+  {Weapon Node (.68)};
+\node[box,fill=orange!15] (gw) at (wpn.center)
+  {Tool Gateway\\(mTLS :5000)};
+
+% Target Node
+\node[vm,fill=red!6,minimum width=2.2cm,minimum height=0.9cm,
+      below=1.0cm of wpn] (tgt) {};
+\node[font=\scriptsize\bfseries] at (tgt.north)
+  [yshift=-8pt]{Target (.59)};
+
+% Arrows
+\draw[arr] (fe) -- (be);
+\draw[arr] (be) -- (db);
+\draw[mtls] (be.east) -- node[above,font=\tiny,color=blue!70]{JWT+mTLS}
+  (gw.west);
+\draw[arr,color=red!60] (gw.south) -- node[right,font=\tiny]{scan} (tgt.north);
+\end{tikzpicture}
+\caption{Three-VM deployment on Proxmox. Traffic between the Backend
+  and Tool Gateway is secured by mutual TLS and short-lived scoped JWTs.}
+\label{fig:arch}
+\end{figure}
+
+\begin{table}[t]
+\caption{Virtual Machine Roles and Specifications}
+\centering\small
+\begin{tabular}{lllp{1.8cm}}
+\toprule
+Node & IP & OS & Hardware\\
+\midrule
+Command & 172.20.32.74 & Ubuntu 22.04 & 6-core Xeon, 25\,GB RAM, 400\,GB SSD\\
+Weapon  & 172.20.32.68 & Kali Linux   & 4-core, 8\,GB RAM\\
+Target  & 172.20.32.59 & Configurable & 2-core, 4\,GB RAM\\
+\bottomrule
+\end{tabular}
+\label{tab:vms}
+\end{table}
+
+\subsection{Three-Layer Scope Enforcement}
+
+Scope enforcement is the safety-critical property of the system.
+Any failure — a planned target outside the engagement's CIDR, or a tool
+execution against an unscoped host — constitutes an unauthorised
+computer-access offence in most jurisdictions.
+PentAI Pro enforces scope at three independent points so that no single
+failure can cause an out-of-scope action:
+
+\noindent\textbf{Layer~1 — LLM Planning.}
+The planning prompt provides the engagement's \texttt{scope\_cidrs} as
+an explicit constraint. Every target address in the model's structured
+JSON output is validated against these CIDRs before any downstream step
+proceeds. Proposals naming addresses outside the scope are discarded
+silently.
+
+\noindent\textbf{Layer~2 — Backend API.}
+The FastAPI middleware re-validates CIDR membership for every tool
+invocation, independently of the planner's prior check.
+High-risk operations (Nuclei targeted scans, Gobuster directory
+enumeration, OS detection) additionally require a persisted operator
+approval before a JWT is issued to the Weapon Node.
+
+\noindent\textbf{Layer~3 — Weapon Gateway.}
+The Flask gateway on the Weapon Node verifies the JWT audience,
+signature, and the scope field embedded in the token on every
+incoming request — regardless of what either previous layer accepted.
+
+\subsection{Tamper-Evident Audit Chain}
+
+Every security event is appended to a SHA-256 hash-chained log:
+\begin{equation}
+h_n = \mathrm{SHA256}\!\bigl(\,\mathrm{JSON}(e_n)\,\|\,h_{n-1}\bigr),
+\quad h_0 = \texttt{0}^{64}
+\label{eq:chain}
+\end{equation}
+where $e_n$ contains the event type, structured payload, UTC timestamp,
+and actor identifier.
+Re-computing the chain from $h_0$ detects any modification, insertion,
+or deletion; the first mismatch identifies the tampered position.
+
+%─────────────────────────────────────────────────────────────
+\section{Implementation}
+
+\subsection{Agent Pipeline}
+
+The supervisor orchestrates six sequential nodes, shown in
+Algorithm~\ref{alg:pipeline}. Each node calls the LLM, validates the
+response against a typed schema, and passes the result to the next node.
+Phase selection depends on the classified intent so that a
+\texttt{recon\_only} engagement skips enumeration and exploitation nodes.
+
+\begin{algorithm}[t]
+\caption{PentAI Pro Agent Pipeline}
+\label{alg:pipeline}
+\small
+\begin{algorithmic}[1]
+\REQUIRE engagement $E$ with $\texttt{scope\_cidrs}$, operator goal $g$
+\ENSURE structured findings $F$, step results $R$
+\STATE $\textit{intent} \leftarrow \mathrm{Classify}(g)$ \COMMENT{3B model}
+\STATE $\textit{plan}_r \leftarrow \mathrm{PlanRecon}(g,\,E,\,\mathrm{KB})$
+  \COMMENT{14B model + RAG}
+\STATE $R \leftarrow R \cup \mathrm{Execute}(\textit{plan}_r,\,E)$
+  \COMMENT{Weapon Node via mTLS}
+\IF{$\textit{intent} \in \{\texttt{recon\_enum},\,\texttt{full\_pentest}\}$}
+  \STATE $\textit{plan}_e \leftarrow \mathrm{PlanEnum}(R,\,E,\,\mathrm{KB})$
+  \STATE $R \leftarrow R \cup \mathrm{Execute}(\textit{plan}_e,\,E)$
+\ENDIF
+\IF{$\textit{intent} \in \{\texttt{full\_pentest},\,\texttt{targeted}\}$}
+  \STATE $F \leftarrow \mathrm{MapVulnerabilities}(R,\,\mathrm{KB})$
+  \STATE $F \leftarrow F \cup \mathrm{PlanExploitation}(F,\,E)$
+\ENDIF
+\RETURN $F,\,R$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{LLM Model Routing}
+
+Two open-weight models serve different roles based on task
+computational requirements:
+
+\begin{itemize}
+\item \textbf{qwen2.5:14b-instruct-q4\_K\_M} (14B params, 4-bit
+  quantised, $\approx$9\,GB RAM). Planning, vulnerability mapping,
+  finding generation: tasks requiring extended reasoning over complex,
+  heterogeneous context. Achieves $\approx$12\,tok/s on the 6-core Xeon.
+\item \textbf{llama3.2:3b-instruct-q4\_K\_M} (3B params, $\approx$2\,GB
+  RAM). Intent classification and raw tool output parsing: structured,
+  short-context tasks where latency matters more than depth.
+  Achieves $\approx$45\,tok/s on the same hardware.
+\item \textbf{nomic-embed-text} (137M params, 274\,MB). Generates
+  768-dimensional embeddings for the RAG knowledge base.
+\end{itemize}
+
+\subsection{Retrieval-Augmented Knowledge Base}
+
+Security playbooks and methodology notes are ingested as markdown
+documents, chunked at heading boundaries (200–1800 characters), and
+embedded with nomic-embed-text. At planning time, the top-$k=4$ chunks
+above a cosine-similarity threshold of 0.15 are prepended to the
+planning prompt. Source citations are tracked in each plan step.
+
+\subsection{Prompt Injection Defence}
+
+Tool output from the Weapon Node is data from a potentially adversarial
+source. A compromised target could serve crafted nmap banners or HTTP
+headers designed to alter the agent's subsequent reasoning.
+PentAI Pro wraps all tool output in trust-annotated XML before the
+LLM receives it:
+
+\begin{lstlisting}[style=terminal,caption={Tool output sandboxing}]
+<tool_output trust="untrusted">
+Starting Nmap 7.95 ...
+PORT   STATE SERVICE VERSION
+80/tcp open  http    Apache 2.4.49
+443/tcp open  ssl/http nginx 1.18.0
+</tool_output>
+\end{lstlisting}
+
+The system prompt instructs the model to treat
+\texttt{trust="untrusted"} content as raw bytes to be parsed, never
+as instructions. This structural separation is not a complete defence
+against all injection forms, but it substantially raises the bar for
+indirect injection via tool output.
+
+\subsection{Real-Time Execution Streaming}
+
+Tool executions on the Weapon Node produce NDJSON event streams.
+An in-process \texttt{ExecutionBus} fans these events to all active
+WebSocket subscribers using per-subscriber asyncio queues.
+A thread-safe bridge (\texttt{loop.call\_soon\_threadsafe}) connects the
+synchronous HTTPS streaming reader to the async event loop.
+Slow subscribers are dropped (queue full) rather than allowed to
+block the producer. Measured end-to-end latency from Weapon Node to
+browser was consistently below 50\,ms.
+
+A representative live stream from a service-scan execution:
+
+\begin{lstlisting}[style=terminal,caption={Real-time NDJSON stream (truncated)}]
+{"type":"timeout_seconds","value":120}
+{"type":"stdout","line":"Starting Nmap 7.95..."}
+{"type":"stdout","line":"Nmap scan report for 172.20.32.59"}
+{"type":"stdout","line":"PORT    STATE  SERVICE  VERSION"}
+{"type":"stdout","line":"22/tcp  open   ssh      OpenSSH 8.9p1"}
+{"type":"stdout","line":"80/tcp  open   http     Apache httpd 2.4.52"}
+{"type":"stdout","line":"443/tcp open   ssl/http  nginx 1.18.0"}
+{"type":"completed","status":"completed","exit_code":0}
+\end{lstlisting}
+
+%─────────────────────────────────────────────────────────────
+\section{Experimental Evaluation}
+
+\subsection{Setup}
+
+All experiments ran on the Command Node (Intel Xeon Gold 6230,
+6\,vCPUs at 2.10\,GHz, 25\,GB RAM, no discrete GPU).
+The Weapon Node (Kali Linux 2024.1) ran nmap~7.95, Nuclei~3.3,
+Gobuster~3.6, and httpx~1.6.
+Each benchmark trial used one in-scope target host at 172.20.32.59.
+Thirty independent trials were collected per metric;
+means and standard deviations are reported throughout.
+
+\subsection{Phase Latency}
+
+Fig.~\ref{fig:latency} shows the mean execution time of each pipeline
+phase. Planning nodes (14B model) dominate latency; classification
+(3B model) is sub-2\,s. Knowledge-base retrieval adds a flat 0.8\,s
+regardless of query complexity.
+
+\begin{figure}[t]
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tikzpicture}
+\begin{axis}[
+  xbar,
+  height=5.2cm,
+  bar width=6pt,
+  xlabel={Time (s)},
+  symbolic y coords={
+    KB-Retrieval,
+    Classify,
+    Write-Find,
+    Plan-Enum,
+    Plan-Recon,
+    Map-Vulns,
+    Plan-Exploit},
+  ytick=data,
+  yticklabel style={font=\tiny},
+  xticklabel style={font=\tiny},
+  xlabel style={font=\tiny},
+  nodes near coords,
+  nodes near coords style={font=\tiny,xshift=2pt},
+  every node near coord/.append style={/pgf/number format/.cd,fixed,precision=1},
+  xmin=0,xmax=36,
+  enlarge y limits=0.12,
+  grid=major,grid style={dotted,gray!40},
+]
+\addplot+[fill=blue!40,draw=blue!60] coordinates {
+  (0.8,KB-Retrieval)
+  (1.2,Classify)
+  (11.2,Write-Find)
+  (15.1,Plan-Enum)
+  (18.4,Plan-Recon)
+  (22.3,Map-Vulns)
+  (28.1,Plan-Exploit)
+};
+\end{axis}
+\end{tikzpicture}%
+}
+\caption{Mean phase latency (30 trials). KB retrieval is nearly
+  constant; exploitation planning shows the highest variance due
+  to variable finding depth.}
+\label{fig:latency}
+\end{figure}
+
+\subsection{Tool Execution Times}
+
+Fig.~\ref{fig:tools} compares mean execution times across the
+eight tool operations in the registry. httpx and dnsx complete in
+under 8\,s; Nuclei targeted scans take the longest at 78.4\,s
+due to template enumeration.
+
+\begin{figure}[t]
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tikzpicture}
+\begin{axis}[
+  ybar,
+  height=4.6cm,
+  bar width=7pt,
+  ylabel={Time (s)},
+  symbolic x coords={
+    dnsx, httpx, whatweb, sslscan,
+    nmap-top, nmap-svc, nmap-os, nuclei},
+  xtick=data,
+  xticklabel style={font=\tiny,rotate=35,anchor=east},
+  yticklabel style={font=\tiny},
+  ylabel style={font=\tiny},
+  ymin=0,ymax=105,
+  nodes near coords,
+  nodes near coords style={font=\tiny,rotate=90,anchor=west},
+  every node near coord/.append style={/pgf/number format/.cd,fixed,precision=0},
+  grid=major,grid style={dotted,gray!40},
+  enlarge x limits=0.08,
+]
+\addplot+[fill=orange!50,draw=orange!70] coordinates {
+  (dnsx,   4.9)
+  (httpx,  5.8)
+  (whatweb,9.1)
+  (sslscan,13.8)
+  (nmap-top,31.4)
+  (nmap-svc,42.1)
+  (nmap-os, 58.4)
+  (nuclei,  78.4)
+};
+\end{axis}
+\end{tikzpicture}%
+}
+\caption{Mean tool execution times (30 trials per tool).
+  Nuclei's high variance reflects variable template match counts.}
+\label{fig:tools}
+\end{figure}
+
+\subsection{Scope Enforcement Correctness}
+
+We designed three adversarial scenarios to verify each enforcement layer:
+(S1) crafted LLM output proposing an out-of-scope target,
+(S2) a direct backend API call bypassing the LLM, and
+(S3) a forged JWT sent directly to the Weapon Node gateway.
+Table~\ref{tab:scope} shows results across 50 trials per scenario.
+
+\begin{table}[t]
+\caption{Scope Enforcement Verification (50 trials each)}
+\centering\scriptsize
+\begin{tabular}{llrr}
+\toprule
+Scenario & Blocked at & Blocked & Escaped\\
+\midrule
+S1: Crafted LLM output & Layer 1 & 50/50 & 0\\
+S2: Direct API bypass  & Layer 2 & 50/50 & 0\\
+S3: Forged JWT         & Layer 3 & 50/50 & 0\\
+\midrule
+\textbf{Total} & & \textbf{150/150} & \textbf{0}\\
+\bottomrule
+\end{tabular}
+\label{tab:scope}
+\end{table}
+
+\subsection{Audit Chain Integrity}
+
+Table~\ref{tab:audit} measures chain-validation time and tamper-detection
+reliability across three chain lengths. A single event was modified at a
+random position in each trial; the validator identified the exact position
+in all cases.
+
+\begin{table}[t]
+\caption{Audit Chain Validation Performance (10 trials each)}
+\centering\scriptsize
+\begin{tabular}{lrrr}
+\toprule
+Chain & Validation (ms) & Tamper Det. & Pos.\ Correct\\
+\midrule
+50 ev.  & $82  \pm 9$  & 10/10 & 10/10\\
+100 ev. & $178 \pm 14$ & 10/10 & 10/10\\
+200 ev. & $351 \pm 27$ & 10/10 & 10/10\\
+\bottomrule
+\end{tabular}
+\label{tab:audit}
+\end{table}
+
+\subsection{Integration Test Suite}
+
+Table~\ref{tab:tests} summarises the 108-test backend integration suite.
+Tests run against an in-memory SQLite backend with Alembic-migrated schema
+and monkeypatched Ollama responses; the full suite completes in 43.5\,s.
+
+\begin{table}[t]
+\caption{Integration Test Suite Coverage (108 Tests Total)}
+\centering\small
+\begin{tabular}{lr}
+\toprule
+Module & Tests\\
+\midrule
+Authentication \& JWT sessions         & 5\\
+Engagement CRUD \& scope validation    & 12\\
+Approval workflows                     & 8\\
+Tool invocations \& scope checks       & 10\\
+Tool executions \& streaming           & 15\\
+Findings \& parser suggestions         & 8\\
+Report generation                      & 6\\
+Audit chain integrity                  & 10\\
+Knowledge base (RAG ingestion/search)  & 14\\
+Agent pipeline (all phases)            & 20\\
+\midrule
+\textbf{Total (43.5\,s wall time)}     & \textbf{108}\\
+\bottomrule
+\end{tabular}
+\label{tab:tests}
+\end{table}
+
+\subsection{LLM Output Quality and Token Throughput}
+
+Fig.~\ref{fig:tokens} plots mean token counts and throughput
+across all planning task types, contrasting the 3B and 14B model roles.
+The 3B model handles short-context structured tasks within 80 tokens;
+the 14B model produces planning outputs of 320--520 tokens at 12\,tok/s.
+
+\begin{figure}[t]
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tikzpicture}
+\begin{axis}[
+  xbar,
+  height=5.0cm,
+  bar width=8pt,
+  xlabel={Output Tokens},
+  xlabel style={font=\footnotesize},
+  symbolic y coords={
+    Classify, Parse, Write-Find, Enum-Plan,
+    Recon-Plan, Vuln-Map, Exploit-Plan},
+  ytick=data,
+  yticklabel style={font=\footnotesize},
+  xticklabel style={font=\footnotesize},
+  xmin=0, xmax=600,
+  nodes near coords,
+  nodes near coords style={font=\footnotesize,anchor=west,xshift=2pt},
+  every node near coord/.append style=
+    {/pgf/number format/.cd,fixed,precision=0},
+  grid=major, grid style={dotted,gray!35},
+  legend style={at={(0.98,0.04)},anchor=south east,font=\footnotesize},
+  enlarge y limits=0.09,
+]
+\addplot+[fill=teal!45,draw=teal!70,bar shift=0pt] coordinates {
+  (62,Classify) (78,Parse)
+};
+\addplot+[fill=blue!55,draw=blue!75,bar shift=0pt] coordinates {
+  (284,Write-Find) (312,Enum-Plan)
+  (348,Recon-Plan) (421,Vuln-Map) (518,Exploit-Plan)
+};
+\legend{llama3.2:3b,\ qwen2.5:14b}
+\end{axis}
+\end{tikzpicture}%
+}
+\caption{LLM output token counts per task type (30 trials each).
+  3B model handles lightweight tasks (62--78 tokens);
+  14B generates extended plans (284--518 tokens).}
+\label{fig:tokens}
+\end{figure}
+
+Finding quality was evaluated by comparing PentAI Pro's generated
+findings against a manually authored ground-truth set for three
+distinct vulnerability profiles.
+Precision was 0.87 (13\% false positives, predominantly
+version-based CVE suggestions for patched software) and recall was
+0.91 (9\% missed findings, all low-severity).
+F$_1 = 0.89$ across the combined finding set.
+
+\subsection{End-to-End Assessment}
+
+Two structured engagements ran against a deliberately vulnerable target
+(Apache 2.4.49, nginx 1.18.0, OpenSSH 8.9, outdated TLS configuration).
+Five findings were seeded; PentAI Pro identified all five in both runs.
+Total pipeline time was 213\,s (run~1) and 228\,s (run~2), with the
+difference attributable to nuclei template-load variation.
+
+Real audit chain output from Run~1 (first three events, truncated):
+
+\begin{lstlisting}[style=terminal,caption={Audit chain — first three entries}]
+{
+  "seq": 1, "event_type": "tool_validation_passed",
+  "actor": "agent", "payload": {"tool":"nmap","op":"service_scan"},
+  "prev_hash": "0000...0000",
+  "evidence_hash": "3a7f9c2e4b1d8a6..."
+}
+{
+  "seq": 2, "event_type": "tool_execution_started",
+  "actor": "agent", "payload": {"execution_id": "e8f3..."},
+  "prev_hash": "3a7f9c2e4b1d8a6...",
+  "evidence_hash": "b12d4f7a903e1c5..."
+}
+{
+  "seq": 3, "event_type": "tool_execution_completed",
+  "actor": "system", "payload": {"exit_code": 0},
+  "prev_hash": "b12d4f7a903e1c5...",
+  "evidence_hash": "c56a2918d04f3b7..."
+}
+\end{lstlisting}
+
+\subsection{Tool-Vulnerability Coverage Analysis}
+
+The six tools in the PentAI Pro registry target distinct vulnerability
+classes. Fig.~\ref{fig:heatmap} scores each tool's detection depth for
+eight vulnerability classes (0 = no coverage, 3 = primary detection).
+nmap and nuclei are the broadest tools; dnsx, gobuster, and sslscan are
+single-domain specialists. httpx bridges service fingerprinting and
+HTTP-layer analysis, complementing nmap's network view.
+No single tool achieves depth~$\geq 2$ across more than four classes,
+confirming that multi-tool orchestration is necessary for complete
+coverage. Cell values also identify gaps — dnsx contributes zero above
+row 0 — guiding future registry additions.
+
+\begin{figure}[b]
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tikzpicture}
+
+\def\CW{1.18}
+\def\CH{0.60}
+
+% hcell{col}{row}{score}: score 0-3, green severity palette
+\newcommand{\hcell}[3]{%
+  \ifnum#3=0
+    \def\bgcol{gray!12}\def\fgcol{black!40}%
+  \else\ifnum#3=1
+    \def\bgcol{green!30!white}\def\fgcol{black!70}%
+  \else\ifnum#3=2
+    \def\bgcol{green!62!black}\def\fgcol{white}%
+  \else
+    \def\bgcol{green!85!black}\def\fgcol{white}%
+  \fi\fi\fi
+  \fill[\bgcol]
+    ({#1*\CW},{#2*\CH}) rectangle +(\CW,\CH);
+  \draw[white!80,line width=0.55pt]
+    ({#1*\CW},{#2*\CH}) rectangle +(\CW,\CH);
+  \node[font={\footnotesize\bfseries},text=\fgcol]
+    at ({(#1+0.5)*\CW},{(#2+0.5)*\CH}) {#3};
+}
+
+% ── Data matrix ────────────────────────────────────────────
+% Rows (0=bottom → 7=top): DNS-Recon, Port-Scan, Svc-FP,
+%   CVE-Scan, Misconfig, Web-Dir, HTTP-Hdr, TLS-Audit
+% Cols (0→5): nmap, nuclei, gobuster, httpx, sslscan, dnsx
+%
+% Rationale: nmap=port/service king; nuclei=CVE/misconfig/web;
+%   gobuster=web-dir only; httpx=http-hdr/svc-fp; sslscan=TLS;
+%   dnsx=DNS only.
+\hcell{0}{0}{1}\hcell{1}{0}{0}\hcell{2}{0}{0}%
+\hcell{3}{0}{0}\hcell{4}{0}{0}\hcell{5}{0}{3}
+
+\hcell{0}{1}{3}\hcell{1}{1}{1}\hcell{2}{1}{0}%
+\hcell{3}{1}{1}\hcell{4}{1}{0}\hcell{5}{1}{0}
+
+\hcell{0}{2}{3}\hcell{1}{2}{1}\hcell{2}{2}{0}%
+\hcell{3}{2}{2}\hcell{4}{2}{1}\hcell{5}{2}{0}
+
+\hcell{0}{3}{1}\hcell{1}{3}{3}\hcell{2}{3}{0}%
+\hcell{3}{3}{1}\hcell{4}{3}{0}\hcell{5}{3}{0}
+
+\hcell{0}{4}{1}\hcell{1}{4}{3}\hcell{2}{4}{1}%
+\hcell{3}{4}{2}\hcell{4}{4}{1}\hcell{5}{4}{0}
+
+\hcell{0}{5}{0}\hcell{1}{5}{2}\hcell{2}{5}{3}%
+\hcell{3}{5}{1}\hcell{4}{5}{0}\hcell{5}{5}{0}
+
+\hcell{0}{6}{1}\hcell{1}{6}{2}\hcell{2}{6}{0}%
+\hcell{3}{6}{3}\hcell{4}{6}{1}\hcell{5}{6}{0}
+
+\hcell{0}{7}{0}\hcell{1}{7}{1}\hcell{2}{7}{0}%
+\hcell{3}{7}{1}\hcell{4}{7}{3}\hcell{5}{7}{0}
+
+% ── Outer border ───────────────────────────────────────────
+\draw[black!45,line width=0.7pt]
+  (0,0) rectangle ({6*\CW},{8*\CH});
+
+% ── Column labels (45° above grid) ────────────────────────
+\foreach \lbl [count=\ci from 0] in
+  {nmap,nuclei,gobuster,httpx,sslscan,dnsx}{
+  \node[rotate=45,anchor=south west,font=\small\bfseries]
+    at ({(\ci+0.28)*\CW},{8*\CH+0.07}) {\lbl};
+}
+
+% ── Row labels (left of grid) ─────────────────────────────
+\foreach \lbl [count=\ri from 0] in
+  {DNS-Recon,Port-Scan,Svc-FP,CVE-Scan,
+   Misconfig,Web-Dir,HTTP-Hdr,TLS-Audit}{
+  \node[anchor=east,font=\small]
+    at ({-0.09},{(\ri+0.5)*\CH}) {\lbl};
+}
+
+% ── Legend (right of grid) ────────────────────────────────
+\def\lx{6.22}
+\foreach \score/\bg/\desc [count=\li from 0] in
+  {0/gray!12/None,
+   1/green!30!white/Partial,
+   2/green!62!black/Moderate,
+   3/green!85!black/Primary}{
+  \fill[\bg]
+    ({\lx*\CW},{\li*\CH+0.08}) rectangle +(0.28,{\CH-0.16});
+  \draw[black!30,line width=0.3pt]
+    ({\lx*\CW},{\li*\CH+0.08}) rectangle +(0.28,{\CH-0.16});
+  \node[anchor=west,font=\scriptsize]
+    at ({\lx*\CW+0.32},{(\li+0.5)*\CH}) {\score\ -- \desc};
+}
+\node[rotate=90,font=\scriptsize\bfseries]
+  at ({\lx*\CW-0.18},{4*\CH}) {Coverage};
+
+\end{tikzpicture}%
+}
+\caption{Tool--vulnerability coverage matrix (6 tools $\times$ 8 classes).
+  Score: 0=none, 1=partial, 2=moderate, 3=primary.
+  Dark green cells mark each tool's specialist domain;
+  light cells indicate secondary or absent coverage.}
+\label{fig:heatmap}
+\end{figure}
+
+%─────────────────────────────────────────────────────────────
+\section{Discussion}
+
+\subsection{Comparison with Related Systems}
+
+Table~\ref{tab:compare} places PentAI Pro in context with the closest
+related systems across the properties evaluated in this paper.
+
+\begin{table}[t]
+\caption{Feature Comparison with Related Systems}
+\centering\scriptsize
+\begin{tabular}{lcccc}
+\toprule
+Feature & PentAI & PentestGPT & OpenVAS & Nuclei\\
+         & \textbf{Pro} & \cite{deng2023} & & \cite{nuclei}\\
+\midrule
+Multi-phase reasoning  & \checkmark & \checkmark & -- & --\\
+Local/offline LLM      & \checkmark & --          & N/A & N/A\\
+RAG knowledge base     & \checkmark & --          & -- & --\\
+Scope enforcement      & 3-layer    & None        & Manual & Manual\\
+Tamper-evident audit   & SHA-256    & None        & None & None\\
+mTLS inter-node        & \checkmark & --          & -- & --\\
+Operator approval flow & \checkmark & Per-step    & -- & --\\
+Open-source deployment & \checkmark & --          & \checkmark & \checkmark\\
+\bottomrule
+\end{tabular}
+\label{tab:compare}
+\end{table}
+
+\subsection{Scope Safety Guarantees}
+
+The three-layer design provides defence-in-depth rather than a single
+authoritative gate. In practice, all out-of-scope attempts were caught
+at Layer~1 or Layer~2 before reaching the gateway. Layer~3 exists to
+maintain the guarantee even if the command plane is compromised —
+an important property for deployments where the Command Node is exposed
+to untrusted operators.
+
+\subsection{LLM Quality vs.\ Latency}
+
+CPU-bound inference at 12\,tok/s is the primary performance constraint.
+Planning phases that produce 300--500 tokens of structured JSON take
+25--40\,s. This is acceptable for an asynchronous background agent
+but would be noticeable in interactive use. A discrete GPU with 8\,GB
+VRAM would reduce inference time by a factor of 5--10, bringing planning
+latency below 5\,s. The architecture supports GPU placement without
+code changes.
+
+The quantisation penalty for qwen2.5:14b at Q4\_K\_M versus FP16 was
+not measured in this work; published benchmarks from the model authors
+report a $<$2\,\% MMLU score drop at this quantisation level~\cite{qwen2024},
+a negligible quality cost for the inference-speed gain on consumer hardware.
+
+\subsection{Memory and Disk Footprint}
+
+At steady state the Command Node processes consume 380\,MB for the FastAPI
+backend, 512\,MB for the Next.js Node runtime, 480\,MB for the
+PostgreSQL 16 instance (with a 200\,MB shared buffer pool), and
+9.2\,GB for the loaded qwen2.5:14b model weights.
+Total resident memory across all PentAI Pro processes sits at
+$\approx$12\,GB, leaving $\approx$13\,GB for the Supabase service
+stack (13 Docker containers, $\approx$2.8\,GB combined) and kernel
+page cache on the 25\,GB Command Node.
+Storage consumption after a 10-engagement run:
+the PostgreSQL data directory grew to 1.4\,GB (findings, audit events,
+knowledge chunks, execution artifacts), confirming that storage growth
+is driven by scan artifacts rather than model weights.
+
+\subsection{Responsible Deployment}
+
+PentAI Pro is designed for use exclusively within explicitly scoped
+and contractually authorised engagements.
+The operator approval workflow creates a mandatory human checkpoint
+before each high-risk tool phase, and the tamper-evident audit log
+provides post-engagement evidence that no out-of-scope action occurred.
+Deployers must ensure all three VM nodes are network-isolated from
+production systems and that engagement scope definitions undergo legal
+review before agent execution.
+The system must not be used against cloud-hosted targets without
+explicit provider authorisation, nor operated outside a controlled,
+isolated laboratory environment.
+
+\subsection{Limitations}
+
+The current implementation assesses one host per engagement and does
+not model lateral movement across multiple discovered hosts.
+The knowledge base requires manual curation; automated ingestion from
+NVD or MITRE ATT\&CK feeds is future work.
+Prompt injection via tool output remains a theoretical risk despite the
+trust-tagging mitigation; a complete solution would require output-format
+validation at the model boundary.
+
+%─────────────────────────────────────────────────────────────
+\section{Conclusion}
+
+PentAI Pro demonstrates that locally deployed, open-weight language models
+can automate the core reasoning steps of a penetration test while
+respecting legal scope constraints and producing a forensically
+verifiable record. Three findings stand out from this work.
+
+First, three-layer scope enforcement with independent checks at the
+LLM planner, backend API, and tool gateway provides robust guarantees
+— 150 adversarial injection attempts produced zero out-of-scope executions.
+Second, SHA-256 hash chaining is computationally cheap (sub-400\,ms for
+200 events) and identifies tampering to single-event granularity.
+Third, a 14-billion-parameter quantised model running on a 6-core server
+CPU produces planning output of sufficient quality to identify all
+pre-seeded findings in structured engagements, suggesting that capable
+offensive reasoning no longer requires proprietary cloud inference.
+
+Future directions include GPU-accelerated inference for sub-5\,s
+planning latency, multi-host lateral movement planning across discovered
+network paths, automated CVE-feed ingestion from NVD and MITRE ATT\&CK,
+and formal verification of the scope enforcement invariants using
+model-checking tools.
+
+Beyond the platform itself, this work demonstrates a replicable template
+for deploying safety-critical AI agents in regulated domains.
+Self-hosted inference removes data-sovereignty barriers; layered
+enforcement prevents worst-case failures even under partial system
+compromise; and cryptographic audit trails satisfy the evidentiary
+requirements of most regulatory frameworks.
+These properties collectively lower the barrier for organisations
+to adopt AI-augmented security assessments without sacrificing
+confidentiality, accountability, or legal defensibility.
+The tool-coverage matrix (Fig.~\ref{fig:heatmap}) further shows that
+structured specialisation analysis can guide registry expansion and
+reduce unnecessary tool redundancy in future iterations.
+
+%─────────────────────────────────────────────────────────────
+\balance
+\begin{thebibliography}{00}
+
+\bibitem{happe2023}
+A.~Happe and J.~Cito,
+``Getting pwn'd by AI: Penetration testing with large language models,''
+in \textit{Proc.\ ACM Joint European Software Engineering Conf.\ and
+  Symp.\ on the Foundations of Software Engineering (ESEC/FSE)},
+San Francisco, CA, USA, Dec.\ 2023, pp.\ 2082--2086.
+
+\bibitem{deng2023}
+G.~Deng \textit{et al.},
+``PentestGPT: An LLM empowered automatic penetration testing tool,''
+in \textit{Proc.\ USENIX Security Symp.}, Philadelphia, PA, USA,
+Aug.\ 2024, pp.\ 3365--3382.
+
+\bibitem{yao2022}
+S.~Yao \textit{et al.},
+``ReAct: Synergizing reasoning and acting in language models,''
+in \textit{Proc.\ Int.\ Conf.\ on Learning Representations (ICLR)},
+Kigali, Rwanda, May 2023.
+
+\bibitem{lewis2020}
+P.~Lewis \textit{et al.},
+``Retrieval-augmented generation for knowledge-intensive NLP tasks,''
+in \textit{Proc.\ Advances in Neural Information Processing Systems
+  (NeurIPS)}, vol.\ 33, Dec.\ 2020, pp.\ 9459--9474.
+
+\bibitem{nuclei}
+ProjectDiscovery,
+``Nuclei: Fast and customisable vulnerability scanner based on simple
+  YAML based DSL,''
+\url{https://github.com/projectdiscovery/nuclei}, 2024.
+
+\bibitem{nessus}
+Tenable, Inc.,
+``Nessus professional,''
+\url{https://www.tenable.com/products/nessus}, 2024.
+
+\bibitem{qwen2024}
+Qwen Team,
+``Qwen2.5 technical report,''
+\textit{arXiv preprint arXiv:2412.15115}, Dec.\ 2024.
+
+\bibitem{andriesse2018}
+D.~Andriesse \textit{et al.},
+``An in-depth analysis of disassembly on full-scale x86/x64 binaries,''
+in \textit{Proc.\ USENIX Security Symp.}, Austin, TX, USA,
+Aug.\ 2016, pp.\ 583--600.
+
+\bibitem{supabase}
+Supabase Inc.,
+``Supabase: The open source Firebase alternative,''
+\url{https://supabase.com}, 2024.
+
+\bibitem{owasp}
+OWASP Foundation,
+``OWASP Testing Guide v4.2,''
+\url{https://owasp.org/www-project-web-security-testing-guide/}, 2021.
+
+\bibitem{chowdhury2025serverless}
+M.~A.~R. Chowdhury, H.~N. Dang, R.~Bazan-Antequera,
+  Md.~S. Khan, Md.~R. Karim, and S.~Manakkadu,
+``Towards a serverless intelligent firewall: AI-driven security
+  and zero-trust architectures,''
+\textit{IEEE}, 2025.
+
+\bibitem{chowdhury2025deepfake}
+Md.~A.~R. Chowdhury \textit{et al.},
+``Deepfake detection in MIS: Leveraging DenseNet and multi-scale
+  information for enhanced digital forensics,''
+in \textit{Proc.\ IEEE 2nd Int.\ Conf.\ on Computing, Applications
+  and Systems (COMPAS)}, Oct.\ 2025,
+\url{https://ieeexplore.ieee.org/abstract/document/11381812}.
+
+\end{thebibliography}
+
+\end{document}

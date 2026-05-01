@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;700&amp;family=Space+Grotesk:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #0A0B0F;
+            color: #E8EAED;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "border-subtle": "#252836",
+                        "text-primary": "#E8EAED",
+                        "text-secondary": "#9AA0B4",
+                        "border-accent": "#2F3447",
+                        "surface-secondary": "#141620",
+                        "surface-tertiary": "#1C1F2E",
+                        "bg-primary": "#0A0B0F",
+                        "primary": "#acc7ff",
+                        "primary-container": "#508ff8",
+                        "severity-high": "#FF8C42",
+                        "severity-critical": "#FF3366",
+                        "severity-low": "#4F8EF7"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem"
+                    },
+                    "spacing": {
+                        "base": "4px",
+                        "padding-card": "24px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "body-md": ["Inter"],
+                        "mono-code": ["JetBrains Mono"],
+                        "h2": ["Space Grotesk"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["11px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "mono-code": ["13px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "h2": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-body-md bg-bg-primary overflow-hidden">
+<!-- TopAppBar -->
+<header class="h-10 fixed top-0 w-full z-50 bg-[#0A0B0F] border-b border-[#252836] flex justify-between items-center px-4">
+<div class="flex items-center gap-4">
+<span class="text-sm font-bold tracking-tighter text-[#E8EAED]">PentAI Pro</span>
+<nav class="hidden md:flex gap-6">
+<span class="font-mono text-xs uppercase tracking-wider text-[#4F8EF7] font-bold">Dashboard</span>
+<span class="font-mono text-xs uppercase tracking-wider text-[#E8EAED]/60">Scans</span>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#E8EAED]/60 text-sm">notifications</span>
+<span class="material-symbols-outlined text-[#E8EAED]/60 text-sm">person</span>
+</div>
+</header>
+<!-- SideNavBar (Collapsed for Modal Focus) -->
+<aside class="fixed left-0 top-10 h-[calc(100vh-40px)] w-16 bg-[#0A0B0F] border-r border-[#252836] z-40 flex flex-col py-4 overflow-hidden">
+<div class="flex flex-col gap-6 items-center">
+<div class="w-full flex justify-center border-l-2 border-[#4F8EF7] bg-[#141620] py-2 text-[#4F8EF7]">
+<span class="material-symbols-outlined">grid_view</span>
+</div>
+<span class="material-symbols-outlined text-[#E8EAED]/40">lan</span>
+<span class="material-symbols-outlined text-[#E8EAED]/40">security</span>
+<span class="material-symbols-outlined text-[#E8EAED]/40">radar</span>
+</div>
+</aside>
+<!-- Main Content / Modal Overlay -->
+<main class="ml-16 mt-10 p-gutter h-[calc(100vh-40px)] flex items-center justify-center bg-surface-dim">
+<!-- NEW ENGAGEMENT WIZARD MODAL -->
+<div class="w-full max-w-2xl bg-surface-secondary border border-border-subtle shadow-2xl">
+<!-- Modal Header -->
+<div class="p-4 border-b border-border-subtle flex justify-between items-center">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-text-secondary uppercase">Initiate Protocol</span>
+<h2 class="font-h2 text-h2 text-text-primary">New Engagement Wizard</h2>
+</div>
+<div class="font-mono-code text-mono-code text-primary bg-primary/10 px-3 py-1 border border-primary/20">
+                    01 / 02 / 03
+                </div>
+</div>
+<!-- Warning Banner -->
+<div class="bg-[#FFB800] px-4 py-2 flex items-center">
+<span class="font-mono-code text-[11px] font-bold text-black uppercase tracking-tighter">
+                    NOTICE: ALL ACTIONS LOGGED UNDER SOX COMPLIANCE PROTOCOL 4.2. AUTHORIZED ACCESS ONLY.
+                </span>
+</div>
+<!-- Modal Body -->
+<div class="p-6 space-y-6">
+<!-- Engagement Name -->
+<div class="space-y-2">
+<label class="font-label-caps text-label-caps text-text-secondary">ENGAGEMENT_ID</label>
+<input class="w-full bg-bg-primary border border-border-subtle px-4 h-10 font-mono-code text-text-primary focus:border-primary focus:ring-0 rounded-none transition-colors" placeholder="e.g. ALPHA-SIERRA-2024" type="text"/>
+</div>
+<!-- Scope Configuration -->
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<label class="font-label-caps text-label-caps text-text-secondary">TARGET_CIDR_SCOPE</label>
+<span class="font-mono-code text-[10px] text-primary">SYNTAX: IP/MASK</span>
+</div>
+<div class="grid grid-cols-12 gap-4">
+<div class="col-span-8">
+<input class="w-full bg-bg-primary border border-border-subtle px-4 h-10 font-mono-code text-text-primary focus:border-primary focus:ring-0 rounded-none transition-colors" type="text" value="192.168.1.0/24"/>
+</div>
+<div class="col-span-4">
+<button class="w-full h-10 border border-border-accent bg-surface-tertiary text-text-primary font-label-caps text-label-caps hover:bg-border-accent transition-colors">VALIDATE</button>
+</div>
+</div>
+<!-- Technical Validation Logic Box -->
+<div class="bg-bg-primary border border-border-subtle p-4 font-mono-code text-[12px] text-text-secondary leading-relaxed">
+<div class="flex items-center gap-2 mb-2">
+<span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_8px_rgba(68,245,189,0.5)]"></span>
+<span class="text-secondary">PARSING_LOGIC_ACTIVE</span>
+</div>
+<div class="opacity-80">
+<p>&gt; Initializing subnet calculation...</p>
+<p>&gt; Base address: 192.168.1.0</p>
+<p>&gt; Broadcast: 192.168.1.255</p>
+<p>&gt; Total Hosts: 254 [Usable]</p>
+<p>&gt; Network Mask: 255.255.255.0</p>
+<p class="text-primary">&gt; Verification complete. Scope valid.</p>
+</div>
+</div>
+</div>
+<!-- Engagement Type Bento -->
+<div class="grid grid-cols-2 gap-4">
+<div class="p-4 border-2 border-primary bg-primary/5 flex flex-col gap-2">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary">radar</span>
+<span class="bg-primary text-on-primary-container px-2 py-0.5 text-[10px] font-bold">SELECTED</span>
+</div>
+<span class="font-label-caps text-label-caps text-primary">BLACK_BOX</span>
+<p class="text-[11px] text-text-secondary leading-tight">No prior internal knowledge. Pure external reconnaissance and exploitation.</p>
+</div>
+<div class="p-4 border border-border-subtle bg-surface-tertiary flex flex-col gap-2 opacity-50 hover:opacity-100 transition-opacity cursor-pointer">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-text-secondary">lan</span>
+</div>
+<span class="font-label-caps text-label-caps text-text-secondary">WHITE_BOX</span>
+<p class="text-[11px] text-text-secondary leading-tight">Full architecture documentation provided. Focus on logic and credentialed access.</p>
+</div>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="p-4 bg-surface-tertiary border-t border-border-subtle flex justify-between items-center">
+<button class="px-6 h-8 border border-border-accent text-text-secondary font-label-caps text-label-caps hover:text-text-primary transition-colors">CANCEL</button>
+<div class="flex gap-4">
+<button class="px-8 h-10 bg-primary-container text-on-primary-container font-label-caps text-label-caps hover:opacity-90 transition-opacity flex items-center gap-2">
+                        CONTINUE_TO_SCAN_CONFIG
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Decorative Background Elements -->
+<div class="fixed inset-0 pointer-events-none z-[-1] overflow-hidden">
+<div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 blur-[120px]"></div>
+<div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-severity-critical/5 blur-[120px]"></div>
+<div class="absolute inset-0 opacity-[0.03]" data-alt="subtle grid pattern of tiny dots on a near black background for a technical interface feel" style="background-image: radial-gradient(#E8EAED 0.5px, transparent 0.5px); background-size: 24px 24px;"></div>
+</div>
+</body></html>

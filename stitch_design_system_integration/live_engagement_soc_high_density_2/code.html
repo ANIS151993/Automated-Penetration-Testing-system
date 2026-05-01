@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 18px;
+        }
+        body {
+            background-color: #0A0B0F;
+            color: #E8EAED;
+            font-family: 'Inter', sans-serif;
+        }
+        .attack-node {
+            position: relative;
+        }
+        .attack-node::after {
+            content: '';
+            position: absolute;
+            width: 1px;
+            height: 24px;
+            background: #2F3447;
+            left: 50%;
+            bottom: -24px;
+            transform: translateX(-50%);
+        }
+        .attack-node:last-child::after {
+            display: none;
+        }
+        .panel-coordinate {
+            font-size: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            color: #5C6378;
+            position: absolute;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary": "#4b2800",
+                      "on-primary-fixed-variant": "#004492",
+                      "on-secondary-fixed": "#002116",
+                      "on-secondary": "#003828",
+                      "surface-container-lowest": "#0b0e14",
+                      "surface-container": "#1d2026",
+                      "surface-secondary": "#141620",
+                      "on-surface-variant": "#c2c6d5",
+                      "on-tertiary-fixed": "#2d1600",
+                      "surface-tint": "#acc7ff",
+                      "primary-container": "#508ff8",
+                      "tertiary-fixed-dim": "#ffb873",
+                      "severity-critical": "#FF3366",
+                      "on-surface": "#e1e2eb",
+                      "inverse-primary": "#005bbf",
+                      "text-secondary": "#9AA0B4",
+                      "on-secondary-fixed-variant": "#00513b",
+                      "text-tertiary": "#5C6378",
+                      "outline-variant": "#424753",
+                      "severity-high": "#FF8C42",
+                      "border-subtle": "#252836",
+                      "surface-container-highest": "#32353c",
+                      "primary-fixed": "#d7e2ff",
+                      "primary": "#acc7ff",
+                      "secondary-container": "#00d8a2",
+                      "error-container": "#93000a",
+                      "on-tertiary-container": "#412200",
+                      "tertiary": "#ffb873",
+                      "primary-fixed-dim": "#acc7ff",
+                      "tertiary-fixed": "#ffdcbf",
+                      "on-secondary-container": "#005840",
+                      "on-error": "#690005",
+                      "surface-container-low": "#191c22",
+                      "severity-info": "#5C6378",
+                      "outline": "#8c909e",
+                      "surface-dim": "#11131a",
+                      "secondary-fixed-dim": "#1fe0aa",
+                      "surface": "#11131a",
+                      "inverse-on-surface": "#2e3037",
+                      "surface-container-high": "#272a31",
+                      "on-primary": "#002f68",
+                      "on-error-container": "#ffdad6",
+                      "surface-variant": "#32353c",
+                      "surface-bright": "#373940",
+                      "surface-tertiary": "#1C1F2E",
+                      "secondary": "#44f5bd",
+                      "inverse-surface": "#e1e2eb",
+                      "on-background": "#e1e2eb",
+                      "background": "#11131a",
+                      "error": "#ffb4ab",
+                      "secondary-fixed": "#50fec5",
+                      "on-primary-fixed": "#001a40",
+                      "on-primary-container": "#00285b",
+                      "bg-primary": "#0A0B0F",
+                      "tertiary-container": "#d37b02",
+                      "text-primary": "#E8EAED",
+                      "on-tertiary-fixed-variant": "#6a3b00",
+                      "severity-low": "#4F8EF7",
+                      "severity-medium": "#FFB800",
+                      "border-accent": "#2F3447"
+              },
+              "spacing": {
+                      "sidebar-collapsed": "64px",
+                      "base": "4px",
+                      "row-regular": "48px",
+                      "gutter": "24px",
+                      "nav-height": "56px",
+                      "padding-card": "24px",
+                      "sidebar-expanded": "240px",
+                      "row-dense": "40px"
+              },
+              "fontFamily": {
+                      "body-md": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "h3": ["Space Grotesk"],
+                      "h2": ["Space Grotesk"],
+                      "body-sm": ["Inter"],
+                      "label-caps": ["Inter"],
+                      "h1": ["Space Grotesk"],
+                      "mono-code": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "body-lg": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "h3": ["20px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "h2": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "body-sm": ["12px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                      "label-caps": ["11px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "h1": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "mono-code": ["13px", {"lineHeight": "1.6", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-primary flex flex-col min-h-screen overflow-x-hidden">
+<!-- Top App Bar -->
+<header class="bg-slate-950 dark:bg-[#0A0B0F] border-b border-slate-800 dark:border-[#252836] flex justify-between items-center w-full px-4 h-10 fixed top-0 z-50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-blue-500 dark:text-[#4F8EF7]" data-icon="security">security</span>
+<h1 class="text-xs font-black tracking-[0.2em] text-slate-100 dark:text-[#E8EAED] font-['JetBrains_Mono'] uppercase">SOC_TERMINAL_V.2.4.1</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-mono-code text-[9px] text-text-tertiary">SYS_LOCAL: 14:04:42</span>
+<button class="w-8 h-8 flex items-center justify-center hover:bg-slate-900/50 dark:hover:bg-[#1C1F2E] transition-colors duration-150 rounded">
+<span class="material-symbols-outlined text-slate-400" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow pt-10 pb-32 px-4 max-w-md mx-auto w-full flex flex-col gap-6">
+<!-- Live Metrics Bar -->
+<section class="flex flex-wrap gap-2 justify-between items-center py-2 border-b border-border-subtle bg-surface-dim/50 backdrop-blur-md sticky top-10 z-40">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 bg-severity-critical rounded-full animate-pulse"></span>
+<span class="font-mono-code text-[11px] text-text-primary uppercase tracking-tighter">01_LIVE_FEED: ENGAGEMENT_04</span>
+</div>
+<div class="flex gap-4">
+<div class="flex flex-col">
+<span class="font-mono-code text-[8px] text-text-tertiary uppercase">LTCY</span>
+<span class="font-mono-code text-[11px] text-secondary">24ms</span>
+</div>
+<div class="flex flex-col">
+<span class="font-mono-code text-[8px] text-text-tertiary uppercase">EPS_V</span>
+<span class="font-mono-code text-[11px] text-text-primary">1.4k</span>
+</div>
+</div>
+</section>
+<!-- Simplified Attack Graph -->
+<section class="flex flex-col gap-2 relative">
+<span class="panel-coordinate top-0 left-0">40.7128° N, 74.0060° W</span>
+<h2 class="font-mono-code text-[11px] text-text-tertiary uppercase flex items-center gap-2">
+<span class="text-primary">02_</span>PROPAGATION_PATH
+            </h2>
+<div class="bg-surface-secondary border border-border-subtle p-6 rounded-sm flex flex-col items-center gap-6 relative overflow-hidden">
+<div class="absolute top-1 right-1 opacity-20">
+<span class="font-mono-code text-[8px] text-text-tertiary">ST_GRP_04.X</span>
+</div>
+<!-- Attack Graph Nodes -->
+<div class="attack-node flex flex-col items-center text-center">
+<div class="w-10 h-10 bg-surface-container border border-border-accent flex items-center justify-center mb-1">
+<span class="material-symbols-outlined text-text-secondary" data-icon="public">public</span>
+</div>
+<span class="font-mono-code text-[10px] text-text-primary">EXT_GW_04</span>
+<span class="font-mono-code text-[8px] text-text-tertiary">192.168.1.104</span>
+</div>
+<div class="attack-node flex flex-col items-center text-center">
+<div class="w-10 h-10 bg-severity-critical/10 border border-severity-critical flex items-center justify-center mb-1">
+<span class="material-symbols-outlined text-severity-critical" data-icon="terminal">terminal</span>
+</div>
+<span class="font-mono-code text-[10px] text-severity-critical">CVE-2023-38831</span>
+<span class="font-mono-code text-[8px] text-text-tertiary">LVL_03_EXPLOIT</span>
+</div>
+<div class="attack-node flex flex-col items-center text-center">
+<div class="w-10 h-10 bg-surface-container border border-border-accent flex items-center justify-center mb-1">
+<span class="material-symbols-outlined text-text-secondary" data-icon="database">database</span>
+</div>
+<span class="font-mono-code text-[10px] text-text-primary">DB_PRI_NODE</span>
+<span class="font-mono-code text-[8px] text-text-tertiary">STAGING_AREA</span>
+</div>
+</div>
+</section>
+<!-- Latest Findings List -->
+<section class="flex flex-col gap-2 relative">
+<span class="panel-coordinate top-0 right-0">NODE_ID: 0x4F2A</span>
+<div class="flex justify-between items-end">
+<h2 class="font-mono-code text-[11px] text-text-tertiary uppercase"><span class="text-primary">03_</span>LATEST_FINDINGS</h2>
+<span class="font-mono-code text-[9px] text-text-tertiary">BUFFER: 124/512</span>
+</div>
+<div class="flex flex-col border border-border-subtle rounded-sm divide-y divide-border-subtle">
+<!-- Row 1 -->
+<div class="h-10 px-3 flex items-center justify-between bg-surface-container-low">
+<div class="flex flex-col">
+<span class="font-mono-code text-[11px] text-severity-critical font-bold">CVE-2024-21413</span>
+<span class="font-mono-code text-[9px] text-text-tertiary uppercase">10.0.4.12 // SHA:9b12</span>
+</div>
+<span class="font-mono-code text-[9px] text-text-secondary">14:02:11</span>
+</div>
+<!-- Row 2 -->
+<div class="h-10 px-3 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-mono-code text-[11px] text-severity-high font-bold">CVE-2023-38831</span>
+<span class="font-mono-code text-[9px] text-text-tertiary uppercase">10.0.2.88 // SHA:a4f1</span>
+</div>
+<span class="font-mono-code text-[9px] text-text-secondary">14:01:45</span>
+</div>
+<!-- Row 3 -->
+<div class="h-10 px-3 flex items-center justify-between bg-surface-container-low">
+<div class="flex flex-col">
+<span class="font-mono-code text-[11px] text-severity-medium font-bold">ANOM_PORT_OPEN</span>
+<span class="font-mono-code text-[9px] text-text-tertiary uppercase">172.16.0.4 // SHA:NONE</span>
+</div>
+<span class="font-mono-code text-[9px] text-text-secondary">13:59:02</span>
+</div>
+<!-- Row 4 -->
+<div class="h-10 px-3 flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-mono-code text-[11px] text-severity-low font-bold">SSL_EXPIRED</span>
+<span class="font-mono-code text-[9px] text-text-tertiary uppercase">192.168.1.1 // SHA:45e3</span>
+</div>
+<span class="font-mono-code text-[9px] text-text-secondary">13:58:20</span>
+</div>
+</div>
+<button class="h-7 border border-border-subtle bg-surface-secondary text-text-secondary font-mono-code uppercase text-[9px] tracking-[0.2em] hover:bg-surface-container-high transition-colors">&gt;&gt; FETCH_EXT_LOGS</button>
+</section>
+<!-- Pending Approvals -->
+<section class="flex flex-col gap-2 relative">
+<span class="panel-coordinate bottom-[-12px] left-0">AUTH_SIG: MD5_332A</span>
+<h2 class="font-mono-code text-[11px] text-text-tertiary uppercase flex items-center gap-2">
+<span class="text-primary">04_</span>PENDING_PROTOCOLS (2)
+            </h2>
+<div class="grid grid-cols-1 gap-2">
+<div class="bg-surface-tertiary border-l-2 border-l-severity-critical border-y border-r border-border-subtle p-3 rounded-sm flex flex-col gap-3">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="font-mono-code text-[11px] text-text-primary font-bold">ISOLATE_NODE_882</span>
+<span class="font-mono-code text-[9px] text-text-tertiary uppercase">CMD: NETWORK_QUARANTINE_V3</span>
+</div>
+<span class="font-mono-code text-[8px] px-1 bg-severity-critical/10 text-severity-critical border border-severity-critical/30 uppercase">Immediate</span>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<button class="h-8 bg-severity-critical/20 text-severity-critical border border-severity-critical/50 text-[10px] font-mono-code font-bold uppercase tracking-tighter hover:bg-severity-critical/30 transition-all">EXECUTE</button>
+<button class="h-8 border border-border-accent text-text-secondary text-[10px] font-mono-code uppercase tracking-tighter hover:bg-surface-container-highest transition-all">ABORT</button>
+</div>
+</div>
+<div class="bg-surface-tertiary border-l-2 border-l-blue-500 border-y border-r border-border-subtle p-3 rounded-sm flex flex-col gap-3">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="font-mono-code text-[11px] text-text-primary font-bold">VLAN_SHIELD_UP</span>
+<span class="font-mono-code text-[9px] text-text-tertiary uppercase">CMD: POLICY_UPDATE_44</span>
+</div>
+<span class="font-mono-code text-[8px] px-1 bg-blue-500/10 text-blue-400 border border-blue-500/30 uppercase">Queued</span>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<button class="h-8 bg-blue-500/20 text-blue-400 border border-blue-500/50 text-[10px] font-mono-code font-bold uppercase tracking-tighter hover:bg-blue-500/30 transition-all">APPROVE</button>
+<button class="h-8 border border-border-accent text-text-secondary text-[10px] font-mono-code uppercase tracking-tighter hover:bg-surface-container-highest transition-all">ABORT</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Mobile Nav -->
+<nav class="fixed bottom-0 left-0 right-0 h-14 bg-[#0A0B0F] border-t border-[#252836] flex justify-around items-center px-4 z-50">
+<div class="flex flex-col items-center gap-1 text-blue-400">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-mono-code text-[8px] uppercase font-bold tracking-widest">OVW</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined" data-icon="warning">warning</span>
+<span class="font-mono-code text-[8px] uppercase tracking-widest">INC</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined" data-icon="radar">radar</span>
+<span class="font-mono-code text-[8px] uppercase tracking-widest">THR</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span class="font-mono-code text-[8px] uppercase tracking-widest">CON</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-mono-code text-[8px] uppercase tracking-widest">CFG</span>
+</div>
+</nav>
+<!-- Technical Status Bar (Top Level) -->
+<div class="fixed bottom-14 left-0 right-0 h-6 bg-surface-container-lowest border-t border-border-subtle flex items-center justify-between px-4 z-40">
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1">
+<span class="w-1 h-1 bg-secondary rounded-full"></span>
+<span class="text-[8px] font-mono-code text-text-tertiary">SRV:99.9</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-1 h-1 bg-severity-medium rounded-full"></span>
+<span class="text-[8px] font-mono-code text-text-tertiary">MEM:64</span>
+</div>
+<span class="text-[8px] font-mono-code text-text-tertiary opacity-40">|</span>
+<span class="text-[8px] font-mono-code text-text-tertiary">NODE:02A_FRA</span>
+</div>
+<div class="text-[8px] font-mono-code text-text-tertiary uppercase tracking-widest flex gap-4">
+<span>SEC_TUN: ACTIVE</span>
+<span class="hidden xs:inline">VER: 0.8.2-B</span>
+</div>
+</div>
+</body></html>

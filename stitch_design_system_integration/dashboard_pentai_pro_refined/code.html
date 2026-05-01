@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@300;400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline-variant": "#252836",
+                    "on-background": "#e1e2eb",
+                    "severity-info": "#5C6378",
+                    "surface-container": "#141620",
+                    "on-surface-variant": "#c2c6d5",
+                    "secondary": "#44f5bd",
+                    "on-primary-fixed-variant": "#004492",
+                    "on-secondary-fixed-variant": "#00513b",
+                    "inverse-surface": "#e1e2eb",
+                    "severity-high": "#FF8C42",
+                    "surface": "#141620",
+                    "on-tertiary-fixed-variant": "#6a3b00",
+                    "surface-dim": "#11131a",
+                    "secondary-container": "#00d8a2",
+                    "severity-critical": "#FF3366",
+                    "on-secondary-fixed": "#002116",
+                    "primary-container": "#4F8EF7",
+                    "error": "#ffb4ab",
+                    "tertiary": "#ffb873",
+                    "text-primary": "#E8EAED",
+                    "inverse-on-surface": "#2e3037",
+                    "border-subtle": "#252836",
+                    "surface-container-highest": "#252836",
+                    "tertiary-fixed-dim": "#ffb873",
+                    "on-secondary-container": "#005840",
+                    "text-secondary": "#9AA0B4",
+                    "inverse-primary": "#005bbf",
+                    "border-accent": "#252836",
+                    "on-tertiary-container": "#412200",
+                    "primary-fixed-dim": "#acc7ff",
+                    "background": "#0A0B0F",
+                    "on-surface": "#e1e2eb",
+                    "primary-fixed": "#d7e2ff",
+                    "secondary-fixed": "#50fec5",
+                    "on-tertiary-fixed": "#2d1600",
+                    "on-tertiary": "#4b2800",
+                    "on-error": "#690005",
+                    "surface-tertiary": "#141620",
+                    "tertiary-container": "#d37b02",
+                    "surface-secondary": "#141620",
+                    "on-secondary": "#003828",
+                    "surface-tint": "#acc7ff",
+                    "surface-container-low": "#141620",
+                    "text-tertiary": "#5C6378",
+                    "tertiary-fixed": "#ffdcbf",
+                    "bg-primary": "#0A0B0F",
+                    "outline": "#8c909e",
+                    "on-error-container": "#ffdad6",
+                    "error-container": "#93000a",
+                    "on-primary": "#002f68",
+                    "surface-container-high": "#141620",
+                    "severity-medium": "#FFB800",
+                    "on-primary-container": "#ffffff",
+                    "surface-container-lowest": "#0A0B0F",
+                    "surface-variant": "#141620",
+                    "secondary-fixed-dim": "#1fe0aa",
+                    "severity-low": "#4F8EF7",
+                    "on-primary-fixed": "#001a40",
+                    "primary": "#4F8EF7",
+                    "surface-bright": "#141620"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0px",
+                    "lg": "0px",
+                    "xl": "0px",
+                    "full": "0px"
+            },
+            "spacing": {
+                    "sidebar-collapsed": "64px",
+                    "gutter": "16px",
+                    "row-regular": "32px",
+                    "padding-card": "16px",
+                    "sidebar-expanded": "240px",
+                    "row-dense": "32px",
+                    "base": "4px",
+                    "nav-height": "56px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "h3": ["Space Grotesk"],
+                    "h2": ["Space Grotesk"],
+                    "body-md": ["Inter"],
+                    "mono-code": ["JetBrains Mono"],
+                    "body-sm": ["Inter"],
+                    "h1": ["Space Grotesk"]
+            },
+            "fontSize": {
+                    "body-lg": ["14px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                    "label-caps": ["10px", {"lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "600"}],
+                    "h3": ["16px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                    "h2": ["20px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                    "body-md": ["13px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                    "mono-code": ["11px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                    "body-sm": ["11px", {"lineHeight": "1.3", "fontWeight": "400"}],
+                    "h1": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+            font-size: 18px;
+        }
+        .sidebar-item-active {
+            background-color: #141620;
+            color: #4F8EF7;
+            border-right: 2px solid #4F8EF7;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 2px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0A0B0F;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #252836;
+        }
+        * {
+            border-radius: 0 !important;
+        }
+        .no-shadow {
+            box-shadow: none !important;
+        }
+    </style>
+</head>
+<body class="bg-bg-primary text-text-primary font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 w-full h-14 border-b border-border-subtle flex justify-between items-center px-4 w-full z-50 bg-bg-primary no-shadow">
+<div class="flex items-center gap-6">
+<span class="text-lg font-bold tracking-tighter text-[#E8EAED] font-['Space_Grotesk']">PentAI Pro</span>
+<div class="hidden md:flex items-center bg-surface-secondary border border-border-subtle px-3 py-1 w-80">
+<span class="material-symbols-outlined text-text-tertiary text-base" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-xs text-text-secondary w-full placeholder:text-text-tertiary font-mono-code" placeholder="Search infrastructure..." type="text"/>
+<span class="text-[9px] text-text-tertiary border border-border-subtle px-1">⌘K</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2 px-2 py-1 bg-surface-secondary border border-border-subtle">
+<div class="w-1.5 h-1.5 bg-secondary"></div>
+<span class="font-['Space_Grotesk'] font-bold text-[10px] uppercase tracking-wider text-[#4F8EF7]">System Online</span>
+</div>
+<button class="bg-[#4F8EF7] text-white px-3 py-1 rounded-none font-['Space_Grotesk'] font-bold text-[11px] uppercase tracking-wider hover:brightness-110 active:bg-blue-700 transition-all">Deploy Agent</button>
+<div class="flex items-center gap-3 ml-1 border-l border-border-subtle pl-3">
+<span class="material-symbols-outlined text-text-secondary cursor-pointer hover:text-white" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-text-secondary cursor-pointer hover:text-white" data-icon="settings">settings</span>
+<img alt="Analyst Profile" class="w-6 h-6 border border-primary" data-alt="Analyst avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqUf6ZUYM-oJjwkaOa_z-wZhmvo1DdaYrsjBb8ba73UWwr4H1eGaADGloUTqajoQksS0F_SJuTfqqvFTke-YpGy8Fdb54mNk79F79_PSiiPdxvuVN1rHJKNn32ODpmhJ3l3sII85cAnkwcR7u6lNvlNvLcQC8CXZ4mcG-4IfZztioGTu5OMIQOEOBxGk3qi3hFGBHtu5qNnuXd1vqZcvWKq6fxKOpbcpywxToQcq_5LRsj8rRWf7r-SLK6ScmxNN6VYRKa-id0toE"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar Shell -->
+<aside class="fixed left-0 top-0 h-full w-56 border-r border-border-subtle bg-bg-primary flex flex-col py-4 px-0 gap-2 z-40 mt-14 no-shadow">
+<div class="mb-4 px-4">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 bg-surface-tertiary border border-border-accent flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-base" data-icon="security" style="font-variation-settings: 'FILL' 1;">security</span>
+</div>
+<div>
+<div class="font-['Space_Grotesk'] font-black text-[#4F8EF7] text-[10px] uppercase tracking-wider">PentAI Pro</div>
+<div class="text-[9px] text-text-tertiary uppercase tracking-widest font-medium">Ops-Command</div>
+</div>
+</div>
+</div>
+<nav class="flex-1">
+<a class="flex items-center gap-3 px-4 py-2 sidebar-item-active transition-none" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="dashboard">dashboard</span>
+<span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-[#6B6F80] hover:bg-[#141620] hover:text-[#E8EAED] transition-none border-r-2 border-transparent" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="security">security</span>
+<span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider">Engagements</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-[#6B6F80] hover:bg-[#141620] hover:text-[#E8EAED] transition-none border-r-2 border-transparent" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="bug_report">bug_report</span>
+<span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider">Findings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-[#6B6F80] hover:bg-[#141620] hover:text-[#E8EAED] transition-none border-r-2 border-transparent" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="terminal">terminal</span>
+<span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider">Terminal</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-[#6B6F80] hover:bg-[#141620] hover:text-[#E8EAED] transition-none border-r-2 border-transparent" href="#">
+<span class="material-symbols-outlined text-[18px]" data-icon="settings">settings</span>
+<span class="font-['Inter'] text-[10px] font-semibold uppercase tracking-wider">Config</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-border-subtle pt-2">
+<a class="flex items-center gap-3 px-4 py-1.5 text-[#6B6F80] hover:text-[#E8EAED]" href="#">
+<span class="material-symbols-outlined text-[16px]" data-icon="receipt_long">receipt_long</span>
+<span class="font-['Inter'] text-[9px] font-medium uppercase tracking-widest">SysLogs</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-56 mt-14 p-gutter max-w-full space-y-4">
+<!-- Header Area -->
+<section class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h1 class="font-h1 text-h1 text-text-primary tracking-tight">Operator Workspace: Anisur</h1>
+<p class="font-mono-code text-[11px] text-text-tertiary mt-0.5">EST: 14:45:01 | AGENTS: 12_ACTIVE | UPTIME: 99.98%</p>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-2 px-3 py-1.5 border border-border-accent text-[11px] font-bold uppercase tracking-wider hover:bg-surface-secondary transition-none">
+<span class="material-symbols-outlined text-sm" data-icon="file_download">file_download</span>
+                Export_DB
+            </button>
+<button class="flex items-center gap-2 px-3 py-1.5 bg-primary-container text-white text-[11px] font-bold uppercase tracking-wider hover:brightness-110 transition-none">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                New_Task
+            </button>
+</div>
+</section>
+<!-- KPI Density Grid -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="bg-surface border border-border-subtle p-padding-card flex flex-col justify-between h-24">
+<div class="flex items-center gap-2 text-text-tertiary">
+<span class="material-symbols-outlined text-xs text-primary" data-icon="target">target</span>
+<span class="font-label-caps text-label-caps uppercase">ACTIVE_OPS</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-h2 text-h2 text-text-primary">24</span>
+<span class="text-secondary font-mono-code text-[10px]">+03.2%</span>
+</div>
+</div>
+<div class="bg-surface border border-border-subtle p-padding-card flex flex-col justify-between h-24">
+<div class="flex items-center gap-2 text-text-tertiary">
+<span class="material-symbols-outlined text-xs text-severity-critical" data-icon="warning">warning</span>
+<span class="font-label-caps text-label-caps uppercase">CRIT_FINDINGS</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-h2 text-h2 text-severity-critical">07</span>
+<span class="text-severity-critical font-mono-code text-[10px] uppercase">Immediate</span>
+</div>
+</div>
+<div class="bg-surface border border-border-subtle p-padding-card flex flex-col justify-between h-24">
+<div class="flex items-center gap-2 text-text-tertiary">
+<span class="material-symbols-outlined text-xs text-severity-medium" data-icon="dns">dns</span>
+<span class="font-label-caps text-label-caps uppercase">TOTAL_NODES</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-h2 text-h2 text-text-primary">1,402</span>
+<span class="text-text-tertiary font-mono-code text-[10px]">VERIFIED</span>
+</div>
+</div>
+<div class="bg-surface border border-border-subtle p-padding-card flex flex-col justify-between h-24">
+<div class="flex items-center gap-2 text-text-tertiary">
+<span class="material-symbols-outlined text-xs text-secondary" data-icon="verified_user">verified_user</span>
+<span class="font-label-caps text-label-caps uppercase">POSTURE_INDEX</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-h2 text-h2 text-text-primary">92%</span>
+<span class="text-secondary font-mono-code text-[10px]">STABLE</span>
+</div>
+</div>
+</section>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+<!-- High Density Table -->
+<section class="lg:col-span-8 bg-surface border border-border-subtle overflow-hidden flex flex-col">
+<div class="px-4 py-3 border-b border-border-subtle flex justify-between items-center bg-surface-container-low">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-base" data-icon="lan">lan</span>
+<h3 class="font-label-caps text-label-caps uppercase text-text-primary">OPERATIONAL_QUEUE</h3>
+</div>
+<button class="text-[10px] text-primary font-bold uppercase tracking-wider hover:underline">Full_Registry</button>
+</div>
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-border-subtle bg-surface-container-lowest">
+<th class="px-4 py-2 font-label-caps text-[9px] text-text-tertiary uppercase">UID / Engagement</th>
+<th class="px-4 py-2 font-label-caps text-[9px] text-text-tertiary uppercase">Status</th>
+<th class="px-4 py-2 font-label-caps text-[9px] text-text-tertiary uppercase">Surface</th>
+<th class="px-4 py-2 font-label-caps text-[9px] text-text-tertiary uppercase">Risk</th>
+<th class="px-4 py-2 font-label-caps text-[9px] text-text-tertiary uppercase">TTL</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-subtle font-mono-code text-[11px]">
+<tr class="hover:bg-surface-container-high transition-none">
+<td class="px-4 py-2">
+<div class="flex flex-col">
+<span class="text-text-primary font-bold">#EP-9201 :: Internal-Pentest-Q4</span>
+<span class="text-[9px] text-text-tertiary">10.0.4.12/24</span>
+</div>
+</td>
+<td class="px-4 py-2"><span class="text-secondary text-[10px] uppercase font-bold">● Running</span></td>
+<td class="px-4 py-2"><div class="w-16 bg-border-subtle h-1"><div class="bg-primary h-1" style="width: 75%"></div></div></td>
+<td class="px-4 py-2"><span class="px-1.5 border border-severity-high/40 text-severity-high text-[9px] font-bold uppercase">High</span></td>
+<td class="px-4 py-2 text-text-tertiary">02d:12h</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-none">
+<td class="px-4 py-2">
+<div class="flex flex-col">
+<span class="text-text-primary font-bold">#EP-8842 :: Cloud-Asset-Audit</span>
+<span class="text-[9px] text-text-tertiary">aws-us-east-1a</span>
+</div>
+</td>
+<td class="px-4 py-2"><span class="text-secondary text-[10px] uppercase font-bold">● Running</span></td>
+<td class="px-4 py-2"><div class="w-16 bg-border-subtle h-1"><div class="bg-primary h-1" style="width: 30%"></div></div></td>
+<td class="px-4 py-2"><span class="px-1.5 border border-severity-critical/40 text-severity-critical text-[9px] font-bold uppercase">Critical</span></td>
+<td class="px-4 py-2 text-text-tertiary">05d:04h</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-none">
+<td class="px-4 py-2">
+<div class="flex flex-col">
+<span class="text-text-primary font-bold">#EP-8711 :: Web-API-Hardening</span>
+<span class="text-[9px] text-text-tertiary">api.internal.prd</span>
+</div>
+</td>
+<td class="px-4 py-2"><span class="text-severity-medium text-[10px] uppercase font-bold">○ Paused</span></td>
+<td class="px-4 py-2"><div class="w-16 bg-border-subtle h-1"><div class="bg-severity-medium h-1" style="width: 100%"></div></div></td>
+<td class="px-4 py-2"><span class="px-1.5 border border-severity-low/40 text-severity-low text-[9px] font-bold uppercase">Low</span></td>
+<td class="px-4 py-2 text-text-tertiary">HOLD_WAIT</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-none">
+<td class="px-4 py-2">
+<div class="flex flex-col">
+<span class="text-text-primary font-bold">#EP-8600 :: Zero-Trust-Audit</span>
+<span class="text-[9px] text-text-tertiary">192.168.10.5</span>
+</div>
+</td>
+<td class="px-4 py-2"><span class="text-text-tertiary text-[10px] uppercase font-bold">○ Queued</span></td>
+<td class="px-4 py-2"><div class="w-16 bg-border-subtle h-1"><div class="bg-border-subtle h-1" style="width: 0%"></div></div></td>
+<td class="px-4 py-2"><span class="px-1.5 border border-border-subtle text-text-tertiary text-[9px] font-bold uppercase">None</span></td>
+<td class="px-4 py-2 text-text-tertiary">PENDING</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Right Panel Activity -->
+<aside class="lg:col-span-4 space-y-4">
+<div class="bg-surface border border-border-subtle p-padding-card">
+<h3 class="font-label-caps text-label-caps uppercase text-text-primary mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-base" data-icon="health_and_safety">health_and_safety</span>
+                    CORE_HEALTH
+                </h3>
+<div class="space-y-2">
+<div class="p-2 border border-border-accent bg-surface-container-low flex items-center justify-between font-mono-code">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="bolt">bolt</span>
+<div class="text-[10px]">
+<div class="font-bold text-text-primary uppercase">Inference_Engine</div>
+<div class="text-text-tertiary">LATENCY: 12ms</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="check_circle">check_circle</span>
+</div>
+<div class="p-2 border border-border-accent bg-surface-container-low flex items-center justify-between font-mono-code">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="storage">storage</span>
+<div class="text-[10px]">
+<div class="font-bold text-text-primary uppercase">Vector_DB</div>
+<div class="text-text-tertiary">SYNC: 99.8%</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="check_circle">check_circle</span>
+</div>
+</div>
+</div>
+<div class="bg-surface border border-border-subtle p-padding-card">
+<h3 class="font-label-caps text-label-caps uppercase text-text-primary mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-base" data-icon="list_alt">list_alt</span>
+                    LIVE_INTEL
+                </h3>
+<div class="space-y-3 font-mono-code">
+<div class="relative pl-4 border-l border-border-subtle">
+<div class="absolute -left-[4.5px] top-1.5 w-2 h-2 bg-severity-critical"></div>
+<div class="text-[9px] text-text-tertiary mb-0.5">14:22:05.102</div>
+<div class="text-[11px] text-text-primary uppercase tracking-tight">SQL_INJECT_DETECTED // CUSTOMER-API-V1</div>
+</div>
+<div class="relative pl-4 border-l border-border-subtle">
+<div class="absolute -left-[4.5px] top-1.5 w-2 h-2 bg-secondary"></div>
+<div class="text-[9px] text-text-tertiary mb-0.5">14:18:12.455</div>
+<div class="text-[11px] text-text-primary uppercase tracking-tight">BRUTEFORCE_ABORTED // NODE-77</div>
+</div>
+</div>
+<button class="w-full mt-4 py-1.5 border border-border-accent text-[10px] font-bold uppercase tracking-widest hover:bg-surface-container-high transition-none">
+                    Launch_Shell
+                </button>
+</div>
+</aside>
+</div>
+<!-- Visual Layer -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-gutter">
+<div class="bg-surface border border-border-subtle p-padding-card relative">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-label-caps text-label-caps uppercase text-text-primary">SCAN_PERIMETER</h3>
+<p class="text-[9px] font-mono-code text-text-tertiary uppercase">real-time surface map</p>
+</div>
+<span class="material-symbols-outlined text-text-tertiary cursor-pointer" data-icon="fullscreen">fullscreen</span>
+</div>
+<div class="h-40 bg-surface-container-lowest border border-border-accent relative flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 opacity-10" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCarREu3bQv3LB9uM8HD3oNZYb_1fWZ8XDrHpfVlyVhd8Dq80Aadm7lBEu5FgSlaXHcEFqYcJXraTNF_9zqkdC_rBmBreztOatrwKAlmHw7aErKPkpwcrew1dD0M3ZavB720w1OHfQqkMwGJ4s4lSwoFkNDHPNS1wxuIK3dx0013z0vgeHNBK1MlhFTdxX0Ln-Fw4OVFEp3lGe_daXcHsuv15MuxL3zNpFj_Pzrktp4_oTIPHOGFqdNnu16BgJquCndwBF90us5Rio'); background-size: cover;"></div>
+<div class="relative z-10 text-center font-mono-code">
+<div class="w-16 h-16 border-2 border-primary/20 border-t-primary animate-spin mb-3"></div>
+<span class="text-[10px] text-primary tracking-widest uppercase">SYSCAP_ACTIVE</span>
+</div>
+</div>
+</div>
+<div class="bg-surface border border-border-subtle p-padding-card">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-label-caps text-label-caps uppercase text-text-primary">RISK_DISTRIBUTION</h3>
+<p class="text-[9px] font-mono-code text-text-tertiary uppercase">by classification</p>
+</div>
+<div class="flex gap-2 font-mono-code">
+<div class="flex items-center gap-1">
+<div class="w-1.5 h-1.5 bg-severity-critical"></div>
+<span class="text-[8px] text-text-tertiary uppercase">Crit</span>
+</div>
+<div class="flex items-center gap-1">
+<div class="w-1.5 h-1.5 bg-severity-high"></div>
+<span class="text-[8px] text-text-tertiary uppercase">High</span>
+</div>
+</div>
+</div>
+<div class="space-y-3 font-mono-code">
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-[10px]">
+<span class="text-text-secondary uppercase">Web_App</span>
+<span class="text-text-tertiary text-[9px]">80% THREAT</span>
+</div>
+<div class="flex gap-1 h-1.5">
+<div class="w-1/4 bg-severity-critical"></div>
+<div class="w-1/4 bg-severity-high"></div>
+<div class="flex-1 bg-border-subtle"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-[10px]">
+<span class="text-text-secondary uppercase">Cloud_Infra</span>
+<span class="text-text-tertiary text-[9px]">45% THREAT</span>
+</div>
+<div class="flex gap-1 h-1.5">
+<div class="w-1/12 bg-severity-critical"></div>
+<div class="w-1/6 bg-severity-high"></div>
+<div class="flex-1 bg-border-subtle"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Tactical FAB -->
+<button class="fixed bottom-6 right-6 w-12 h-12 bg-primary text-white border border-white/20 flex items-center justify-center hover:bg-blue-600 transition-none z-50 group no-shadow">
+<span class="material-symbols-outlined text-2xl" data-icon="bolt" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<div class="absolute bottom-full right-0 mb-2 bg-surface border border-border-subtle px-2 py-1 text-[9px] font-mono-code uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-none pointer-events-none whitespace-nowrap">
+        FORCE_SCAN_01
+    </div>
+</button>
+</body></html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&amp;family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@100..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "border-subtle": "#252836",
+                  "inverse-on-surface": "#2e3037",
+                  "surface-container-highest": "#32353c",
+                  "text-primary": "#E8EAED",
+                  "tertiary": "#ffb873",
+                  "inverse-primary": "#005bbf",
+                  "border-accent": "#2F3447",
+                  "on-tertiary-container": "#412200",
+                  "tertiary-fixed-dim": "#ffb873",
+                  "text-secondary": "#9AA0B4",
+                  "on-secondary-container": "#005840",
+                  "secondary": "#44f5bd",
+                  "on-primary-fixed-variant": "#004492",
+                  "on-secondary-fixed-variant": "#00513b",
+                  "outline-variant": "#424753",
+                  "on-background": "#e1e2eb",
+                  "on-surface-variant": "#c2c6d5",
+                  "surface-container": "#1d2026",
+                  "severity-info": "#5C6378",
+                  "on-secondary-fixed": "#002116",
+                  "primary-container": "#508ff8",
+                  "surface-dim": "#11131a",
+                  "severity-critical": "#FF3366",
+                  "secondary-container": "#00d8a2",
+                  "error": "#ffb4ab",
+                  "inverse-surface": "#e1e2eb",
+                  "on-tertiary-fixed-variant": "#6a3b00",
+                  "surface": "#11131a",
+                  "severity-high": "#FF8C42",
+                  "on-primary": "#002f68",
+                  "surface-container-high": "#272a31",
+                  "severity-medium": "#FFB800",
+                  "error-container": "#93000a",
+                  "outline": "#8c909e",
+                  "on-error-container": "#ffdad6",
+                  "tertiary-fixed": "#ffdcbf",
+                  "bg-primary": "#0A0B0F",
+                  "surface-variant": "#32353c",
+                  "secondary-fixed-dim": "#1fe0aa",
+                  "severity-low": "#4F8EF7",
+                  "surface-container-lowest": "#0b0e14",
+                  "primary": "#acc7ff",
+                  "on-primary-fixed": "#001a40",
+                  "surface-bright": "#373940",
+                  "on-primary-container": "#00285b",
+                  "on-tertiary": "#4b2800",
+                  "on-error": "#690005",
+                  "secondary-fixed": "#50fec5",
+                  "on-tertiary-fixed": "#2d1600",
+                  "surface-secondary": "#141620",
+                  "on-secondary": "#003828",
+                  "surface-tertiary": "#1C1F2E",
+                  "tertiary-container": "#d37b02",
+                  "primary-fixed": "#d7e2ff",
+                  "on-surface": "#e1e2eb",
+                  "primary-fixed-dim": "#acc7ff",
+                  "background": "#11131a",
+                  "surface-tint": "#acc7ff",
+                  "surface-container-low": "#191c22",
+                  "text-tertiary": "#5C6378"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "row-regular": "48px",
+                  "padding-card": "24px",
+                  "sidebar-expanded": "240px",
+                  "row-dense": "40px",
+                  "sidebar-collapsed": "64px",
+                  "gutter": "24px",
+                  "nav-height": "56px",
+                  "base": "4px"
+          },
+          "fontFamily": {
+                  "label-caps": ["Inter"],
+                  "body-lg": ["Inter"],
+                  "h1": ["Space Grotesk"],
+                  "mono-code": ["JetBrains Mono"],
+                  "h3": ["Space Grotesk"],
+                  "h2": ["Space Grotesk"],
+                  "body-sm": ["Inter"],
+                  "body-md": ["Inter"]
+          },
+          "fontSize": {
+                  "label-caps": ["11px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                  "body-lg": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                  "h1": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                  "mono-code": ["13px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                  "h3": ["20px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                  "h2": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                  "body-sm": ["12px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                  "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .custom-input-h {
+      height: 32px;
+    }
+    .wireframe-bg {
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54.627 0l.83.83L1.242 55.444l-.83-.83L54.627 0zm-2.737 0l.83.83L0 52.708l-.83-.83L51.89 0zm-2.737 0l.83.83L0 49.97l-.83-.83L49.153 0z' fill='%234F8EF7' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+    }
+  </style>
+</head>
+<body class="bg-bg-primary text-text-primary min-h-screen flex selection:bg-severity-low/30">
+<!-- Left Panel: Minimalist Wireframe -->
+<div class="hidden lg:flex w-1/2 relative overflow-hidden border-r border-border-subtle wireframe-bg">
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none p-12">
+<div class="w-full h-full border border-border-subtle/30 relative">
+<div class="absolute top-0 left-0 w-8 h-8 border-t border-l border-severity-low/40"></div>
+<div class="absolute top-0 right-0 w-8 h-8 border-t border-r border-severity-low/40"></div>
+<div class="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-severity-low/40"></div>
+<div class="absolute bottom-0 right-0 w-8 h-8 border-b border-r border-severity-low/40"></div>
+<!-- Abstract Network Plot -->
+<div class="flex flex-col items-center justify-center h-full opacity-20">
+<span class="material-symbols-outlined text-[160px] text-severity-low" data-icon="lan">lan</span>
+<div class="mt-8 font-mono-code text-label-caps text-severity-low uppercase tracking-[0.3em]">System Topology: Active</div>
+</div>
+</div>
+</div>
+<!-- Decorative Meta -->
+<div class="absolute bottom-8 left-8 flex flex-col gap-1 font-mono-code text-[10px] text-text-tertiary">
+<div>LATENCY: 12ms</div>
+<div>ENCRYPTION: AES-256-GCM</div>
+<div>CORE: PENTAI-NODE-ALPHA</div>
+</div>
+</div>
+<!-- Right Panel: Login Form -->
+<div class="w-full lg:w-1/2 flex flex-col justify-center items-center px-6 lg:px-24">
+<div class="w-full max-w-sm">
+<!-- Header Area -->
+<div class="mb-10">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-severity-low" data-icon="security">security</span>
+<span class="font-mono-code text-label-caps text-severity-low">SECURE GATEWAY</span>
+</div>
+<h2 class="font-h2 text-h2 uppercase tracking-tight text-text-primary">AUTHENTICATION REQUIRED</h2>
+<div class="h-1 w-12 bg-severity-low mt-2"></div>
+</div>
+<!-- Login Form -->
+<form class="space-y-6">
+<div>
+<label class="block font-mono-code text-label-caps text-text-secondary uppercase mb-2" for="uid">Operator ID</label>
+<div class="relative">
+<input class="w-full custom-input-h bg-surface-container-lowest border border-border-subtle rounded-none px-3 text-text-primary font-mono-code text-body-sm focus:ring-0 focus:border-severity-low transition-colors placeholder:text-text-tertiary/50" id="uid" name="uid" placeholder="NODE_ID_..." type="text"/>
+</div>
+</div>
+<div>
+<label class="block font-mono-code text-label-caps text-text-secondary uppercase mb-2" for="key">Access Key</label>
+<div class="relative">
+<input class="w-full custom-input-h bg-surface-container-lowest border border-border-subtle rounded-none px-3 text-text-primary font-mono-code text-body-sm focus:ring-0 focus:border-severity-low transition-colors placeholder:text-text-tertiary/50" id="key" name="key" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-2">
+<input class="w-3 h-3 bg-transparent border-border-subtle rounded-none text-severity-low focus:ring-0" id="persist" type="checkbox"/>
+<label class="font-mono-code text-label-caps text-text-tertiary uppercase" for="persist">Persist Session</label>
+</div>
+<a class="font-mono-code text-label-caps text-severity-low hover:brightness-125 transition-all" href="#">Forgot?</a>
+</div>
+<button class="w-full h-10 bg-severity-low text-on-primary font-mono-code text-label-caps font-bold tracking-widest uppercase transition-all active:opacity-80 hover:brightness-110" type="submit">
+          Initiate Sequence
+        </button>
+</form>
+<!-- Technical Metadata Footnote -->
+<div class="mt-16 pt-8 border-t border-border-subtle flex flex-col gap-2">
+<div class="flex justify-between font-mono-code text-[10px] text-text-tertiary">
+<span>NODE ID:</span>
+<span class="text-text-secondary">PAI-PR-8829-X</span>
+</div>
+<div class="flex justify-between font-mono-code text-[10px] text-text-tertiary">
+<span>SESSION TOKEN:</span>
+<span class="text-text-secondary">NULL_PENDING_AUTH</span>
+</div>
+<div class="flex justify-between font-mono-code text-[10px] text-text-tertiary">
+<span>SYSTEM STATE:</span>
+<span class="text-secondary flex items-center gap-1">
+<span class="w-1 h-1 bg-secondary inline-block"></span>
+            NOMINAL
+          </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Decorative Corner Elements -->
+<div class="fixed top-0 left-0 p-4 font-mono-code text-[10px] text-text-tertiary opacity-30 select-none">
+    00:00:00:00 // PENTAI_BOOT_LOADER
+  </div>
+<div class="fixed top-0 right-0 p-4 font-mono-code text-[10px] text-text-tertiary opacity-30 select-none">
+    v2.4.0-STABLE // BUILD_ID: 99x-AF
+  </div>
+</body></html>

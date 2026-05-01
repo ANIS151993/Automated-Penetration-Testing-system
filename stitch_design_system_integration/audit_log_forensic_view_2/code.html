@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0A0B0F;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #252836;
+        }
+        .scanline {
+            background: linear-gradient(to bottom, transparent 50%, rgba(172, 199, 255, 0.02) 50%);
+            background-size: 100% 4px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary": "#4b2800",
+                      "on-primary-fixed-variant": "#004492",
+                      "on-secondary-fixed": "#002116",
+                      "on-secondary": "#003828",
+                      "surface-container-lowest": "#0b0e14",
+                      "surface-container": "#1d2026",
+                      "surface-secondary": "#141620",
+                      "on-surface-variant": "#c2c6d5",
+                      "on-tertiary-fixed": "#2d1600",
+                      "surface-tint": "#acc7ff",
+                      "primary-container": "#508ff8",
+                      "tertiary-fixed-dim": "#ffb873",
+                      "severity-critical": "#FF3366",
+                      "on-surface": "#e1e2eb",
+                      "inverse-primary": "#005bbf",
+                      "text-secondary": "#9AA0B4",
+                      "on-secondary-fixed-variant": "#00513b",
+                      "text-tertiary": "#5C6378",
+                      "outline-variant": "#424753",
+                      "severity-high": "#FF8C42",
+                      "border-subtle": "#252836",
+                      "surface-container-highest": "#32353c",
+                      "primary-fixed": "#d7e2ff",
+                      "primary": "#acc7ff",
+                      "secondary-container": "#00d8a2",
+                      "error-container": "#93000a",
+                      "on-tertiary-container": "#412200",
+                      "tertiary": "#ffb873",
+                      "primary-fixed-dim": "#acc7ff",
+                      "tertiary-fixed": "#ffdcbf",
+                      "on-secondary-container": "#005840",
+                      "on-error": "#690005",
+                      "surface-container-low": "#191c22",
+                      "severity-info": "#5C6378",
+                      "outline": "#8c909e",
+                      "surface-dim": "#11131a",
+                      "secondary-fixed-dim": "#1fe0aa",
+                      "surface": "#11131a",
+                      "inverse-on-surface": "#2e3037",
+                      "surface-container-high": "#272a31",
+                      "on-primary": "#002f68",
+                      "on-error-container": "#ffdad6",
+                      "surface-variant": "#32353c",
+                      "surface-bright": "#373940",
+                      "surface-tertiary": "#1C1F2E",
+                      "secondary": "#44f5bd",
+                      "inverse-surface": "#e1e2eb",
+                      "on-background": "#e1e2eb",
+                      "background": "#11131a",
+                      "error": "#ffb4ab",
+                      "secondary-fixed": "#50fec5",
+                      "on-primary-fixed": "#001a40",
+                      "on-primary-container": "#00285b",
+                      "bg-primary": "#0A0B0F",
+                      "tertiary-container": "#d37b02",
+                      "text-primary": "#E8EAED",
+                      "on-tertiary-fixed-variant": "#6a3b00",
+                      "severity-low": "#4F8EF7",
+                      "severity-medium": "#FFB800",
+                      "border-accent": "#2F3447"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "sidebar-collapsed": "64px",
+                      "base": "4px",
+                      "row-regular": "48px",
+                      "gutter": "24px",
+                      "nav-height": "56px",
+                      "padding-card": "24px",
+                      "sidebar-expanded": "240px",
+                      "row-dense": "40px"
+              },
+              "fontFamily": {
+                      "body-md": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "h3": ["Space Grotesk"],
+                      "h2": ["Space Grotesk"],
+                      "body-sm": ["Inter"],
+                      "label-caps": ["Inter"],
+                      "h1": ["Space Grotesk"],
+                      "mono-code": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "body-lg": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "h3": ["20px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "h2": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "body-sm": ["12px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                      "label-caps": ["11px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "h1": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "mono-code": ["12px", {"lineHeight": "1.6", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased selection:bg-primary-container selection:text-on-primary-container scanline">
+<!-- Top Navigation Anchor -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-slate-950 dark:bg-[#0A0B0F] border-b border-slate-800 dark:border-[#252836] h-10 flex justify-between items-center px-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-blue-500 dark:text-[#4F8EF7] text-lg" data-icon="security">security</span>
+<h1 class="font-['Space_Grotesk'] font-bold tracking-tight text-[10px] uppercase text-slate-100 dark:text-[#E8EAED]">SOC_COMMAND_CENTER // ARCH_SEC_V.2.4</h1>
+</div>
+<div class="flex items-center gap-3">
+<div class="hidden xs:flex items-center gap-1.5 px-2 border-r border-border-subtle h-6 mr-1">
+<span class="text-[9px] font-mono-code text-secondary">CPU: 12%</span>
+</div>
+<span class="material-symbols-outlined text-slate-500 dark:text-slate-400 text-sm" data-icon="search">search</span>
+<span class="material-symbols-outlined text-slate-500 dark:text-slate-400 text-sm" data-icon="notifications">notifications</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-10 pb-16 min-h-screen bg-[#0A0B0F]">
+<!-- Forensic Header -->
+<section class="p-4 border-b border-border-subtle bg-surface-dim/80 backdrop-blur-sm">
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="text-[10px] font-mono-code text-primary uppercase tracking-[0.2em] font-bold">03_SYSTEM_AUDIT</span>
+<span class="text-[9px] font-mono-code text-text-tertiary">REF: LOG-7742-ALPHA</span>
+</div>
+<h2 class="text-h3 font-h3 text-text-primary mt-1">LOG_EXPLORER_V1</h2>
+<div class="flex items-center gap-2 mt-2">
+<div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-surface-container-high border border-border-subtle">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary shadow-[0_0_8px_rgba(68,245,189,0.5)] animate-pulse"></span>
+<span class="text-[10px] font-mono-code text-text-secondary uppercase">Live Monitoring</span>
+</div>
+<span class="text-[10px] font-mono-code text-text-tertiary">NODE: US-EAST-01-BK</span>
+<div class="ml-auto flex items-center gap-1">
+<span class="text-[8px] font-mono-code text-secondary opacity-70">INTEGRITY_CHECK:</span>
+<span class="text-[8px] font-mono-code text-secondary font-bold px-1 bg-secondary/10 border border-secondary/20">PASSED</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Dense Data Grid -->
+<div class="overflow-x-auto relative">
+<div class="absolute top-0 right-4 py-1 z-10">
+<span class="text-[8px] font-mono-code text-text-tertiary/40">COORDS: 40.7128° N, 74.0060° W</span>
+</div>
+<table class="w-full border-collapse">
+<thead>
+<tr class="h-10 border-b border-border-subtle bg-surface-container-low/30">
+<th class="px-4 text-left text-[10px] font-mono-code text-text-tertiary uppercase tracking-wider">Timestamp / Actor / UUID</th>
+<th class="px-4 text-left text-[10px] font-mono-code text-text-tertiary uppercase tracking-wider text-right">Result / Hash</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-subtle/50">
+<!-- Row 1 -->
+<tr class="h-row-dense hover:bg-surface-container-low transition-colors duration-150">
+<td class="px-4 py-2">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-[9px] font-mono-code text-text-tertiary/50">01</span>
+<span class="text-mono-code font-mono-code text-text-primary">2023-11-24T14:22:01.004Z</span>
+</div>
+<span class="text-[10px] font-mono-code text-text-tertiary pl-4">ACTOR: UID-8829-X [ROOT]</span>
+</div>
+</td>
+<td class="px-4 py-2 text-right">
+<div class="inline-flex items-center px-2 py-0.5 rounded-sm bg-secondary-container/10 border border-secondary-container/30">
+<span class="text-[10px] font-mono-code text-secondary uppercase font-bold">Success</span>
+</div>
+<div class="text-[9px] font-mono-code text-text-tertiary mt-0.5">HASH: 7e8a...3f1c <span class="text-secondary ml-1">✓</span></div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="h-row-dense hover:bg-surface-container-low transition-colors duration-150">
+<td class="px-4 py-2">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-[9px] font-mono-code text-text-tertiary/50">02</span>
+<span class="text-mono-code font-mono-code text-text-primary">2023-11-24T14:21:58.210Z</span>
+</div>
+<span class="text-[10px] font-mono-code text-text-tertiary pl-4">ACTOR: UID-1024-A [UNV]</span>
+</div>
+</td>
+<td class="px-4 py-2 text-right">
+<div class="inline-flex items-center px-2 py-0.5 rounded-sm bg-severity-critical/10 border border-severity-critical/30">
+<span class="text-[10px] font-mono-code text-severity-critical uppercase font-bold">Blocked</span>
+</div>
+<div class="text-[9px] font-mono-code text-text-tertiary mt-0.5">HASH: 2d4f...991a <span class="text-secondary ml-1">✓</span></div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="h-row-dense hover:bg-surface-container-low transition-colors duration-150">
+<td class="px-4 py-2">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-[9px] font-mono-code text-text-tertiary/50">03</span>
+<span class="text-mono-code font-mono-code text-text-primary">2023-11-24T14:21:55.992Z</span>
+</div>
+<span class="text-[10px] font-mono-code text-text-tertiary pl-4">ACTOR: UID-8829-X [ROOT]</span>
+</div>
+</td>
+<td class="px-4 py-2 text-right">
+<div class="inline-flex items-center px-2 py-0.5 rounded-sm bg-secondary-container/10 border border-secondary-container/30">
+<span class="text-[10px] font-mono-code text-secondary uppercase font-bold">Success</span>
+</div>
+<div class="text-[9px] font-mono-code text-text-tertiary mt-0.5">HASH: a3b1...cc02 <span class="text-secondary ml-1">✓</span></div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="h-row-dense hover:bg-surface-container-low transition-colors duration-150">
+<td class="px-4 py-2">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-[9px] font-mono-code text-text-tertiary/50">04</span>
+<span class="text-mono-code font-mono-code text-text-primary">2023-11-24T14:21:52.001Z</span>
+</div>
+<span class="text-[10px] font-mono-code text-text-tertiary pl-4">ACTOR: SYS_DAEMON [SYSTEM]</span>
+</div>
+</td>
+<td class="px-4 py-2 text-right">
+<div class="inline-flex items-center px-2 py-0.5 rounded-sm bg-secondary-container/10 border border-secondary-container/30">
+<span class="text-[10px] font-mono-code text-secondary uppercase font-bold">Success</span>
+</div>
+<div class="text-[9px] font-mono-code text-text-tertiary mt-0.5">HASH: dd23...4490 <span class="text-secondary ml-1">✓</span></div>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="h-row-dense hover:bg-surface-container-low transition-colors duration-150">
+<td class="px-4 py-2">
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-[9px] font-mono-code text-text-tertiary/50">05</span>
+<span class="text-mono-code font-mono-code text-text-primary">2023-11-24T14:21:49.882Z</span>
+</div>
+<span class="text-[10px] font-mono-code text-text-tertiary pl-4">ACTOR: UID-UNKNOWN [??]</span>
+</div>
+</td>
+<td class="px-4 py-2 text-right">
+<div class="inline-flex items-center px-2 py-0.5 rounded-sm bg-severity-critical/10 border border-severity-critical/30">
+<span class="text-[10px] font-mono-code text-severity-critical uppercase font-bold">Blocked</span>
+</div>
+<div class="text-[9px] font-mono-code text-text-tertiary mt-0.5">HASH: f55e...ba12 <span class="text-secondary ml-1">✓</span></div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Hash Chained Visualization -->
+<section class="mt-8 px-4 pb-12">
+<div class="bg-surface-container/60 p-4 rounded-lg border border-border-subtle relative overflow-hidden">
+<div class="absolute top-0 right-0 p-1">
+<span class="text-[8px] font-mono-code text-text-tertiary/30">04_ENCRYPTION_MODULE</span>
+</div>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="text-label-caps font-label-caps text-text-secondary uppercase">Integrity_Chain</span>
+<span class="text-[8px] font-mono-code text-secondary px-1 border border-secondary/30">ACTIVE</span>
+</div>
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="lock">lock</span>
+</div>
+<div class="flex gap-1 overflow-x-hidden relative h-12 items-center">
+<!-- Chain Links Representation -->
+<div class="w-8 h-8 rounded border border-border-accent bg-surface-tertiary flex items-center justify-center flex-shrink-0">
+<span class="text-[8px] font-mono-code text-text-tertiary">#7E</span>
+</div>
+<div class="w-4 h-[1px] bg-border-accent flex-shrink-0"></div>
+<div class="w-8 h-8 rounded border border-border-accent bg-surface-tertiary flex items-center justify-center flex-shrink-0">
+<span class="text-[8px] font-mono-code text-text-tertiary">#2D</span>
+</div>
+<div class="w-4 h-[1px] bg-border-accent flex-shrink-0"></div>
+<div class="w-8 h-8 rounded border border-border-accent bg-surface-tertiary flex items-center justify-center flex-shrink-0">
+<span class="text-[8px] font-mono-code text-text-tertiary">#A3</span>
+</div>
+<div class="w-4 h-[1px] bg-border-accent flex-shrink-0"></div>
+<div class="w-8 h-8 rounded border border-border-accent bg-surface-tertiary flex items-center justify-center flex-shrink-0">
+<span class="text-[8px] font-mono-code text-text-tertiary">#DD</span>
+</div>
+<div class="w-4 h-[1px] bg-border-accent flex-shrink-0"></div>
+<div class="w-8 h-8 rounded border border-border-accent bg-surface-tertiary flex items-center justify-center flex-shrink-0">
+<span class="text-[8px] font-mono-code text-text-tertiary">#F5</span>
+</div>
+<div class="w-4 h-[1px] bg-border-accent flex-shrink-0"></div>
+<div class="w-8 h-8 rounded border border-blue-500/50 bg-blue-500/5 flex items-center justify-center flex-shrink-0 relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-tr from-transparent via-blue-500/10 to-transparent"></div>
+<span class="text-[8px] font-mono-code text-blue-400">#CUR</span>
+</div>
+</div>
+<p class="text-[10px] font-mono-code text-text-tertiary mt-4 leading-relaxed">
+                Cryptographic verification active. All log entries are immutable and hash-chained to the genesis block (ID: SOC-001-A). Last verified: 2023-11-24 14:22:05.
+            </p>
+<div class="mt-4 pt-4 border-t border-border-subtle/30 flex justify-between">
+<span class="text-[9px] font-mono-code text-text-tertiary uppercase">BUILD: 882.A-V1</span>
+<span class="text-[9px] font-mono-code text-text-tertiary uppercase">ENV: PRODUCTION-SECURED</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-[#0A0B0F] border-t border-[#252836] h-14 px-2 flex justify-around items-center backdrop-blur-md bg-opacity-95">
+<button class="flex flex-col items-center justify-center gap-1 w-full h-full text-slate-500 dark:text-slate-400 hover:bg-slate-900/50 dark:hover:bg-[#1C1F2E] transition-colors duration-150">
+<span class="material-symbols-outlined text-xl" data-icon="dashboard">dashboard</span>
+<span class="font-['Space_Grotesk'] text-[9px] font-medium uppercase">Overview</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 w-full h-full text-slate-500 dark:text-slate-400 hover:bg-slate-900/50 dark:hover:bg-[#1C1F2E] transition-colors duration-150">
+<span class="material-symbols-outlined text-xl" data-icon="warning">warning</span>
+<span class="font-['Space_Grotesk'] text-[9px] font-medium uppercase">Incidents</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 w-full h-full text-blue-400 dark:text-[#4F8EF7] border-t-2 border-blue-500 bg-blue-500/5">
+<span class="material-symbols-outlined text-xl" data-icon="terminal">terminal</span>
+<span class="font-['Space_Grotesk'] text-[9px] font-medium uppercase">Log_Explorer</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 w-full h-full text-slate-500 dark:text-slate-400 hover:bg-slate-900/50 dark:hover:bg-[#1C1F2E] transition-colors duration-150">
+<span class="material-symbols-outlined text-xl" data-icon="radar">radar</span>
+<span class="font-['Space_Grotesk'] text-[9px] font-medium uppercase">Threat_Intel</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 w-full h-full text-slate-500 dark:text-slate-400 hover:bg-slate-900/50 dark:hover:bg-[#1C1F2E] transition-colors duration-150">
+<span class="material-symbols-outlined text-xl" data-icon="settings">settings</span>
+<span class="font-['Space_Grotesk'] text-[9px] font-medium uppercase">Settings</span>
+</button>
+</nav>
+<!-- Footer Versioning Data (Mobile Overlay) -->
+<footer class="fixed bottom-14 left-0 right-0 pointer-events-none px-4 flex justify-between z-40">
+<span class="text-[7px] font-mono-code text-text-tertiary/20 uppercase">STABLE_REL_2.4.0</span>
+<span class="text-[7px] font-mono-code text-text-tertiary/20 uppercase">SEC_CHKSUM_OK</span>
+</footer>
+</body></html>

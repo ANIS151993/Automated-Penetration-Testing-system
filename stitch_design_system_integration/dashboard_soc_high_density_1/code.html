@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Space+Grotesk:wght@500;700;900&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0A0B0F;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #252836;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary": "#4b2800",
+                        "on-primary-fixed-variant": "#004492",
+                        "on-secondary-fixed": "#002116",
+                        "on-secondary": "#003828",
+                        "surface-container-lowest": "#0b0e14",
+                        "surface-container": "#1d2026",
+                        "surface-secondary": "#141620",
+                        "on-surface-variant": "#c2c6d5",
+                        "on-tertiary-fixed": "#2d1600",
+                        "surface-tint": "#acc7ff",
+                        "primary-container": "#508ff8",
+                        "tertiary-fixed-dim": "#ffb873",
+                        "severity-critical": "#FF3366",
+                        "on-surface": "#e1e2eb",
+                        "inverse-primary": "#005bbf",
+                        "text-secondary": "#9AA0B4",
+                        "on-secondary-fixed-variant": "#00513b",
+                        "text-tertiary": "#5C6378",
+                        "outline-variant": "#424753",
+                        "severity-high": "#FF8C42",
+                        "border-subtle": "#252836",
+                        "surface-container-highest": "#32353c",
+                        "primary-fixed": "#d7e2ff",
+                        "primary": "#acc7ff",
+                        "secondary-container": "#00d8a2",
+                        "error-container": "#93000a",
+                        "on-tertiary-container": "#412200",
+                        "tertiary": "#ffb873",
+                        "primary-fixed-dim": "#acc7ff",
+                        "tertiary-fixed": "#ffdcbf",
+                        "on-secondary-container": "#005840",
+                        "on-error": "#690005",
+                        "surface-container-low": "#191c22",
+                        "severity-info": "#5C6378",
+                        "outline": "#8c909e",
+                        "surface-dim": "#11131a",
+                        "secondary-fixed-dim": "#1fe0aa",
+                        "surface": "#11131a",
+                        "inverse-on-surface": "#2e3037",
+                        "surface-container-high": "#272a31",
+                        "on-primary": "#002f68",
+                        "on-error-container": "#ffdad6",
+                        "surface-variant": "#32353c",
+                        "surface-bright": "#373940",
+                        "surface-tertiary": "#1C1F2E",
+                        "secondary": "#44f5bd",
+                        "inverse-surface": "#e1e2eb",
+                        "on-background": "#e1e2eb",
+                        "background": "#11131a",
+                        "error": "#ffb4ab",
+                        "secondary-fixed": "#50fec5",
+                        "on-primary-fixed": "#001a40",
+                        "on-primary-container": "#00285b",
+                        "bg-primary": "#0A0B0F",
+                        "tertiary-container": "#d37b02",
+                        "text-primary": "#E8EAED",
+                        "on-tertiary-fixed-variant": "#6a3b00",
+                        "severity-low": "#4F8EF7",
+                        "severity-medium": "#FFB800",
+                        "border-accent": "#2F3447"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sidebar-collapsed": "64px",
+                        "base": "4px",
+                        "row-regular": "48px",
+                        "gutter": "24px",
+                        "nav-height": "56px",
+                        "padding-card": "24px",
+                        "sidebar-expanded": "240px",
+                        "row-dense": "40px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "h3": ["Space Grotesk"],
+                        "h2": ["Space Grotesk"],
+                        "body-sm": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "h1": ["Space Grotesk"],
+                        "mono-code": ["JetBrains Mono"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-primary text-on-surface font-body-md overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-slate-950 dark:bg-[#0A0B0F] border-b border-slate-800 dark:border-[#252836] flex justify-between items-center w-full px-4 h-10">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-blue-500 dark:text-[#4F8EF7] text-[18px]">security</span>
+<span class="text-sm font-black tracking-widest text-slate-100 dark:text-[#E8EAED] font-['Space_Grotesk'] uppercase">SOC_COMMAND_CENTER</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="hover:bg-slate-900/50 dark:hover:bg-[#1C1F2E] transition-colors duration-150 p-1 rounded">
+<span class="material-symbols-outlined text-slate-400 dark:text-slate-400 text-[18px]">notifications</span>
+</button>
+</div>
+</header>
+<main class="pt-14 pb-20 px-4 flex flex-col gap-6 max-w-md mx-auto">
+<!-- SYSTEM HEALTH GRID -->
+<section>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-secondary border border-border-subtle p-3 flex flex-col gap-1">
+<span class="text-[10px] font-mono-code text-text-secondary uppercase tracking-tighter">Uplink_Latency</span>
+<div class="flex items-baseline justify-between">
+<span class="text-h3 font-h3 text-secondary">14ms</span>
+<div class="h-1 w-8 bg-secondary/20 rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-1/3"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-secondary border border-border-subtle p-3 flex flex-col gap-1">
+<span class="text-[10px] font-mono-code text-text-secondary uppercase tracking-tighter">Threat_Index</span>
+<div class="flex items-baseline justify-between">
+<span class="text-h3 font-h3 text-severity-medium">4.82</span>
+<span class="text-[10px] font-mono-code text-severity-medium">MODERATE</span>
+</div>
+</div>
+</div>
+</section>
+<!-- ACTIVE ENGAGEMENTS (Bento Style Card) -->
+<section class="flex flex-col gap-2">
+<h2 class="text-label-caps font-label-caps text-text-tertiary px-1">ACTIVE_ENGAGEMENTS</h2>
+<div class="bg-surface-secondary border border-border-subtle overflow-hidden">
+<div class="p-4 border-b border-border-subtle flex justify-between items-center bg-surface-tertiary">
+<div class="flex flex-col">
+<span class="text-body-sm font-mono-code font-bold text-text-primary uppercase">OPS-BRAVO-NINER</span>
+<span class="text-[10px] font-mono-code text-text-tertiary">PID: 88241 // UID: admin_x04</span>
+</div>
+<span class="px-2 py-0.5 bg-severity-low/10 border border-severity-low/30 text-severity-low text-[10px] font-mono-code">EN_ROUTE</span>
+</div>
+<div class="h-24 relative overflow-hidden">
+<div class="absolute inset-0 bg-slate-900/50"></div>
+<img class="w-full h-full object-cover mix-blend-overlay opacity-40" data-alt="abstract digital matrix grid pattern with glowing blue data lines and connection points on black background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqSYwsJxe5zTLBX8AmYsn6uqyDzDTWwVHc0l6pVNRTjnIDts860q90zyTJBgWKT6Cg-8bFzKqO3Lln4gtD2P4Ia9plR1s9ia9PkbFTE1MGJ8YbBi2BeOIvxXbpPqBZWiyJhv3nHKlJooULHaCd-hSGbHBDtvSkDPYkDTj8vYMLf1e1MJclACTRHSfsl6MefBxCiaueaPwNQb5p6v9HD7ZRmoIfUsLrALhzLltU5nfnN6eC3lM4s6pGU4ZbeNdxbn0DcN-IiE_yvGs"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="grid grid-cols-4 gap-2 w-full px-4">
+<div class="h-1 bg-severity-low/40 rounded-full"></div>
+<div class="h-1 bg-severity-low/40 rounded-full"></div>
+<div class="h-1 bg-severity-low rounded-full shadow-[0_0_8px_rgba(79,142,247,0.5)]"></div>
+<div class="h-1 bg-surface-container-highest rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="p-3 bg-surface-secondary flex flex-col gap-2">
+<div class="flex justify-between items-center h-row-dense px-2 border-l-2 border-severity-low bg-surface-container-low/30">
+<span class="text-[11px] font-mono-code text-text-secondary">Target_Asset:</span>
+<span class="text-[11px] font-mono-code text-text-primary">192.168.1.104</span>
+</div>
+</div>
+</div>
+</section>
+<!-- CRITICAL FINDINGS LIST (High Density) -->
+<section class="flex flex-col gap-2">
+<div class="flex justify-between items-end px-1">
+<h2 class="text-label-caps font-label-caps text-text-tertiary uppercase">Critical_Findings</h2>
+<span class="text-[10px] font-mono-code text-text-tertiary">COUNT: 03</span>
+</div>
+<div class="flex flex-col border border-border-subtle bg-surface-secondary">
+<!-- Row 1 -->
+<div class="flex items-center h-row-dense px-3 border-b border-border-subtle hover:bg-surface-tertiary transition-colors">
+<div class="w-2 h-2 rounded-full bg-severity-critical mr-3 shadow-[0_0_8px_rgba(255,51,102,0.4)]"></div>
+<div class="flex-1 flex flex-col justify-center min-w-0">
+<span class="text-[11px] font-mono-code font-bold text-text-primary truncate">EXT_SQL_INJECTION_ATTEMPT</span>
+<span class="text-[10px] font-mono-code text-text-tertiary truncate">HASH: f32a8...91b0</span>
+</div>
+<span class="text-[10px] font-mono-code text-severity-critical ml-2">14:22:01</span>
+</div>
+<!-- Row 2 -->
+<div class="flex items-center h-row-dense px-3 border-b border-border-subtle hover:bg-surface-tertiary transition-colors">
+<div class="w-2 h-2 rounded-full bg-severity-critical mr-3"></div>
+<div class="flex-1 flex flex-col justify-center min-w-0">
+<span class="text-[11px] font-mono-code font-bold text-text-primary truncate">UNAUTHORIZED_SSH_KEY_ADD</span>
+<span class="text-[10px] font-mono-code text-text-tertiary truncate">UID: root_service_v2</span>
+</div>
+<span class="text-[10px] font-mono-code text-severity-critical ml-2">14:20:45</span>
+</div>
+<!-- Row 3 -->
+<div class="flex items-center h-row-dense px-3 hover:bg-surface-tertiary transition-colors">
+<div class="w-2 h-2 rounded-full bg-severity-high mr-3"></div>
+<div class="flex-1 flex flex-col justify-center min-w-0">
+<span class="text-[11px] font-mono-code font-bold text-text-primary truncate">LATERAL_MOVE_DETECTED</span>
+<span class="text-[10px] font-mono-code text-text-tertiary truncate">SRV: PROD-DB-01</span>
+</div>
+<span class="text-[10px] font-mono-code text-severity-high ml-2">14:18:12</span>
+</div>
+</div>
+</section>
+<!-- SYSTEM TELEMETRY -->
+<section class="flex flex-col gap-2">
+<h2 class="text-label-caps font-label-caps text-text-tertiary px-1 uppercase">Node_Telemetry</h2>
+<div class="bg-surface-secondary border border-border-subtle p-4">
+<div class="flex flex-col gap-4">
+<!-- CPU Usage -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-[10px] font-mono-code uppercase">
+<span class="text-text-secondary">Core_Load_Avg</span>
+<span class="text-text-primary">82%</span>
+</div>
+<div class="h-1 bg-surface-container-highest w-full rounded-full">
+<div class="h-full bg-severity-medium w-[82%] rounded-full"></div>
+</div>
+</div>
+<!-- Mem Usage -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between text-[10px] font-mono-code uppercase">
+<span class="text-text-secondary">VRAM_Allocation</span>
+<span class="text-text-primary">44%</span>
+</div>
+<div class="h-1 bg-surface-container-highest w-full rounded-full">
+<div class="h-full bg-secondary w-[44%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- NavigationDrawer (Mobile Bottom Navbar Implementation) -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-slate-900 dark:bg-[#141620] border-t border-slate-800 dark:border-[#252836] h-14 px-2">
+<div class="flex justify-around items-center h-full">
+<!-- Overview (Active) -->
+<div class="flex flex-col items-center justify-center gap-1 flex-1 bg-blue-500/10 dark:bg-[#4F8EF7]/10 border-t-2 border-blue-500 text-blue-400 dark:text-[#4F8EF7] h-full">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-medium uppercase font-mono tracking-tighter">Overview</span>
+</div>
+<!-- Incidents -->
+<div class="flex flex-col items-center justify-center gap-1 flex-1 text-slate-400 dark:text-slate-500 hover:text-slate-100 transition-all">
+<span class="material-symbols-outlined text-[20px]">warning</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-medium uppercase font-mono tracking-tighter">Incidents</span>
+</div>
+<!-- Threat_Intel -->
+<div class="flex flex-col items-center justify-center gap-1 flex-1 text-slate-400 dark:text-slate-500 hover:text-slate-100 transition-all">
+<span class="material-symbols-outlined text-[20px]">radar</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-medium uppercase font-mono tracking-tighter">Intel</span>
+</div>
+<!-- Log_Explorer -->
+<div class="flex flex-col items-center justify-center gap-1 flex-1 text-slate-400 dark:text-slate-500 hover:text-slate-100 transition-all">
+<span class="material-symbols-outlined text-[20px]">terminal</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-medium uppercase font-mono tracking-tighter">Logs</span>
+</div>
+<!-- Settings -->
+<div class="flex flex-col items-center justify-center gap-1 flex-1 text-slate-400 dark:text-slate-500 hover:text-slate-100 transition-all">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="font-['Space_Grotesk'] text-[10px] font-medium uppercase font-mono tracking-tighter">Config</span>
+</div>
+</div>
+</nav>
+<!-- Background Decorative Texture -->
+<div class="fixed inset-0 pointer-events-none opacity-[0.03] z-[-1] overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-full grid grid-cols-12 gap-px">
+<div class="border-r border-white h-full"></div>
+<div class="border-r border-white h-full"></div>
+<div class="border-r border-white h-full"></div>
+<div class="border-r border-white h-full"></div>
+<div class="border-r border-white h-full"></div>
+<div class="border-r border-white h-full"></div>
+<div class="border-r border-white h-full"></div>
+<div class="border-r border-white h-full"></div>
+<div class="border-r border-white h-full"></div>
+<div class="border-r border-white h-full"></div>
+<div class="border-r border-white h-full"></div>
+<div class="border-r border-white h-full"></div>
+</div>
+</div>
+</body></html>
