@@ -157,6 +157,26 @@ code{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--accent)
 .sec-title{font-size:1rem;color:var(--text);margin-bottom:.6rem}
 .sec-body{font-size:.82rem;color:var(--text2);line-height:1.7}
 
+/* HOW-TO GUIDE */
+.howto-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}
+@media(max-width:800px){.howto-grid{grid-template-columns:1fr}}
+.howto-card{background:var(--surface);border:1px solid var(--border);padding:1.5rem;position:relative}
+.howto-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--primary),var(--accent))}
+.howto-num{font-family:'Orbitron',monospace;font-size:1.8rem;font-weight:900;color:var(--primary);opacity:.3;line-height:1;margin-bottom:.5rem}
+.howto-card h3{font-size:1rem;color:var(--text);margin-bottom:.5rem}
+.howto-card p{color:var(--text2);font-size:.85rem;margin-bottom:.8rem;line-height:1.7}
+.howto-card ul{list-style:none;display:flex;flex-direction:column;gap:.4rem}
+.howto-card ul li{font-size:.82rem;color:var(--text2);padding-left:1.2rem;position:relative;line-height:1.5}
+.howto-card ul li::before{content:'›';position:absolute;left:0;color:var(--primary)}
+.howto-badge{display:inline-block;background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.25);color:var(--primary);font-family:'JetBrains Mono',monospace;font-size:.68rem;padding:.2rem .5rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:.7rem}
+.howto-tip{margin-top:.8rem;padding:.7rem 1rem;background:rgba(0,212,170,.06);border-left:2px solid var(--accent);font-size:.8rem;color:var(--text2);font-family:'JetBrains Mono',monospace}
+.howto-warn{margin-top:.8rem;padding:.7rem 1rem;background:rgba(249,115,22,.06);border-left:2px solid var(--accent2);font-size:.8rem;color:var(--text2);font-family:'JetBrains Mono',monospace}
+.howto-flow{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;margin:.8rem 0}
+.howto-flow-step{background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.72rem;padding:.3rem .7rem;white-space:nowrap}
+.howto-flow-arrow{color:var(--primary);font-size:.9rem}
+.howto-full{background:var(--surface);border:1px solid var(--border);padding:1.5rem;position:relative;margin-top:1.5rem}
+.howto-full::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent2),var(--primary))}
+
 /* FOOTER */
 footer{background:var(--surface);border-top:1px solid var(--border);padding:3rem 2rem;text-align:center}
 .footer-inner{max-width:800px;margin:0 auto}
@@ -182,7 +202,8 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:3rem
     <a class="nav-logo" href="#">PENTAI PRO</a>
     <ul class="nav-links">
       <li><a href="#architecture">Architecture</a></li>
-      <li><a href="#guide">Guide</a></li>
+      <li><a href="#guide">Setup</a></li>
+      <li><a href="#howto">How to Use</a></li>
       <li><a href="#performance">Performance</a></li>
       <li><a href="#security">Security</a></li>
       <li><a href="#paper">Paper</a></li>
@@ -541,6 +562,211 @@ curl http://172.20.32.74/api/v1/healthz
       </div>
     </div>
   </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- HOW TO USE -->
+<section id="howto">
+  <div class="section-header">
+    <div class="section-label">// User Manual</div>
+    <h2 class="section-title">How to Use PentAI Pro</h2>
+    <p class="section-desc">A complete walkthrough — from first login to reading your final penetration test report.</p>
+  </div>
+
+  <div class="howto-grid">
+
+    <!-- 1. Login -->
+    <div class="howto-card">
+      <div class="howto-num">01</div>
+      <div class="howto-badge">Access</div>
+      <h3>Login to the System</h3>
+      <p>Open your browser and navigate to the PentAI Pro dashboard. Use the account created during setup, or register a new operator account.</p>
+      <ul>
+        <li>Go to <code>https://apts.marcbd.site</code> (or your custom domain)</li>
+        <li>Click <strong>Sign Up</strong> to create a new operator account</li>
+        <li>Enter your email and a strong password — no email confirmation needed (auto-confirm is on)</li>
+        <li>After login, you land on the <strong>Operator Workspace</strong> dashboard</li>
+      </ul>
+      <div class="howto-tip">TIP: The Core_Health panel on the right shows the live status of all system components. All four rows should show a green check mark within a few seconds.</div>
+    </div>
+
+    <!-- 2. Create Engagement -->
+    <div class="howto-card">
+      <div class="howto-num">02</div>
+      <div class="howto-badge">Engagement</div>
+      <h3>Create a New Engagement</h3>
+      <p>An engagement defines the scope and authorisation for a penetration test. You must create one before running any tools.</p>
+      <ul>
+        <li>Click the blue <strong>+ New_Task</strong> button (top right) or the orange <strong>⚡</strong> FAB button (bottom right)</li>
+        <li>Fill in the <strong>Engagement Name</strong> (e.g. <em>Lab Network Q2 2025</em>)</li>
+        <li>Enter the <strong>Target Scope</strong> — one or more CIDR ranges (e.g. <code>172.20.32.59/32</code>)</li>
+        <li>Set the <strong>Operator Name</strong> and optional <strong>Notes</strong></li>
+        <li>Click <strong>Create</strong> — the engagement status is set to <em>Active</em></li>
+      </ul>
+      <div class="howto-warn">WARN: The system will reject any tool invocation that targets an IP outside the declared scope. Always set scope accurately.</div>
+    </div>
+
+    <!-- 3. Dashboard Overview -->
+    <div class="howto-card">
+      <div class="howto-num">03</div>
+      <div class="howto-badge">Dashboard</div>
+      <h3>Understand the Dashboard</h3>
+      <p>The Operator Workspace gives you a real-time operational picture at a glance.</p>
+      <ul>
+        <li><strong>KPI Grid</strong> — shows active operations, critical findings, total hosts discovered, and security posture index</li>
+        <li><strong>Operational Queue</strong> — lists all engagements with their current agent run status</li>
+        <li><strong>Core_Health panel</strong> — monitors Control Plane API, PostgreSQL, Weapon Node connection, and Ollama LLM service</li>
+        <li><strong>Live Intel feed</strong> — shows the four most recent findings sorted by time</li>
+        <li><strong>Risk Distribution chart</strong> — bar chart of findings by severity across all engagements</li>
+      </ul>
+      <div class="howto-tip">TIP: The dashboard auto-polls for health status every 30 seconds. You do not need to refresh the page manually.</div>
+    </div>
+
+    <!-- 4. Run Recon -->
+    <div class="howto-card">
+      <div class="howto-num">04</div>
+      <div class="howto-badge">Reconnaissance</div>
+      <h3>Run Automated Reconnaissance</h3>
+      <p>Open an engagement and start the AI agent. The agent decides which tools to run and in what order.</p>
+      <div class="howto-flow">
+        <span class="howto-flow-step">Engagements List</span>
+        <span class="howto-flow-arrow">→</span>
+        <span class="howto-flow-step">Select Engagement</span>
+        <span class="howto-flow-arrow">→</span>
+        <span class="howto-flow-step">Start Agent</span>
+      </div>
+      <ul>
+        <li>From the Operational Queue, click an engagement row to open it</li>
+        <li>Click <strong>Start Agent Run</strong> — the agent enters the Reconnaissance phase</li>
+        <li>Watch the live terminal panel for real-time tool output (nmap, httpx, whatweb)</li>
+        <li>The agent automatically advances through: Recon → Enumeration → Vulnerability Mapping</li>
+        <li>Each tool invocation is scope-checked at three layers before execution</li>
+      </ul>
+    </div>
+
+    <!-- 5. Exploit Gate -->
+    <div class="howto-card">
+      <div class="howto-num">05</div>
+      <div class="howto-badge">Exploitation</div>
+      <h3>Approve or Deny Exploit Actions</h3>
+      <p>PentAI Pro never auto-exploits without your approval. When the agent reaches the exploitation phase, it pauses and waits.</p>
+      <ul>
+        <li>A <strong>Pending Approvals</strong> badge appears on the engagement row in the queue</li>
+        <li>Open the engagement — you will see the proposed exploit action with full details</li>
+        <li>Review the <strong>target IP</strong>, <strong>CVE ID</strong>, <strong>risk level</strong>, and the <strong>exact command</strong> that will be run</li>
+        <li>Click <strong>Approve</strong> to let the agent proceed, or <strong>Deny</strong> to skip that action</li>
+        <li>The agent logs your decision and continues to the next task</li>
+      </ul>
+      <div class="howto-warn">WARN: Approved exploits run against real targets on the Weapon Node. Only approve actions targeting systems you are authorised to test.</div>
+    </div>
+
+    <!-- 6. View Findings -->
+    <div class="howto-card">
+      <div class="howto-num">06</div>
+      <div class="howto-badge">Findings</div>
+      <h3>Review Findings & Evidence</h3>
+      <p>All discovered vulnerabilities are logged in the Findings panel with tamper-evident audit records.</p>
+      <ul>
+        <li>Navigate to the engagement → <strong>Findings</strong> tab</li>
+        <li>Each finding shows: severity badge, CVE reference, affected host, description, and evidence snippet</li>
+        <li>Click a finding row to expand the full technical detail and raw tool output</li>
+        <li>Findings are colour-coded: <span style="color:#ef4444">Critical</span> / <span style="color:#f97316">High</span> / <span style="color:#f59e0b">Medium</span> / <span style="color:#4f8ef7">Low</span> / Info</li>
+        <li>Every finding is linked to its audit log entry — you can verify the SHA-256 chain at any time</li>
+      </ul>
+    </div>
+
+    <!-- 7. Inventory -->
+    <div class="howto-card">
+      <div class="howto-num">07</div>
+      <div class="howto-badge">Inventory</div>
+      <h3>Explore Host Inventory</h3>
+      <p>Every host and open service discovered during the engagement is stored in the Inventory.</p>
+      <ul>
+        <li>Navigate to the engagement → <strong>Inventory</strong> tab</li>
+        <li>The <strong>Hosts</strong> table shows IP, hostname, OS guess, and discovery time</li>
+        <li>The <strong>Services</strong> table shows port, protocol, banner, and version string</li>
+        <li>Click a host row to see all services detected on that host</li>
+        <li>The KPI Grid on the main dashboard shows the total host count across all engagements</li>
+      </ul>
+      <div class="howto-tip">TIP: Inventory data is built incrementally — each agent run adds new hosts and services without overwriting previous discoveries.</div>
+    </div>
+
+    <!-- 8. Generate Report -->
+    <div class="howto-card">
+      <div class="howto-num">08</div>
+      <div class="howto-badge">Report</div>
+      <h3>Generate the PDF Pentest Report</h3>
+      <p>When the engagement is complete, generate a professional PDF report with one click.</p>
+      <ul>
+        <li>Open the engagement → scroll to the bottom → click <strong>Generate Report</strong></li>
+        <li>The agent uses the reasoning LLM to write narrative findings and remediation advice</li>
+        <li>Report includes: executive summary, methodology, findings table, evidence screenshots, CVSS scores</li>
+        <li>Click <strong>Download PDF</strong> to save the report locally</li>
+        <li>Reports are stored in <code>/app/artifacts/</code> on the Command Node container</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Full workflow diagram -->
+  <div class="howto-full">
+    <p class="chart-title">// Complete Operator Workflow</p>
+    <div class="howto-flow" style="flex-wrap:wrap;gap:.6rem;margin-top:.5rem">
+      <span class="howto-flow-step" style="border-color:var(--primary);color:var(--primary)">Login</span>
+      <span class="howto-flow-arrow">→</span>
+      <span class="howto-flow-step">Create Engagement + Set Scope</span>
+      <span class="howto-flow-arrow">→</span>
+      <span class="howto-flow-step">Start Agent Run</span>
+      <span class="howto-flow-arrow">→</span>
+      <span class="howto-flow-step">Recon &amp; Enumeration (auto)</span>
+      <span class="howto-flow-arrow">→</span>
+      <span class="howto-flow-step">Vuln Mapping (auto)</span>
+      <span class="howto-flow-arrow">→</span>
+      <span class="howto-flow-step" style="border-color:var(--accent2);color:var(--accent2)">Approve Exploits (manual)</span>
+      <span class="howto-flow-arrow">→</span>
+      <span class="howto-flow-step">Post-Exploitation (auto)</span>
+      <span class="howto-flow-arrow">→</span>
+      <span class="howto-flow-step">Review Findings</span>
+      <span class="howto-flow-arrow">→</span>
+      <span class="howto-flow-step" style="border-color:var(--accent);color:var(--accent)">Download Report</span>
+    </div>
+    <p style="font-size:.8rem;color:var(--text3);margin-top:1rem;font-family:'JetBrains Mono',monospace">
+      All tool invocations are scope-validated at three layers and recorded in a tamper-evident SHA-256 hash chain. No raw shell commands are ever executed — every action is structured JSON dispatched through the Tool Gateway on the Weapon Node.
+    </p>
+  </div>
+
+  <!-- FAQ / Troubleshooting -->
+  <div class="howto-full" style="margin-top:1.5rem">
+    <p class="chart-title">// Common Questions &amp; Troubleshooting</p>
+    <div class="howto-grid" style="margin-top:1rem">
+      <div>
+        <p style="font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--primary);margin-bottom:.4rem">Q: Core_Health shows OFFLINE after login?</p>
+        <p style="font-size:.82rem;color:var(--text2)">Wait 5–10 seconds and the panel will auto-refresh. The health poller runs every 30s. If it stays red, check that all Docker containers are running: <code>docker compose ps</code></p>
+      </div>
+      <div>
+        <p style="font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--primary);margin-bottom:.4rem">Q: Agent run completes but no findings?</p>
+        <p style="font-size:.82rem;color:var(--text2)">Verify the Target Node is reachable from the Weapon Node. SSH to Kali and run <code>ping 172.20.32.59</code>. Also confirm the scope CIDR matches the target IP exactly.</p>
+      </div>
+      <div>
+        <p style="font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--primary);margin-bottom:.4rem">Q: Ollama LLM shows UNKNOWN?</p>
+        <p style="font-size:.82rem;color:var(--text2)">Check that the Ollama container is healthy: <code>docker compose ps ollama</code>. Then verify models are pulled: <code>docker exec pentai-pro-ollama-1 ollama list</code></p>
+      </div>
+      <div>
+        <p style="font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--primary);margin-bottom:.4rem">Q: How do I add a new target for a second engagement?</p>
+        <p style="font-size:.82rem;color:var(--text2)">Create a new engagement with the new target's CIDR. Each engagement is isolated — scope enforcement is per-engagement. You can run multiple engagements simultaneously.</p>
+      </div>
+      <div>
+        <p style="font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--primary);margin-bottom:.4rem">Q: How do I access the Supabase admin dashboard?</p>
+        <p style="font-size:.82rem;color:var(--text2)">Navigate to <code>http://172.20.32.74:3001</code> on your local network. Default credentials are in <code>~/supabase-docker/.env</code> under <code>DASHBOARD_USERNAME</code> and <code>DASHBOARD_PASSWORD</code>.</p>
+      </div>
+      <div>
+        <p style="font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--primary);margin-bottom:.4rem">Q: Where are the API docs?</p>
+        <p style="font-size:.82rem;color:var(--text2)">FastAPI auto-generates interactive docs at <code>https://apts.marcbd.site/api/docs</code> (Swagger UI) and <code>/api/redoc</code>. You can test all endpoints directly from the browser.</p>
+      </div>
+    </div>
+  </div>
+
 </section>
 
 <div class="divider"></div>

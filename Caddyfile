@@ -2,7 +2,13 @@
   encode gzip zstd
 
   handle /api/* {
+    header Cache-Control "no-store, no-cache, must-revalidate"
     reverse_proxy backend:8000
+  }
+
+  handle /supabase/* {
+    uri strip_prefix /supabase
+    reverse_proxy 172.20.32.74:8543
   }
 
   handle {

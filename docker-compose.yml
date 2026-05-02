@@ -20,6 +20,9 @@ services:
       dockerfile: Dockerfile
     image: pentai-pro-frontend:local
     restart: unless-stopped
+    environment:
+      SUPABASE_URL: ${SUPABASE_URL:-http://172.20.32.74:8543}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzc3NTE3NDU5LCJleHAiOjIwOTI4Nzc0NTl9.fgAyCWkT-GflZwkQpDFpbSSyQTXiz7L-tiwOlJtH5qA}
     healthcheck:
       test:
         [

@@ -85,6 +85,8 @@ function shortId(id: string): string {
 }
 
 export function DashboardScreen() {
+  const [healthError, setHealthError] = useState<string | null>(null);
+  const [healthLoading, setHealthLoading] = useState(true);
   const [data, setData] = useState<DashboardData>({
     health: null,
     engagements: [],
@@ -102,16 +104,41 @@ export function DashboardScreen() {
     return () => window.clearInterval(id);
   }, []);
 
+  // Health polling — runs independently every 30s so the card updates without a full reload
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchHealth() {
+      setHealthLoading(true);
+      try {
+        const health = await getHealth();
+        if (!cancelled) {
+          setData((prev) => ({ ...prev, health }));
+          setHealthError(null);
+        }
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.error("[PentAI] getHealth failed:", msg);
+        if (!cancelled) setHealthError(msg);
+      } finally {
+        if (!cancelled) setHealthLoading(false);
+      }
+    }
+    void fetchHealth();
+    const pollId = window.setInterval(() => void fetchHealth(), 30_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(pollId);
+    };
+  }, []);
+
+  // Main data load — engagements, findings, inventory, etc.
   useEffect(() => {
     let cancelled = false;
     async function load() {
       setLoading(true);
       setError(null);
       try {
-        const [health, engagements] = await Promise.all([
-          getHealth().catch(() => null),
-          listEngagements().catch(() => [] as Engagement[]),
-        ]);
+        const engagements = await listEngagements().catch(() => [] as Engagement[]);
         const findingsEntries = await Promise.all(
           engagements.map((eng) =>
             listFindings(eng.id)
@@ -144,14 +171,14 @@ export function DashboardScreen() {
           ),
         );
         if (cancelled) return;
-        setData({
-          health,
+        setData((prev) => ({
+          ...prev,
           engagements,
           findingsByEngagement: Object.fromEntries(findingsEntries),
           inventoryByEngagement: Object.fromEntries(inventoryEntries),
           agentRunsByEngagement: Object.fromEntries(agentRunEntries),
           pendingApprovalsByEngagement: Object.fromEntries(pendingApprovalEntries),
-        });
+        }));
       } catch (err) {
         if (!cancelled)
           setError(err instanceof Error ? err.message : "Dashboard load failed.");
@@ -243,7 +270,7 @@ export function DashboardScreen() {
             error={error}
           />
           <aside className="lg:col-span-4 space-y-4">
-            <CoreHealthCard health={data.health} />
+            <CoreHealthCard health={data.health} healthError={healthError} healthLoading={healthLoading} />
             <LiveIntelCard findings={liveIntel} />
           </aside>
         </div>
@@ -568,15 +595,17 @@ function OperationalQueue({
 
 type CoreHealthCardProps = {
   health: HealthResponse | null;
+  healthError?: string | null;
+  healthLoading?: boolean;
 };
 
-function CoreHealthCard({ health }: CoreHealthCardProps) {
+function CoreHealthCard({ health, healthError, healthLoading }: CoreHealthCardProps) {
   const dbOk =
     health?.database_status?.toLowerCase() === "ok" ||
     health?.database_status?.toLowerCase() === "healthy";
   const apiOk = health?.status?.toLowerCase() === "ok" || !!health;
   const ollamaOk = health?.ollama_status === "ok";
-  const requiredModels = ["llama3.2:3b-instruct-q4_K_M", "qwen2.5:7b-instruct-q4_K_M"];
+  const requiredModels = ["llama3.2:3b-instruct-q4_K_M", "qwen2.5:14b-instruct-q4_K_M"];
   const pulledModels = health?.ollama_models ?? [];
   const missingModels = requiredModels.filter((m) => !pulledModels.includes(m));
   return (
@@ -586,42 +615,74 @@ function CoreHealthCard({ health }: CoreHealthCardProps) {
           health_and_safety
         </span>
         Core_Health
-      </h3>
-      <div className="space-y-2">
-        <HealthRow
-          icon="bolt"
-          label="Control_Plane"
-          detail={health ? `ENV: ${health.environment}` : "OFFLINE"}
-          ok={apiOk}
-        />
-        <HealthRow
-          icon="storage"
-          label="Database"
-          detail={`STATUS: ${health?.database_status ?? "UNKNOWN"}`}
-          ok={dbOk}
-        />
-        <HealthRow
-          icon="hub"
-          label="Weapon_Node"
-          detail={health?.weapon_node_url ?? "—"}
-          ok={!!health?.weapon_node_url}
-        />
-        <HealthRow
-          icon="smart_toy"
-          label="Ollama_LLM"
-          detail={
-            ollamaOk
-              ? `${pulledModels.length} model${pulledModels.length === 1 ? "" : "s"} ready`
-              : (health?.ollama_status ?? "UNKNOWN")
-          }
-          ok={ollamaOk}
-        />
-        {missingModels.length > 0 && (
-          <div className="px-2 py-1.5 border border-severity-medium/40 bg-severity-medium/5 font-mono text-[9px] text-severity-medium">
-            MISSING: {missingModels.join(", ")}
-          </div>
+        {healthLoading && (
+          <span className="ml-auto font-mono text-[9px] text-text-tertiary animate-pulse tracking-widest">
+            POLLING…
+          </span>
         )}
-      </div>
+      </h3>
+      {!healthLoading && !health && healthError && (
+        <div className="mb-2 px-2 py-1 bg-severity-critical/10 border border-severity-critical/30 font-mono text-[10px] text-severity-critical break-all">
+          API ERROR: {healthError}
+        </div>
+      )}
+      {healthLoading && !health ? (
+        <div className="space-y-2">
+          {["Control_Plane", "Database", "Weapon_Node", "Ollama_LLM"].map((label) => (
+            <div
+              key={label}
+              className="p-2 border border-border-accent bg-surface-container-low flex items-center justify-between font-mono"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-4 h-4 bg-border-subtle rounded-sm animate-pulse" />
+                <div className="text-[10px]">
+                  <div className="font-bold text-text-primary uppercase">{label}</div>
+                  <div className="text-text-tertiary">CONNECTING…</div>
+                </div>
+              </div>
+              <span className="material-symbols-outlined text-sm text-text-tertiary animate-pulse">
+                sync
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <HealthRow
+            icon="bolt"
+            label="Control_Plane"
+            detail={health ? `ENV: ${health.environment}` : "OFFLINE"}
+            ok={apiOk}
+          />
+          <HealthRow
+            icon="storage"
+            label="Database"
+            detail={`STATUS: ${health?.database_status ?? "UNKNOWN"}`}
+            ok={dbOk}
+          />
+          <HealthRow
+            icon="hub"
+            label="Weapon_Node"
+            detail={health?.weapon_node_url ?? "—"}
+            ok={!!health?.weapon_node_url}
+          />
+          <HealthRow
+            icon="smart_toy"
+            label="Ollama_LLM"
+            detail={
+              ollamaOk
+                ? `${pulledModels.length} model${pulledModels.length === 1 ? "" : "s"} ready`
+                : (health?.ollama_status ?? "UNKNOWN")
+            }
+            ok={ollamaOk}
+          />
+          {missingModels.length > 0 && (
+            <div className="px-2 py-1.5 border border-severity-medium/40 bg-severity-medium/5 font-mono text-[9px] text-severity-medium">
+              MISSING: {missingModels.join(", ")}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

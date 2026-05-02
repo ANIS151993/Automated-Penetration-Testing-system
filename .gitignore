@@ -15,3 +15,9 @@ certs/*
 !certs/.gitkeep
 artifacts/*
 !artifacts/.gitkeep
+frontend/.env.local
+docs/paper/*.aux
+docs/paper/*.bbl
+docs/paper/*.blg
+docs/paper/*.log
+docs/paper/*.out
