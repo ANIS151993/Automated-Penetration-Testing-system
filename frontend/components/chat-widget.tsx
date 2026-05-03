@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { ChatMessage, streamChat } from "@/lib/api";
 
 const SUGGESTIONS = [
@@ -19,6 +20,25 @@ function uid() {
 }
 
 export default function ChatWidget() {
+  const [authed, setAuthed] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setAuthed(!!session);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthed(!!session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (!authed) return null;
+
+  return <ChatWidgetInner />;
+}
+
+function ChatWidgetInner() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
