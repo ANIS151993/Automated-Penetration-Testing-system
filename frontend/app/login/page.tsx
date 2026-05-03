@@ -707,7 +707,7 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
     if (err) {
       setError(
         err.message === "Invalid login credentials"
-          ? "Invalid email or access key. Please check and try again."
+          ? "Incorrect email or password. If you are new, use the Register tab to create an account."
           : err.message,
       );
       setBusy(false);
@@ -768,24 +768,60 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [alreadyExists, setAlreadyExists] = useState(false);
   const [done, setDone] = useState(false);
 
   const strength = getPasswordStrength(password);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (password !== confirm) { setError("Passwords do not match."); return; }
+    if (!email.trim()) { setError("Please enter your email address."); return; }
+    if (!displayName.trim()) { setError("Please enter a display name."); return; }
     if (password.length < 8) { setError("Access key must be at least 8 characters."); return; }
+    if (password !== confirm) { setError("Passwords do not match."); return; }
     setBusy(true);
     setError(null);
+    setAlreadyExists(false);
     const supabase = createClient();
     const { error: err } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { display_name: displayName } },
     });
-    if (err) { setError(err.message); setBusy(false); return; }
+    if (err) {
+      if (err.message.toLowerCase().includes("already") || err.status === 422) {
+        setAlreadyExists(true);
+      } else {
+        setError(err.message);
+      }
+      setBusy(false);
+      return;
+    }
     setDone(true);
+  }
+
+  if (alreadyExists) {
+    return (
+      <>
+        <div className="auth-error" style={{ marginBottom: "20px", alignItems: "flex-start" }}>
+          <span className="material-symbols-outlined" style={{ marginTop: "2px" }}>info</span>
+          <div>
+            <div style={{ fontWeight: 700, marginBottom: "4px" }}>Account Already Exists</div>
+            <div style={{ fontSize: "12px", lineHeight: "1.6", color: "#9AA0B4" }}>
+              <strong style={{ color: "#E8EAED" }}>{email}</strong> is already registered.
+              Please sign in with your existing password instead.
+            </div>
+          </div>
+        </div>
+        <button type="button" onClick={onSuccess} className="auth-submit" style={{ marginBottom: "10px" }}>
+          <span className="material-symbols-outlined">login</span>
+          Go to Sign In
+        </button>
+        <button type="button" onClick={() => setAlreadyExists(false)} className="auth-back-btn">
+          Try a Different Email
+        </button>
+      </>
+    );
   }
 
   if (done) {
@@ -794,16 +830,16 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
         <div className="auth-success">
           <p className="auth-success-title">
             <span className="material-symbols-outlined">check_circle</span>
-            Access Request Submitted
+            Account Created
           </p>
           <p className="auth-success-body">
-            Check <strong>{email}</strong> for a confirmation link, then sign in.
-            Email auto-confirm may be enabled — try signing in directly.
+            Account for <strong>{email}</strong> is ready.
+            Click below to sign in now.
           </p>
         </div>
-        <button type="button" onClick={onSuccess} className="auth-back-btn">
-          <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>arrow_back</span>
-          Back to Sign In
+        <button type="button" onClick={onSuccess} className="auth-submit">
+          <span className="material-symbols-outlined">login</span>
+          Sign In Now
         </button>
       </>
     );
