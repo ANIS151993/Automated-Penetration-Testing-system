@@ -44,7 +44,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,26,0.9
 
 /* HERO */
 .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem 4rem;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(79,142,247,0.12) 0%,transparent 70%)}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(79,142,247,0.12) 0%,transparent 70%);pointer-events:none}
 .grid-bg{position:absolute;inset:0;opacity:.04;background-image:linear-gradient(var(--primary) 1px,transparent 1px),linear-gradient(90deg,var(--primary) 1px,transparent 1px);background-size:50px 50px;pointer-events:none}
 .scan-line{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--primary),transparent);animation:scan 6s linear infinite;opacity:.4;pointer-events:none}
 @keyframes scan{0%{top:0;opacity:0}5%{opacity:.4}95%{opacity:.4}100%{top:100%;opacity:0}}
@@ -269,7 +269,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:3rem
   </div>
 
   <div class="hero-btns">
-    <a class="btn-primary" href="https://apts.marcbd.site" target="_blank">Live System</a>
+    <a class="btn-primary" href="https://apts.marcbd.site/">Live System</a>
     <a class="btn-outline" href="https://github.com/ANIS151993/pentai-pro" target="_blank">GitHub Repo</a>
     <a class="btn-outline" href="#guide">Setup Guide</a>
   </div>
