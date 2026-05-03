@@ -756,3 +756,68 @@ export async function streamToolExecution(
     onEvent(JSON.parse(tail) as ExecutionEvent);
   }
 }
+
+/* ─── Chat ─── */
+
+export type ChatMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+export type ChatChunk = {
+  delta?: string;
+  done: boolean;
+  error?: string;
+};
+
+export async function streamChat(
+  messages: ChatMessage[],
+  onChunk: (chunk: ChatChunk) => void,
+  signal?: AbortSignal,
+): Promise<void> {
+  const token = await getSupabaseToken();
+  const response = await fetch(`${apiBaseUrl}/api/v1/chat/stream`, {
+    method: "POST",
+    cache: "no-store",
+    credentials: "include",
+    signal,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ messages }),
+  });
+
+  if (response.status === 401) {
+    handleUnauthorized();
+    throw new Error("not_authenticated");
+  }
+  if (!response.ok) {
+    let detail = `Chat request failed: ${response.status}`;
+    try {
+      const p = (await response.json()) as ApiErrorPayload;
+      detail = p.detail ?? p.error ?? detail;
+    } catch { /* ignore */ }
+    throw new Error(detail);
+  }
+  if (!response.body) throw new Error("No response stream.");
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      onChunk(JSON.parse(trimmed) as ChatChunk);
+    }
+  }
+  const tail = buffer.trim();
+  if (tail) onChunk(JSON.parse(tail) as ChatChunk);
+}

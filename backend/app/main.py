@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.auth_routes import auth_router
+from app.api.chat_routes import chat_router
 from app.api.knowledge_routes import knowledge_router
 from app.api.routes import router
 from app.core.llm_client import MODEL_ROUTING, LLMClient
@@ -196,6 +197,7 @@ def create_app() -> FastAPI:
         return await call_next(request)
 
     app.include_router(auth_router)
+    app.include_router(chat_router)
     app.include_router(knowledge_router)
     app.include_router(router)
     return app

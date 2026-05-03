@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import "./globals.css";
+
+const ChatWidget = dynamic(() => import("@/components/chat-widget"), { ssr: false });
 
 export const metadata: Metadata = {
   title: "PentAI Pro",
@@ -15,6 +18,7 @@ export default function RootLayout({
     <html className="dark" lang="en">
       <body className="bg-bg-primary text-text-primary font-sans antialiased">
         {children}
+        <ChatWidget />
         <footer className="border-t border-border-subtle bg-surface-secondary py-3 px-6 flex flex-wrap items-center justify-between gap-2">
           <p className="font-mono text-[9px] text-text-tertiary uppercase tracking-widest">
             © 2026{" "}

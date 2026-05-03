@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import AsyncGenerator
 from typing import Any, Literal
 
 import httpx
@@ -16,6 +17,7 @@ MODEL_ROUTING: dict[str, str] = {
     "plan_recon": "qwen2.5:14b-instruct-q4_K_M",
     "plan_enumeration": "qwen2.5:14b-instruct-q4_K_M",
     "embed": "nomic-embed-text",
+    "chat": "qwen2.5:14b-instruct-q4_K_M",
 }
 
 ResponseFormat = Literal["text", "json"]
@@ -145,6 +147,44 @@ class LLMClient:
         if not isinstance(embedding, list):
             raise LLMError(f"Malformed embedding response: {data!r}")
         return embedding
+
+    async def stream_chat(
+        self,
+        messages: list[dict[str, str]],
+        system_prompt: str = "",
+    ) -> AsyncGenerator[str, None]:
+        """Stream a chat response token-by-token from Ollama."""
+        full_messages: list[dict[str, str]] = []
+        if system_prompt:
+            full_messages.append({"role": "system", "content": system_prompt})
+        full_messages.extend(messages)
+
+        payload: dict[str, Any] = {
+            "model": MODEL_ROUTING["chat"],
+            "messages": full_messages,
+            "stream": True,
+            "options": {"num_ctx": self._num_ctx},
+        }
+        client = await self._ensure_client()
+        try:
+            async with client.stream(
+                "POST",
+                f"{self._base_url}/api/chat",
+                json=payload,
+                timeout=120.0,
+            ) as response:
+                response.raise_for_status()
+                async for line in response.aiter_lines():
+                    if not line:
+                        continue
+                    data = json.loads(line)
+                    content: str = data.get("message", {}).get("content", "")
+                    if content:
+                        yield content
+                    if data.get("done"):
+                        return
+        except httpx.HTTPError as exc:
+            raise LLMError(f"Ollama streaming request failed: {exc}") from exc
 
     async def _ensure_client(self) -> httpx.AsyncClient:
         if self._client is None:
