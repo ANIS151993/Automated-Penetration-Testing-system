@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ChatMessage, streamChat } from "@/lib/api";
 
@@ -19,7 +20,10 @@ function uid() {
   return Math.random().toString(36).slice(2);
 }
 
+const AUTH_PATHS = ["/login", "/signup"];
+
 export default function ChatWidget() {
+  const pathname = usePathname();
   const [authed, setAuthed] = useState(false);
 
   useEffect(() => {
@@ -33,6 +37,8 @@ export default function ChatWidget() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Never show on auth pages, even if a stale session exists in localStorage
+  if (AUTH_PATHS.some((p) => pathname.startsWith(p))) return null;
   if (!authed) return null;
 
   return <ChatWidgetInner />;
