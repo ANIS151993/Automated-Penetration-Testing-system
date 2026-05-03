@@ -192,6 +192,35 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:3rem
 .highlight{color:var(--primary)}
 .highlight2{color:var(--accent)}
 .mono{font-family:'JetBrains Mono',monospace}
+
+/* VIDEO SECTION */
+.video-interactive-grid{display:grid;gap:20px;grid-template-columns:minmax(0,1.06fr) minmax(300px,0.94fr);align-items:start;margin-top:2rem}
+@media(max-width:800px){.video-interactive-grid{grid-template-columns:1fr}}
+.video-info-card{padding:20px;background:var(--surface);border:1px solid var(--border);position:relative}
+.video-info-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--primary),var(--accent))}
+.video-info-card h3{margin:0 0 10px;font-family:'Orbitron',monospace;font-size:1rem;color:var(--primary)}
+.video-info-card p{margin:0;color:var(--text2);font-size:.9rem;line-height:1.7}
+.video-info-card ul{margin:.8rem 0 0;padding-left:1.2rem}
+.video-info-card ul li{margin-bottom:.45rem;color:var(--text2);font-size:.85rem}
+.video-meta-row{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+.video-meta-pill{display:inline-flex;align-items:center;padding:5px 10px;background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.25);color:var(--primary);font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase}
+.video-frame-wrap{display:flex;flex-direction:column;gap:10px}
+.video-frame{overflow:hidden;background:#000;aspect-ratio:16/9;border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.video-frame iframe{width:100%;height:100%;border:0}
+.video-caption{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text3);text-align:center}
+.video-chapter-shell{margin-top:1.5rem;background:var(--surface);border:1px solid var(--border);padding:16px;position:relative}
+.video-chapter-shell::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--primary))}
+.video-chapter-buttons{display:grid;gap:8px;grid-template-columns:repeat(5,minmax(0,1fr))}
+@media(max-width:600px){.video-chapter-buttons{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.video-chapter-btn{border:1px solid var(--border);background:var(--surface2);color:var(--text2);padding:10px 6px;font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .2s;text-align:center}
+.video-chapter-btn:hover,.video-chapter-btn.is-active{background:rgba(79,142,247,.12);border-color:var(--primary);color:var(--primary);transform:translateY(-1px)}
+.video-chapter-detail{margin-top:12px;padding:14px;background:var(--bg2);border:1px solid var(--border)}
+.video-chapter-detail h3{margin:0 0 6px;font-family:'Orbitron',monospace;font-size:.95rem;color:var(--primary)}
+.video-chapter-detail p{margin:0;color:var(--text2);font-size:.85rem;line-height:1.6}
+.video-flow-rail{margin-top:10px;display:grid;gap:6px;grid-template-columns:repeat(5,minmax(0,1fr))}
+@media(max-width:600px){.video-flow-rail{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.video-flow-node{display:inline-flex;align-items:center;justify-content:center;padding:6px 4px;background:var(--surface2);border:1px solid var(--border);color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:.68rem;text-align:center;transition:all .2s}
+.video-flow-node.is-active{background:linear-gradient(135deg,var(--primary-dim),var(--primary));border-color:var(--primary);color:#fff}
 </style>
 </head>
 <body>
@@ -204,6 +233,7 @@ footer{background:var(--surface);border-top:1px solid var(--border);padding:3rem
       <li><a href="#architecture">Architecture</a></li>
       <li><a href="#guide">Setup</a></li>
       <li><a href="#howto">How to Use</a></li>
+      <li><a href="#video">Video</a></li>
       <li><a href="#performance">Performance</a></li>
       <li><a href="#security">Security</a></li>
       <li><a href="#paper">Paper</a></li>
@@ -767,6 +797,95 @@ curl http://172.20.32.74/api/v1/healthz
     </div>
   </div>
 
+</section>
+
+<div class="divider"></div>
+
+<!-- OVERVIEW VIDEO -->
+<section id="video">
+  <div class="section-header">
+    <div class="section-label">// Overview Video</div>
+    <h2 class="section-title">Platform Walkthrough</h2>
+    <p class="section-desc">A full demonstration of PentAI Pro — from creating an engagement to reviewing findings and generating a penetration test report.</p>
+  </div>
+
+  <div class="video-interactive-grid">
+    <article class="video-info-card">
+      <h3>What this video covers</h3>
+      <p>This walkthrough demonstrates the full lifecycle of an automated penetration test using PentAI Pro — from initial setup through report generation.</p>
+      <ul>
+        <li>Platform login and dashboard orientation.</li>
+        <li>Creating an engagement with scope CIDRs and authorization details.</li>
+        <li>Starting an agent run and monitoring recon → enumeration → exploitation phases.</li>
+        <li>Reviewing the approval gate and authorizing exploit actions.</li>
+        <li>Reading findings, severity classifications, and generating a PDF report.</li>
+      </ul>
+      <div class="video-meta-row">
+        <span class="video-meta-pill">Live Demo</span>
+        <span class="video-meta-pill">Full Lifecycle</span>
+        <span class="video-meta-pill">Local LLM</span>
+      </div>
+    </article>
+
+    <div class="video-frame-wrap">
+      <div class="video-frame">
+        <iframe
+          id="overview-video-player"
+          src="https://www.youtube.com/embed/IHXee9ziOkM?rel=0"
+          title="PentAI Pro platform walkthrough"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen></iframe>
+      </div>
+      <p class="video-caption">Use the chapter controls below to jump to any part of the demo.</p>
+    </div>
+  </div>
+
+  <div class="video-chapter-shell">
+    <div class="video-chapter-buttons">
+      <button class="video-chapter-btn is-active" type="button"
+        data-video-start="0" data-video-node="1"
+        data-video-title="Introduction"
+        data-video-note="Overview of PentAI Pro — architecture, goals, and the three-layer scope enforcement model.">
+        00:00 Intro
+      </button>
+      <button class="video-chapter-btn" type="button"
+        data-video-start="60" data-video-node="2"
+        data-video-title="Dashboard &amp; Setup"
+        data-video-note="Login, Core Health panel orientation, and creating your first engagement with scope CIDRs.">
+        01:00 Setup
+      </button>
+      <button class="video-chapter-btn" type="button"
+        data-video-start="180" data-video-node="3"
+        data-video-title="Agent Run"
+        data-video-note="Starting the LangGraph agent — recon, enumeration, and vulnerability mapping phases with live tool output.">
+        03:00 Agent Run
+      </button>
+      <button class="video-chapter-btn" type="button"
+        data-video-start="300" data-video-node="4"
+        data-video-title="Approvals &amp; Findings"
+        data-video-note="Reviewing the approval gate, authorizing exploit actions, and inspecting findings by severity.">
+        05:00 Findings
+      </button>
+      <button class="video-chapter-btn" type="button"
+        data-video-start="420" data-video-node="5"
+        data-video-title="Report Generation"
+        data-video-note="Generating and downloading a branded PDF penetration test report from the completed engagement.">
+        07:00 Report
+      </button>
+    </div>
+
+    <article class="video-chapter-detail">
+      <h3 id="video-chapter-title">Introduction</h3>
+      <p id="video-chapter-note">Overview of PentAI Pro — architecture, goals, and the three-layer scope enforcement model.</p>
+      <div class="video-flow-rail">
+        <span class="video-flow-node is-active" data-video-node="1">Intro</span>
+        <span class="video-flow-node" data-video-node="2">Setup</span>
+        <span class="video-flow-node" data-video-node="3">Agent Run</span>
+        <span class="video-flow-node" data-video-node="4">Findings</span>
+        <span class="video-flow-node" data-video-node="5">Report</span>
+      </div>
+    </article>
+  </div>
 </section>
 
 <div class="divider"></div>
@@ -1401,6 +1520,32 @@ body.gate-locked{overflow:hidden}
       if(e.target===this)closeGate();
     });
     syncButtons();
+  });
+})();
+</script>
+
+<script>
+(function(){
+  var player = document.getElementById('overview-video-player');
+  var buttons = document.querySelectorAll('.video-chapter-btn');
+  if (!player || !buttons.length) return;
+  var titleEl = document.getElementById('video-chapter-title');
+  var noteEl = document.getElementById('video-chapter-note');
+  var flowNodes = document.querySelectorAll('.video-flow-node');
+  var base = 'https://www.youtube.com/embed/IHXee9ziOkM';
+  buttons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      buttons.forEach(function(b){ b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+      var start = btn.dataset.videoStart || '0';
+      var node = btn.dataset.videoNode || '';
+      if (titleEl) titleEl.textContent = btn.dataset.videoTitle || '';
+      if (noteEl) noteEl.textContent = btn.dataset.videoNote || '';
+      player.src = base + '?start=' + encodeURIComponent(start) + '&autoplay=1&rel=0';
+      flowNodes.forEach(function(chip){
+        chip.classList.toggle('is-active', chip.dataset.videoNode === node);
+      });
+    });
   });
 })();
 </script>
