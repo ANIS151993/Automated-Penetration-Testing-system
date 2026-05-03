@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { FormEvent, Suspense, useRef, useState } from "react";
+import { FormEvent, Suspense, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
@@ -26,60 +26,671 @@ function AuthScreen() {
   }
 
   return (
-    <main className="flex min-h-screen w-full bg-bg-primary text-text-primary font-sans overflow-hidden">
-      <TacticalPanel />
+    <>
+      <style>{`
+        /* Responsive viewport-safe layout */
+        html, body { height: 100%; }
 
-      <section className="w-full lg:w-2/5 bg-surface-secondary flex flex-col items-center justify-center p-8 relative border-l border-border-subtle">
-        <div className="w-full max-w-sm space-y-6">
-          {/* Heading */}
-          <div className="space-y-1">
-            <h3 className="font-display text-h3 text-text-primary uppercase tracking-wider">
-              System Entry
-            </h3>
-            <p className="text-body-sm text-text-tertiary">
-              Verify credentials to decrypt terminal.
-            </p>
+        .auth-root {
+          min-height: 100svh;
+          display: flex;
+          flex-direction: column;
+          background: #0A0B0F;
+          color: #E8EAED;
+          font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+        }
+
+        /* ── Mobile header (visible < lg) ── */
+        .auth-mobile-header {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 20px 24px 0;
+        }
+        @media (min-width: 1024px) { .auth-mobile-header { display: none; } }
+
+        .auth-logo-icon {
+          width: 44px; height: 44px;
+          background: #141620;
+          border: 1px solid #252836;
+          display: flex; align-items: center; justify-content: center;
+          position: relative; flex-shrink: 0;
+        }
+        .auth-logo-icon::before {
+          content: '';
+          position: absolute; top: 0; left: 0;
+          width: 10px; height: 10px;
+          border-top: 2px solid #4F8EF7; border-left: 2px solid #4F8EF7;
+        }
+        .auth-logo-icon::after {
+          content: '';
+          position: absolute; bottom: 0; right: 0;
+          width: 10px; height: 10px;
+          border-bottom: 2px solid #4F8EF7; border-right: 2px solid #4F8EF7;
+        }
+        .auth-logo-text h1 {
+          font-family: 'Space Grotesk', sans-serif;
+          font-size: clamp(18px, 4vw, 22px);
+          font-weight: 700;
+          color: #E8EAED;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          line-height: 1;
+          margin: 0;
+        }
+        .auth-logo-text p {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 11px;
+          color: #5C6378;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          margin: 4px 0 0;
+        }
+
+        /* ── Main layout ── */
+        .auth-body {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+        }
+        @media (min-width: 1024px) {
+          .auth-body { flex-direction: row; }
+        }
+
+        /* ── Tactical left panel ── */
+        .auth-panel {
+          display: none;
+        }
+        @media (min-width: 1024px) {
+          .auth-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex: 0 0 58%;
+            padding: clamp(32px, 4vw, 56px);
+            border-right: 1px solid #252836;
+            position: relative;
+            overflow: hidden;
+          }
+        }
+
+        .auth-panel-grid {
+          position: absolute; inset: 0;
+          opacity: 0.04;
+          background-image:
+            linear-gradient(#4F8EF7 1px, transparent 1px),
+            linear-gradient(90deg, #4F8EF7 1px, transparent 1px);
+          background-size: 44px 44px;
+          pointer-events: none;
+        }
+
+        .auth-panel-glow {
+          position: absolute;
+          top: -20%;  left: -10%;
+          width: 60%;  height: 60%;
+          background: radial-gradient(ellipse, rgba(79,142,247,0.08) 0%, transparent 70%);
+          pointer-events: none;
+        }
+
+        .auth-panel-scan {
+          position: absolute; left: 0; right: 0; height: 1px;
+          background: linear-gradient(90deg, transparent, #4F8EF7, transparent);
+          opacity: 0;
+          animation: panel-scan 6s linear infinite;
+          pointer-events: none;
+        }
+        @keyframes panel-scan {
+          0%   { top: 0%;   opacity: 0; }
+          5%   { opacity: 0.4; }
+          95%  { opacity: 0.4; }
+          100% { top: 100%; opacity: 0; }
+        }
+
+        .auth-panel-brand {
+          position: relative; z-index: 2;
+          display: flex; align-items: center; gap: 16px;
+        }
+        .auth-panel-brand-icon {
+          width: 52px; height: 52px;
+          background: #141620;
+          border: 1px solid #252836;
+          display: flex; align-items: center; justify-content: center;
+          position: relative;
+        }
+        .auth-panel-brand-icon::before {
+          content: '';
+          position: absolute; top: 0; left: 0;
+          width: 12px; height: 12px;
+          border-top: 2px solid #4F8EF7; border-left: 2px solid #4F8EF7;
+        }
+        .auth-panel-brand-icon::after {
+          content: '';
+          position: absolute; bottom: 0; right: 0;
+          width: 12px; height: 12px;
+          border-bottom: 2px solid #4F8EF7; border-right: 2px solid #4F8EF7;
+        }
+        .auth-panel-brand h1 {
+          font-family: 'Space Grotesk', sans-serif;
+          font-size: clamp(20px, 2vw, 26px);
+          font-weight: 700;
+          color: #E8EAED;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          line-height: 1;
+          margin: 0;
+        }
+        .auth-panel-brand p {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 12px;
+          color: #5C6378;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          margin: 5px 0 0;
+        }
+
+        .auth-panel-body { position: relative; z-index: 2; }
+
+        .auth-panel-alert {
+          display: inline-flex; align-items: center; gap: 10px;
+          padding: 8px 14px;
+          border: 1px solid #FF3366;
+          background: rgba(255,51,102,0.06);
+          margin-bottom: 24px;
+        }
+        .auth-panel-alert-dot {
+          width: 7px; height: 7px;
+          background: #FF3366;
+          flex-shrink: 0;
+          animation: blink 1.4s ease-in-out infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        .auth-panel-alert span {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 12px;
+          color: #FF3366;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+        }
+
+        .auth-panel-heading {
+          font-family: 'Space Grotesk', sans-serif;
+          font-size: clamp(26px, 2.8vw, 38px);
+          font-weight: 700;
+          color: #E8EAED;
+          text-transform: uppercase;
+          line-height: 1.1;
+          margin: 0 0 16px;
+        }
+        .auth-panel-heading .highlight { color: #4F8EF7; }
+
+        .auth-panel-desc {
+          font-size: clamp(14px, 1.3vw, 15px);
+          color: #9AA0B4;
+          line-height: 1.7;
+          max-width: 420px;
+          margin: 0;
+        }
+
+        /* Feature list */
+        .auth-features {
+          margin-top: 32px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+        .auth-feature-row {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .auth-feature-icon {
+          width: 32px; height: 32px;
+          background: rgba(79,142,247,0.08);
+          border: 1px solid rgba(79,142,247,0.2);
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
+        }
+        .auth-feature-icon .material-symbols-outlined {
+          font-size: 16px;
+          color: #4F8EF7;
+        }
+        .auth-feature-text {
+          font-size: 13px;
+          color: #9AA0B4;
+          line-height: 1.4;
+        }
+
+        .auth-panel-stats {
+          position: relative; z-index: 2;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 24px;
+          padding-top: 24px;
+          border-top: 1px solid #252836;
+        }
+        .auth-stat-label {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 11px;
+          color: #5C6378;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          margin: 0 0 6px;
+        }
+        .auth-stat-value {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 13px;
+          color: #E8EAED;
+          margin: 0;
+        }
+        .auth-stat-value.ok { color: #00D9A3; }
+
+        /* ── Right form panel ── */
+        .auth-form-panel {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: clamp(24px, 5vw, 56px) clamp(20px, 6vw, 64px);
+          background: #141620;
+          position: relative;
+        }
+        @media (min-width: 1024px) {
+          .auth-form-panel { border-left: 1px solid #252836; }
+        }
+
+        .auth-form-inner {
+          width: 100%;
+          max-width: min(460px, 100%);
+        }
+
+        .auth-form-heading {
+          margin: 0 0 6px;
+          font-family: 'Space Grotesk', sans-serif;
+          font-size: clamp(20px, 4vw, 26px);
+          font-weight: 700;
+          color: #E8EAED;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+        .auth-form-sub {
+          margin: 0 0 28px;
+          font-size: 14px;
+          color: #5C6378;
+          line-height: 1.5;
+        }
+
+        /* Tab switcher */
+        .auth-tabs {
+          display: flex;
+          border: 1px solid #252836;
+          margin-bottom: 28px;
+        }
+        .auth-tab {
+          flex: 1;
+          padding: 13px 16px;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 13px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          color: #5C6378;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s;
+          line-height: 1;
+        }
+        .auth-tab.active {
+          background: #4F8EF7;
+          color: #ffffff;
+        }
+        .auth-tab:not(.active):hover {
+          color: #E8EAED;
+          background: rgba(79,142,247,0.06);
+        }
+
+        /* Form fields */
+        .auth-field { margin-bottom: 20px; }
+        .auth-field-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 8px;
+        }
+        .auth-field-label {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 12px;
+          font-weight: 600;
+          color: #9AA0B4;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+        }
+        .auth-field-link {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 11px;
+          color: #4F8EF7;
+          background: none; border: none; cursor: pointer;
+          text-transform: uppercase; letter-spacing: 1px;
+          padding: 0;
+          transition: color 0.2s;
+        }
+        .auth-field-link:hover { color: #E8EAED; }
+
+        .auth-input-wrap { position: relative; }
+        .auth-input-icon {
+          position: absolute;
+          left: 14px; top: 50%; transform: translateY(-50%);
+          pointer-events: none;
+        }
+        .auth-input-icon .material-symbols-outlined {
+          font-size: 18px;
+          color: #5C6378;
+        }
+        .auth-input {
+          display: block; width: 100%;
+          height: 52px;
+          padding: 0 16px 0 44px;
+          background: #0A0B0F;
+          border: 1px solid #252836;
+          color: #E8EAED;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 14px;
+          transition: border-color 0.2s, box-shadow 0.2s;
+          outline: none;
+          -webkit-appearance: none;
+          appearance: none;
+        }
+        .auth-input::placeholder { color: #5C6378; }
+        .auth-input:focus {
+          border-color: #4F8EF7;
+          box-shadow: 0 0 0 3px rgba(79,142,247,0.12);
+        }
+        .auth-input:hover:not(:focus) { border-color: #2F3447; }
+
+        /* Error */
+        .auth-error {
+          display: flex; align-items: flex-start; gap: 10px;
+          padding: 12px 14px;
+          border: 1px solid rgba(255,51,102,0.35);
+          background: rgba(255,51,102,0.06);
+          margin-bottom: 20px;
+        }
+        .auth-error .material-symbols-outlined { font-size: 16px; color: #FF3366; flex-shrink: 0; margin-top: 1px; }
+        .auth-error-text {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 13px;
+          color: #FF3366;
+          line-height: 1.4;
+        }
+
+        /* Submit */
+        .auth-submit {
+          display: flex; align-items: center; justify-content: center; gap: 10px;
+          width: 100%; height: 54px;
+          background: #4F8EF7;
+          color: #ffffff;
+          border: none; cursor: pointer;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 14px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          transition: filter 0.2s, transform 0.1s;
+          margin-top: 4px;
+        }
+        .auth-submit:hover:not(:disabled) { filter: brightness(1.12); }
+        .auth-submit:active:not(:disabled) { transform: scale(0.995); }
+        .auth-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+        .auth-submit .material-symbols-outlined { font-size: 18px; }
+
+        /* Spinner */
+        .auth-spinner {
+          width: 18px; height: 18px;
+          border: 2px solid rgba(255,255,255,0.3);
+          border-top-color: #fff;
+          border-radius: 50%;
+          animation: spin 0.7s linear infinite;
+          flex-shrink: 0;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Success box */
+        .auth-success {
+          padding: 16px 18px;
+          border: 1px solid rgba(79,142,247,0.35);
+          background: rgba(79,142,247,0.06);
+          margin-bottom: 20px;
+        }
+        .auth-success-title {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 13px;
+          color: #4F8EF7;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          margin: 0 0 8px;
+          display: flex; align-items: center; gap: 8px;
+        }
+        .auth-success-title .material-symbols-outlined { font-size: 16px; }
+        .auth-success-body {
+          font-size: 14px;
+          color: #9AA0B4;
+          line-height: 1.6;
+          margin: 0;
+        }
+        .auth-success-body strong { color: #E8EAED; font-weight: 600; }
+
+        .auth-back-btn {
+          display: flex; align-items: center; justify-content: center; gap: 8px;
+          width: 100%; height: 50px;
+          border: 1px solid #252836;
+          background: transparent;
+          color: #9AA0B4;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 13px;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .auth-back-btn:hover { color: #E8EAED; border-color: #4F8EF7; }
+
+        /* Footer */
+        .auth-footer {
+          padding-top: 24px;
+          margin-top: 4px;
+          border-top: 1px solid #252836;
+          text-align: center;
+        }
+        .auth-footer p {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 11px;
+          color: #5C6378;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          line-height: 1.8;
+          margin: 0;
+        }
+
+        /* Corner tag */
+        .auth-corner-tag {
+          position: absolute; bottom: 16px; right: 16px;
+          display: flex; flex-direction: column; align-items: flex-end;
+          border-right: 1px solid #252836;
+          border-bottom: 1px solid #252836;
+          padding: 4px 8px;
+          opacity: 0.6;
+        }
+        .auth-corner-tag span {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 10px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          line-height: 1.6;
+        }
+        .auth-corner-tag .ok { color: #00D9A3; }
+        .auth-corner-tag .muted { color: #5C6378; }
+
+        /* Password strength bar */
+        .auth-strength { margin-top: 6px; display: flex; gap: 4px; }
+        .auth-strength-bar {
+          flex: 1; height: 3px; background: #252836;
+          transition: background 0.3s;
+        }
+        .auth-strength-bar.s1 { background: #FF3366; }
+        .auth-strength-bar.s2 { background: #FF8C42; }
+        .auth-strength-bar.s3 { background: #FFB800; }
+        .auth-strength-bar.s4 { background: #00D9A3; }
+
+        /* Mobile bottom padding */
+        @media (max-width: 1023px) {
+          .auth-form-panel { padding-bottom: 40px; }
+        }
+      `}</style>
+
+      <div className="auth-root">
+        {/* Mobile-only header */}
+        <header className="auth-mobile-header">
+          <div className="auth-logo-icon">
+            <span
+              className="material-symbols-outlined"
+              style={{ fontSize: "22px", color: "#4F8EF7", fontVariationSettings: "'FILL' 1" }}
+            >
+              security
+            </span>
           </div>
-
-          {/* Tab switcher */}
-          <div className="flex border border-border-subtle">
-            <TabButton active={tab === "signin"} onClick={() => setTab("signin")}>
-              Sign In
-            </TabButton>
-            <TabButton active={tab === "signup"} onClick={() => setTab("signup")}>
-              Register
-            </TabButton>
+          <div className="auth-logo-text">
+            <h1>PentAI Pro</h1>
+            <p>Advanced Intelligence Systems</p>
           </div>
+        </header>
 
-          {tab === "signin" ? (
-            <SignInForm onSuccess={onSignInSuccess} />
-          ) : (
-            <SignUpForm onSuccess={() => setTab("signin")} />
-          )}
+        <div className="auth-body">
+          {/* ── Left tactical panel (desktop only) ── */}
+          <section className="auth-panel">
+            <div className="auth-panel-grid" />
+            <div className="auth-panel-glow" />
+            <div className="auth-panel-scan" />
 
-          <div className="pt-4 text-center border-t border-border-subtle">
-            <p className="font-mono text-[10px] text-text-tertiary uppercase leading-tight">
-              APTS Version: 1.1.0-STABLE
-              <br />© 2026 Automated-Penetration-Testing-system
-            </p>
-          </div>
+            {/* Brand */}
+            <div className="auth-panel-brand">
+              <div className="auth-panel-brand-icon">
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "24px", color: "#4F8EF7", fontVariationSettings: "'FILL' 1" }}
+                >
+                  security
+                </span>
+              </div>
+              <div>
+                <h1>PentAI Pro</h1>
+                <p>Advanced Intelligence Systems</p>
+              </div>
+            </div>
+
+            {/* Central message */}
+            <div className="auth-panel-body">
+              <div className="auth-panel-alert">
+                <div className="auth-panel-alert-dot" />
+                <span>Protocol 88-Alpha: Secure Zone</span>
+              </div>
+              <h2 className="auth-panel-heading">
+                Authorized Personnel<br />
+                <span className="highlight">Access Only</span>
+              </h2>
+              <p className="auth-panel-desc">
+                All sessions are encrypted end-to-end and recorded in a
+                tamper-evident audit chain. Unauthorized access attempts
+                trigger immediate defensive lockout.
+              </p>
+              <div className="auth-features">
+                {[
+                  ["verified_user", "Three-layer scope enforcement on every tool invocation"],
+                  ["lock", "AES-256-GCM encrypted session with mTLS inter-node transport"],
+                  ["smart_toy", "Local LLM inference — zero data leaves your environment"],
+                  ["history", "SHA-256 tamper-evident audit log for all agent actions"],
+                ].map(([icon, text]) => (
+                  <div className="auth-feature-row" key={text}>
+                    <div className="auth-feature-icon">
+                      <span className="material-symbols-outlined">{icon}</span>
+                    </div>
+                    <span className="auth-feature-text">{text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="auth-panel-stats">
+              <div>
+                <p className="auth-stat-label">Node Status</p>
+                <p className="auth-stat-value ok">● ACTIVE</p>
+              </div>
+              <div>
+                <p className="auth-stat-label">Encryption</p>
+                <p className="auth-stat-value">AES-256-GCM</p>
+              </div>
+              <div>
+                <p className="auth-stat-label">Version</p>
+                <p className="auth-stat-value">1.1.0-STABLE</p>
+              </div>
+            </div>
+          </section>
+
+          {/* ── Right form panel ── */}
+          <section className="auth-form-panel">
+            <div className="auth-form-inner">
+              <h2 className="auth-form-heading">System Entry</h2>
+              <p className="auth-form-sub">Verify credentials to access the terminal.</p>
+
+              {/* Tabs */}
+              <div className="auth-tabs" role="tablist">
+                <button
+                  role="tab"
+                  aria-selected={tab === "signin"}
+                  className={`auth-tab${tab === "signin" ? " active" : ""}`}
+                  onClick={() => setTab("signin")}
+                  type="button"
+                >
+                  Sign In
+                </button>
+                <button
+                  role="tab"
+                  aria-selected={tab === "signup"}
+                  className={`auth-tab${tab === "signup" ? " active" : ""}`}
+                  onClick={() => setTab("signup")}
+                  type="button"
+                >
+                  Register
+                </button>
+              </div>
+
+              {tab === "signin" ? (
+                <SignInForm onSuccess={onSignInSuccess} />
+              ) : (
+                <SignUpForm onSuccess={() => setTab("signin")} />
+              )}
+
+              <div className="auth-footer">
+                <p>
+                  APTS v1.1.0-STABLE &nbsp;·&nbsp; © 2026 Automated-Penetration-Testing-System
+                </p>
+              </div>
+            </div>
+
+            {/* Corner decoration */}
+            <div className="auth-corner-tag">
+              <span className="muted">Node: DC-EAST-01</span>
+              <span className="ok">PentAI Shield Active</span>
+            </div>
+          </section>
         </div>
-
-        {/* Corner decoration */}
-        <div className="absolute bottom-4 right-4 flex flex-col items-end opacity-60 border-r border-b border-border-subtle p-1">
-          <div className="font-mono text-[9px] text-text-tertiary uppercase leading-none">
-            Node: DC-EAST-01
-          </div>
-          <div className="font-mono text-[9px] text-primary leading-none mt-1 uppercase">
-            PentAI Shield Active
-          </div>
-        </div>
-      </section>
-    </main>
+      </div>
+    </>
   );
 }
 
-/* ─── Sign In ─── */
+/* ─── Sign In Form ─── */
 
 function SignInForm({ onSuccess }: { onSuccess: () => void }) {
   const [email, setEmail] = useState("");
@@ -96,7 +707,7 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
     if (err) {
       setError(
         err.message === "Invalid login credentials"
-          ? "Invalid email or access key."
+          ? "Invalid email or access key. Please check and try again."
           : err.message,
       );
       setBusy(false);
@@ -106,8 +717,8 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <FormField label="Agent Identifier" icon="fingerprint">
+    <form onSubmit={handleSubmit} noValidate>
+      <AuthField label="Agent Identifier" icon="fingerprint">
         <input
           type="email"
           required
@@ -115,18 +726,15 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="operator@pentai.local"
           autoComplete="username"
-          className={inputCls}
+          className="auth-input"
         />
-      </FormField>
+      </AuthField>
 
-      <FormField
+      <AuthField
         label="Access Key"
         icon="lock"
         rightSlot={
-          <button
-            type="button"
-            className="font-mono text-label-caps text-primary hover:text-text-primary transition-colors"
-          >
+          <button type="button" className="auth-field-link">
             Forgot Key?
           </button>
         }
@@ -136,22 +744,22 @@ function SignInForm({ onSuccess }: { onSuccess: () => void }) {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="••••••••••••"
+          placeholder="Enter your access key"
           autoComplete="current-password"
-          className={inputCls}
+          className="auth-input"
         />
-      </FormField>
+      </AuthField>
 
-      {error && <ErrorBanner>{error}</ErrorBanner>}
+      {error && <AuthError>{error}</AuthError>}
 
-      <SubmitButton busy={busy} busyLabel="Authenticating…" icon="terminal">
-        INITIATE DEPLOYMENT
-      </SubmitButton>
+      <AuthSubmitButton busy={busy} busyLabel="Authenticating…" icon="terminal">
+        Initiate Deployment
+      </AuthSubmitButton>
     </form>
   );
 }
 
-/* ─── Sign Up ─── */
+/* ─── Sign Up Form ─── */
 
 function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
   const [email, setEmail] = useState("");
@@ -161,6 +769,8 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+
+  const strength = getPasswordStrength(password);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -180,30 +790,28 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
 
   if (done) {
     return (
-      <div className="space-y-4">
-        <div className="border border-primary/40 bg-primary/5 px-4 py-3 space-y-1">
-          <p className="font-mono text-[11px] text-primary uppercase tracking-wider">
+      <>
+        <div className="auth-success">
+          <p className="auth-success-title">
+            <span className="material-symbols-outlined">check_circle</span>
             Access Request Submitted
           </p>
-          <p className="text-body-sm text-text-secondary">
-            Check <span className="text-text-primary font-mono">{email}</span> for
-            a confirmation link, then sign in.
+          <p className="auth-success-body">
+            Check <strong>{email}</strong> for a confirmation link, then sign in.
+            Email auto-confirm may be enabled — try signing in directly.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onSuccess}
-          className="w-full border border-border-subtle py-2.5 font-mono text-label-caps uppercase tracking-wider text-text-secondary hover:text-text-primary hover:border-primary transition-colors"
-        >
+        <button type="button" onClick={onSuccess} className="auth-back-btn">
+          <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>arrow_back</span>
           Back to Sign In
         </button>
-      </div>
+      </>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <FormField label="Agent Identifier" icon="fingerprint">
+    <form onSubmit={handleSubmit} noValidate>
+      <AuthField label="Agent Identifier (Email)" icon="fingerprint">
         <input
           type="email"
           required
@@ -211,11 +819,11 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="operator@pentai.local"
           autoComplete="username"
-          className={inputCls}
+          className="auth-input"
         />
-      </FormField>
+      </AuthField>
 
-      <FormField label="Display Name" icon="badge">
+      <AuthField label="Display Name" icon="badge">
         <input
           type="text"
           required
@@ -223,173 +831,56 @@ function SignUpForm({ onSuccess }: { onSuccess: () => void }) {
           onChange={(e) => setDisplayName(e.target.value)}
           placeholder="Operator Alpha"
           autoComplete="name"
-          className={inputCls}
+          className="auth-input"
         />
-      </FormField>
+      </AuthField>
 
-      <FormField label="Access Key" icon="lock">
+      <AuthField label="Access Key" icon="lock">
         <input
           type="password"
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="min. 8 characters"
+          placeholder="Min. 8 characters"
           autoComplete="new-password"
-          className={inputCls}
+          className="auth-input"
         />
-      </FormField>
+        {password.length > 0 && (
+          <div className="auth-strength">
+            {[1, 2, 3, 4].map((n) => (
+              <div
+                key={n}
+                className={`auth-strength-bar${strength >= n ? ` s${strength}` : ""}`}
+              />
+            ))}
+          </div>
+        )}
+      </AuthField>
 
-      <FormField label="Confirm Access Key" icon="lock_reset">
+      <AuthField label="Confirm Access Key" icon="lock_reset">
         <input
           type="password"
           required
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
-          placeholder="••••••••••••"
+          placeholder="Re-enter your access key"
           autoComplete="new-password"
-          className={inputCls}
+          className="auth-input"
         />
-      </FormField>
+      </AuthField>
 
-      {error && <ErrorBanner>{error}</ErrorBanner>}
+      {error && <AuthError>{error}</AuthError>}
 
-      <SubmitButton busy={busy} busyLabel="Processing…" icon="shield_person">
-        REQUEST ACCESS
-      </SubmitButton>
+      <AuthSubmitButton busy={busy} busyLabel="Creating Account…" icon="shield_person">
+        Request Access
+      </AuthSubmitButton>
     </form>
-  );
-}
-
-/* ─── Tactical left panel ─── */
-
-function TacticalPanel() {
-  const lineRef = useRef<HTMLDivElement>(null);
-
-  return (
-    <section className="hidden lg:flex lg:w-3/5 relative flex-col justify-between p-8 bg-bg-primary border-r border-border-subtle overflow-hidden">
-      {/* Grid overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.04]"
-        style={{
-          backgroundImage:
-            "linear-gradient(#4F8EF7 1px, transparent 1px), linear-gradient(90deg, #4F8EF7 1px, transparent 1px)",
-          backgroundSize: "40px 40px",
-        }}
-      />
-
-      {/* Branding */}
-      <div className="relative z-10 flex items-center gap-4">
-        <div className="w-10 h-10 bg-surface-secondary border border-border-subtle flex items-center justify-center relative">
-          <span
-            className="material-symbols-outlined text-primary"
-            style={{ fontVariationSettings: "'FILL' 1", fontSize: "20px" }}
-          >
-            security
-          </span>
-          <span className="absolute top-0 left-0 w-2 h-2 border-t border-l border-primary" />
-          <span className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-primary" />
-        </div>
-        <div>
-          <h1 className="font-display text-h2 text-text-primary tracking-tight uppercase leading-none">
-            PentAI Pro
-          </h1>
-          <p className="font-mono text-label-caps text-text-tertiary mt-1 tracking-widest">
-            Advanced Intelligence Systems
-          </p>
-        </div>
-      </div>
-
-      {/* Central messaging */}
-      <div className="relative z-10 max-w-lg">
-        <div className="inline-flex items-center gap-2 px-2 py-1 border border-severity-critical mb-6 bg-severity-critical/5">
-          <span className="w-1.5 h-1.5 bg-severity-critical flex-shrink-0" />
-          <span className="font-mono text-label-caps text-severity-critical uppercase">
-            Protocol 88-Alpha: Secure Zone
-          </span>
-        </div>
-        <h2 className="font-display text-[28px] font-bold text-text-primary mb-4 leading-none uppercase">
-          Authorized Personnel
-          <br />
-          <span className="text-primary">Access Only</span>
-        </h2>
-        <p className="text-body-md text-text-secondary max-w-md leading-relaxed">
-          Secure node access. Activity monitored and logged.
-          Unauthorized attempts trigger immediate defensive lockout.
-        </p>
-      </div>
-
-      {/* Stats row */}
-      <div className="relative z-10 grid grid-cols-3 gap-8 pt-8 border-t border-border-subtle">
-        <div>
-          <p className="font-mono text-label-caps text-text-tertiary mb-2 uppercase tracking-widest">
-            Node Status
-          </p>
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-body-sm text-primary">ACTIVE</span>
-            <div className="w-20 h-1 bg-surface-container">
-              <div className="h-full bg-primary w-3/4" />
-            </div>
-          </div>
-        </div>
-        <div>
-          <p className="font-mono text-label-caps text-text-tertiary mb-2 uppercase tracking-widest">
-            Encryption
-          </p>
-          <p className="font-mono text-body-sm text-text-primary">AES-256-GCM</p>
-        </div>
-        <div>
-          <p className="font-mono text-label-caps text-text-tertiary mb-2 uppercase tracking-widest">
-            System Load
-          </p>
-          <p className="font-mono text-body-sm text-text-primary">1.24 MS / 0.02%</p>
-        </div>
-      </div>
-
-      {/* Scanner line */}
-      <div
-        ref={lineRef}
-        className="absolute inset-x-0 h-px bg-primary opacity-0 pointer-events-none"
-        style={{ animation: "pentai-scan 5s linear infinite" }}
-      />
-      <style>{`
-        @keyframes pentai-scan {
-          0%   { top: 0%;   opacity: 0; }
-          5%   { opacity: 0.35; }
-          95%  { opacity: 0.35; }
-          100% { top: 100%; opacity: 0; }
-        }
-      `}</style>
-    </section>
   );
 }
 
 /* ─── Shared primitives ─── */
 
-function TabButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex-1 py-2 font-mono text-label-caps uppercase tracking-wider transition-colors ${
-        active
-          ? "bg-primary text-white"
-          : "bg-transparent text-text-tertiary hover:text-text-primary"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function FormField({
+function AuthField({
   label,
   icon,
   rightSlot,
@@ -401,37 +892,31 @@ function FormField({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-1.5">
-      <div className="flex justify-between items-center">
-        <label className="font-mono text-label-caps text-text-tertiary uppercase tracking-widest">
-          {label}
-        </label>
+    <div className="auth-field">
+      <div className="auth-field-header">
+        <label className="auth-field-label">{label}</label>
         {rightSlot}
       </div>
-      <div className="relative">
-        <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-          <span
-            className="material-symbols-outlined text-text-tertiary"
-            style={{ fontSize: "16px" }}
-          >
-            {icon}
-          </span>
+      <div className="auth-input-wrap">
+        <div className="auth-input-icon">
+          <span className="material-symbols-outlined">{icon}</span>
         </div>
-        <div className="[&>input]:pl-9">{children}</div>
+        {children}
       </div>
     </div>
   );
 }
 
-function ErrorBanner({ children }: { children: React.ReactNode }) {
+function AuthError({ children }: { children: React.ReactNode }) {
   return (
-    <div className="border border-severity-critical/40 bg-severity-critical/5 px-3 py-2 font-mono text-[11px] text-severity-critical">
-      {children}
+    <div className="auth-error">
+      <span className="material-symbols-outlined">error</span>
+      <span className="auth-error-text">{children}</span>
     </div>
   );
 }
 
-function SubmitButton({
+function AuthSubmitButton({
   busy,
   busyLabel,
   icon,
@@ -443,24 +928,28 @@ function SubmitButton({
   children: React.ReactNode;
 }) {
   return (
-    <button
-      type="submit"
-      disabled={busy}
-      className="w-full h-10 bg-primary text-white font-mono text-label-caps uppercase tracking-wider flex items-center justify-center gap-2 hover:brightness-110 disabled:opacity-40 transition-all"
-    >
+    <button type="submit" disabled={busy} className="auth-submit">
       {busy ? (
-        busyLabel
+        <>
+          <div className="auth-spinner" />
+          {busyLabel}
+        </>
       ) : (
         <>
           {children}
-          <span className="material-symbols-outlined" style={{ fontSize: "16px" }}>
-            {icon}
-          </span>
+          <span className="material-symbols-outlined">{icon}</span>
         </>
       )}
     </button>
   );
 }
 
-const inputCls =
-  "block w-full h-10 px-3 bg-surface-secondary border border-border-subtle text-text-primary font-mono text-body-sm placeholder:text-text-tertiary focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors";
+function getPasswordStrength(pw: string): number {
+  if (pw.length === 0) return 0;
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (pw.length >= 12) score++;
+  if (/[A-Z]/.test(pw) && /[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  return Math.max(score, pw.length > 0 ? 1 : 0);
+}
